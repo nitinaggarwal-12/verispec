@@ -1,0 +1,12 @@
+{
+  "name": "verispec",
+  "version": "1.0.0",
+  "description": "VeriSpec — Stateful Prompt-Driven Iterative Architecture Diagramming Studio",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.mjs",
+    "pre-render-gate": "node scripts/verify_deterministic_mutation_invariants.mjs",
+    "verify": "node scripts/verify_verispec_chrome_gate.mjs",
+    "quality-gate": "node scripts/verify_deterministic_mutation_invariants.mjs && node scripts/verify_verispec_chrome_gate.mjs"
+  }
+}

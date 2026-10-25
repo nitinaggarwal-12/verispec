@@ -1,0 +1,57 @@
+name: VeriSpec Architecture & FinOps PR Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      blueprint_code:
+        description: 'Blueprint Code to Audit (D01-D18)'
+        required: false
+        default: 'D05'
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  architecture-diff-and-finops-gate:
+    name: Phase-0 Geometry, FinOps BOM & PR Diff Bot
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository (nitinaggarwal-12/verispec)
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24+ (with native node:sqlite)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install Dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Generate VeriSpec Architecture & FinOps PR Diff Report
+        id: pr_bot
+        env:
+          BLUEPRINT_CODE: ${{ github.event.inputs.blueprint_code || 'D05' }}
+          PR_NUMBER: ${{ github.event.pull_request.number || 42 }}
+          GITHUB_REPOSITORY: ${{ github.repository || 'nitinaggarwal-12/verispec' }}
+        run: node scripts/verispec_github_pr_bot.mjs --code="$BLUEPRINT_CODE" --out=/tmp/verispec_pr_comment.md
+
+      - name: Post or Update Architecture Diff Comment on Pull Request
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const body = fs.readFileSync('/tmp/verispec_pr_comment.md', 'utf8');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const existing = await github.rest.issues.listComments({ owner, repo, issue_number });
+            const botComment = existing.data.find(c => c.body && c.body.includes('VeriSpec Architecture-as-Code & FinOps PR Bot'));
+            if (botComment) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: botComment.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

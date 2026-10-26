@@ -414,7 +414,7 @@ def main() -> None:
 
     receipt = {
         "serviceName": service_name,
-        "version": "v3.4",
+        "version": "v3.5",
         "beyondCorpUrl": f"https://{service_name}-248990048888.cr.gclb.goog",
         "directCloudRunUrl": direct_url,
         "buildProject": "nitina-ggarwal-sandbox-647724",

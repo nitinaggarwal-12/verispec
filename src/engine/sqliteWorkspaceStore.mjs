@@ -198,6 +198,13 @@ export function initSqliteWorkspaceStore(port = 8080) {
       messages_json TEXT NOT NULL,
       updated_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS workspace_starred_blueprints (
+      blueprint_code TEXT PRIMARY KEY,
+      starred INTEGER NOT NULL DEFAULT 1,
+      starred_by TEXT NOT NULL DEFAULT 'Alex Rivera (@alex.rivera)',
+      updated_at TEXT NOT NULL
+    );
   `);
 
   // Ensure default workspace metadata row exists with unified folder IDs
@@ -224,6 +231,18 @@ export function initSqliteWorkspaceStore(port = 8080) {
     JSON.stringify(defaultFolders),
     new Date().toISOString()
   );
+
+  // Seed default starred blueprints if table is empty
+  const starCountRow = dbInstance.prepare(`SELECT COUNT(*) AS cnt FROM workspace_starred_blueprints`).get();
+  if (!starCountRow || Number(starCountRow.cnt) === 0) {
+    const insStar = dbInstance.prepare(`
+      INSERT OR IGNORE INTO workspace_starred_blueprints (blueprint_code, starred, starred_by, updated_at)
+      VALUES (?, 1, 'Alex Rivera (@alex.rivera)', ?)
+    `);
+    for (const stCode of ['D05', 'D06', 'D10', 'D12', 'D15']) {
+      insStar.run(stCode, new Date().toISOString());
+    }
+  }
 
   // Seed default anchored @mention threads if table is empty
   const threadCountRow = dbInstance.prepare(`SELECT COUNT(*) AS cnt FROM collab_threads`).get();
@@ -559,6 +578,42 @@ export function replyToCollabThread(threadId, payload = {}, port = 8080) {
   return getCollabThreads(row.blueprint_code, port);
 }
 
+export function getStarredBlueprints(port = 8080) {
+  const db = initSqliteWorkspaceStore(port);
+  return db
+    .prepare(`SELECT blueprint_code FROM workspace_starred_blueprints WHERE starred = 1 ORDER BY blueprint_code ASC`)
+    .all()
+    .map((r) => r.blueprint_code);
+}
+
+export function toggleStarredBlueprint(code = 'D05', starredOverride = null, port = 8080) {
+  const db = initSqliteWorkspaceStore(port);
+  const cleanCode = String(code || 'D05').toUpperCase();
+  const existing = db
+    .prepare(`SELECT starred FROM workspace_starred_blueprints WHERE blueprint_code = ?`)
+    .get(cleanCode);
+  const nextStarred =
+    starredOverride !== null && starredOverride !== undefined
+      ? starredOverride
+        ? 1
+        : 0
+      : existing && Number(existing.starred) === 1
+        ? 0
+        : 1;
+  db.prepare(`
+    INSERT INTO workspace_starred_blueprints (blueprint_code, starred, starred_by, updated_at)
+    VALUES (?, ?, 'Alex Rivera (@alex.rivera)', ?)
+    ON CONFLICT(blueprint_code) DO UPDATE SET
+      starred = excluded.starred,
+      updated_at = excluded.updated_at
+  `).run(cleanCode, nextStarred, new Date().toISOString());
+  return {
+    code: cleanCode,
+    starred: nextStarred === 1,
+    starredBlueprints: getStarredBlueprints(port)
+  };
+}
+
 export function getSqliteStoreTelemetry(port = 8080) {
   const db = initSqliteWorkspaceStore(port);
   const journalMode = db.prepare(`PRAGMA journal_mode`).get()?.journal_mode || 'wal';
@@ -569,6 +624,7 @@ export function getSqliteStoreTelemetry(port = 8080) {
   const wbCount = db.prepare(`SELECT COUNT(*) AS cnt FROM whiteboard_overlays`).get()?.cnt || 0;
   const rfcCount = db.prepare(`SELECT COUNT(*) AS cnt FROM rfc_custom_blocks`).get()?.cnt || 0;
   const threadCount = db.prepare(`SELECT COUNT(*) AS cnt FROM collab_threads`).get()?.cnt || 0;
+  const starredList = getStarredBlueprints(port);
   const digests = db
     .prepare(`SELECT sha256_digest FROM blueprint_versions ORDER BY blueprint_code ASC, version_index ASC`)
     .all()
@@ -582,7 +638,8 @@ export function getSqliteStoreTelemetry(port = 8080) {
     whiteboardOverlays: Number(wbCount),
     rfcBlockDocs: Number(rfcCount),
     rfcCustomBlocks: Number(rfcCount),
-    collabThreads: Number(threadCount)
+    collabThreads: Number(threadCount),
+    starredBlueprints: starredList.length
   };
 
   return {
@@ -594,6 +651,7 @@ export function getSqliteStoreTelemetry(port = 8080) {
     repoUrl: ws?.repo_url || CANONICAL_GITHUB_REPO_URL,
     activeBranch: ws?.active_branch || 'main',
     folders: JSON.parse(ws?.folders_json || '[]'),
+    starredBlueprints: starredList,
     counts: countsObj,
     tableCounts: countsObj,
     combinedSqliteSha256: sha256Hex(digests || 'empty')

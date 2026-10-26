@@ -315,7 +315,9 @@ const {
   saveRfcCustomBlocks,
   getRfcCustomBlocks,
   createCollabThread,
-  getCollabThreads
+  getCollabThreads,
+  getStarredBlueprints,
+  toggleStarredBlueprint
 } = await import('../src/engine/sqliteWorkspaceStore.mjs');
 const { generateGitHubPrBotReport } = await import('../src/engine/githubPrBotEngine.mjs');
 
@@ -328,6 +330,12 @@ assert.deepEqual(
   ['fld_01', 'fld_02', 'fld_03', 'fld_04'],
   'SQLite workspace folder IDs must match #railFolderSelect (fld_01..fld_04) 1:1'
 );
+
+// Verify starred blueprints persistence in SQLite
+const starRes = toggleStarredBlueprint('D01', true);
+assert.equal(starRes.starred, true, 'Expected D01 to be starred in SQLite');
+assert.equal(getStarredBlueprints().includes('D01'), true, 'Expected getStarredBlueprints() to include D01');
+toggleStarredBlueprint('D01', false);
 
 // Verify all 18 blueprints emit data-base-x and data-base-y on every <g class="arch-node"> (zero (0,0) drag teleportation)
 for (const bp of LIFECYCLE_BLUEPRINTS_18) {
@@ -394,7 +402,7 @@ assert.equal(prBotReport.repoUrl, 'https://github.com/nitinaggarwal-12/verispec'
 assert.equal(prBotReport.prCommentMarkdown.includes('VeriSpec Architecture & FinOps PR Bot'), true);
 assert.equal(prBotReport.prCommentMarkdown.includes('Monthly FinOps Run-Rate'), true);
 console.log(
-  `  [PASS] Native node:sqlite (${sqliteStat.journalMode.toUpperCase()} mode) + 18/18 Node Drag Base-Coords + Draw.io Sticky/Pin Export + WYSIWYG RFC Dual-Fields + @mention Threads (${threadCountAfter}) + GitHub PR Bot (+$${prBotReport.deltaMonthlyUsd}/mo)`
+  `  [PASS] Native node:sqlite (${sqliteStat.journalMode.toUpperCase()} mode) + Starred Blueprints + 18/18 Node Drag Base-Coords + Draw.io Sticky/Pin Export + WYSIWYG RFC Dual-Fields + @mention Threads (${threadCountAfter}) + GitHub PR Bot (+$${prBotReport.deltaMonthlyUsd}/mo)`
 );
 
 console.log('=== ALL 10 DETERMINISTIC, SQLITE WAL & LIVE VERTEX AI GEMINI INVARIANTS PASSED ===');

@@ -63,6 +63,8 @@ import {
   getCollabThreads,
   createCollabThread,
   replyToCollabThread,
+  getStarredBlueprints,
+  toggleStarredBlueprint,
   getSqliteStoreTelemetry
 } from './engine/sqliteWorkspaceStore.mjs';
 import {
@@ -366,10 +368,12 @@ function buildBlueprintResponseItem(code, showDiff = true, detailLevel = 'L200',
       : '';
   const livingRfcMarkdown = baseLivingRfcMarkdown + customRfcMdSection;
   const githubPrBotReport = generateGitHubPrBotReport(baselineGraph, latestGraph, judgeReport, preRenderPlan);
+  const starredSet = new Set(getStarredBlueprints(PORT_NUM));
 
   return {
     code,
     id: latestGraph.id,
+    starred: starredSet.has(code),
     phaseId: latestGraph.phaseId,
     phaseNumber: latestGraph.phaseNumber,
     phaseTitle: latestGraph.phaseTitle,
@@ -471,6 +475,7 @@ const server = http.createServer((req, res) => {
       totalDiagrams: diagrams.length,
       detailLevel,
       repoUrl: CANONICAL_GITHUB_REPO_URL,
+      starredBlueprints: getStarredBlueprints(PORT_NUM),
       sqliteTelemetry: sqliteStat,
       sqliteStatus: sqliteStat,
       rfcCustomBlocks: rfcBlocksMap,
@@ -1498,6 +1503,240 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // 7B. POST /api/workspace/star -> Toggles Star / Bookmark Status on a Blueprint in SQLite
+  if (req.method === 'POST' && url.pathname === '/api/workspace/star') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body || '{}');
+        const code = String(parsed.code || 'D05').toUpperCase();
+        const starredOverride = parsed.starred !== undefined ? Boolean(parsed.starred) : null;
+        const result = toggleStarredBlueprint(code, starredOverride, PORT_NUM);
+        broadcastWorkspaceEvent({ code, action: 'STAR_TOGGLED', starred: result.starred });
+        return sendJson(res, 200, {
+          ok: true,
+          ...result,
+          sqliteTelemetry: getSqliteStoreTelemetry(PORT_NUM)
+        });
+      } catch (err) {
+        return sendJson(res, 500, { ok: false, error: String(err.message || err) });
+      }
+    });
+    return;
+  }
+
+  // 7C. GET /api/mcp/manifest & POST /api/mcp -> Agent-Ready Model Context Protocol (verispec_mcp) Server
+  if (req.method === 'GET' && url.pathname === '/api/mcp/manifest') {
+    return sendJson(res, 200, {
+      ok: true,
+      serverName: 'verispec_mcp',
+      protocolVersion: '2025-06-18',
+      transports: ['http-sse', 'stdio'],
+      authModes: ['oauth2_pkce', 'bearer_api_token', 'gcp_iam_oidc'],
+      endpointUrl: `${url.origin}/api/mcp`,
+      compatibleClients: ['Claude Code', 'Cursor IDE', 'Gemini CLI', 'Windsurf', 'GitHub Actions CI/CD'],
+      tools: [
+        {
+          name: 'verispec_list_blueprints',
+          description: 'List all 18 SDLC architecture blueprints with version, node/edge counts, FinOps $/mo, and p99 latency.',
+          inputSchema: { type: 'object', properties: { folderId: { type: 'string' }, starredOnly: { type: 'boolean' } } }
+        },
+        {
+          name: 'verispec_generate_diagram',
+          description: 'Synthesize or compile an architecture diagram from a natural language prompt, Terraform HCL, or SQL DDL.',
+          inputSchema: {
+            type: 'object',
+            required: ['prompt'],
+            properties: { code: { type: 'string', default: 'D05' }, prompt: { type: 'string' }, detailLevel: { type: 'string', default: 'L200' } }
+          }
+        },
+        {
+          name: 'verispec_mutate_ast',
+          description: 'Apply a deterministic natural-language or DSL graph mutation to an existing blueprint and bump its micro-version.',
+          inputSchema: {
+            type: 'object',
+            required: ['code', 'command'],
+            properties: { code: { type: 'string' }, command: { type: 'string' } }
+          }
+        },
+        {
+          name: 'verispec_finops_slo_audit',
+          description: 'Run Phase-0 5-Stage Geometry Certificate + FinOps unit-cost ($/mo) + critical-path p99 latency + 5-Pillar Judge Jury.',
+          inputSchema: { type: 'object', required: ['code'], properties: { code: { type: 'string', default: 'D05' } } }
+        },
+        {
+          name: 'verispec_export_iac',
+          description: 'Export a blueprint as Terraform HCL, Mermaid.js, VeriSpec DSL, Living RFC Markdown, or Draw.io mxGraphModel XML.',
+          inputSchema: {
+            type: 'object',
+            required: ['code', 'format'],
+            properties: { code: { type: 'string', default: 'D05' }, format: { type: 'string', enum: ['terraform', 'mermaid', 'dsl', 'rfc', 'drawio'] } }
+          }
+        }
+      ]
+    });
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/mcp') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body || '{}');
+        const toolName = String(parsed.tool || parsed.params?.name || 'verispec_list_blueprints').trim();
+        const args = parsed.arguments || parsed.params?.arguments || parsed;
+        const code = String(args.code || 'D05').toUpperCase();
+        const detailLevel = String(args.detailLevel || 'L200').toUpperCase();
+
+        if (toolName === 'verispec_list_blueprints') {
+          const starredSet = new Set(getStarredBlueprints(PORT_NUM));
+          const items = LIFECYCLE_BLUEPRINTS_18.map((bp) => {
+            const history = blueprintStateStore.get(bp.code) || [bp];
+            const latest = history[history.length - 1];
+            const finops = estimateArchitectureFinOpsAndLatency(latest);
+            return {
+              code: bp.code,
+              title: latest.title,
+              version: latest.version,
+              starred: starredSet.has(bp.code),
+              nodeCount: latest.nodes.length,
+              edgeCount: latest.edges.length,
+              finopsMonthlyUsd: finops.totalMonthlyUsd,
+              p99LatencyMs: finops.estimatedEndToEndP99Ms
+            };
+          }).filter((it) => (args.starredOnly ? it.starred : true));
+          return sendJson(res, 200, {
+            jsonrpc: '2.0',
+            id: parsed.id || 1,
+            ok: true,
+            tool: toolName,
+            result: { count: items.length, blueprints: items }
+          });
+        }
+
+        if (toolName === 'verispec_mutate_ast' || toolName === 'verispec_generate_diagram') {
+          const cmd = String(args.command || args.prompt || 'Add Cloud Armor WAF and Cloud DLP Guardrail').trim();
+          const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
+          const current = history[history.length - 1];
+          const nextGraph = applyPromptMutation(current, cmd, null, '');
+          history.push(nextGraph);
+          saveStoreToDisk({ code, action: 'MCP_TOOL_MUTATION', tool: toolName });
+          const item = buildBlueprintResponseItem(code, true, detailLevel, null);
+          return sendJson(res, 200, {
+            jsonrpc: '2.0',
+            id: parsed.id || 1,
+            ok: true,
+            tool: toolName,
+            result: {
+              code: item.code,
+              version: item.version,
+              nodeCount: item.nodeCount,
+              edgeCount: item.edgeCount,
+              diffSummary: item.diffManifest?.summaryBadge || 'Updated via MCP',
+              finopsMonthlyUsd: item.finopsTelemetry?.totalMonthlyUsd,
+              p99LatencyMs: item.finopsTelemetry?.estimatedEndToEndP99Ms,
+              preRenderZeroHitAndTrial: item.preRenderPlan?.zeroHitAndTrialGuarantee,
+              compositeJudgeScore: item.judgeReport?.compositeScore
+            }
+          });
+        }
+
+        if (toolName === 'verispec_finops_slo_audit') {
+          const item = buildBlueprintResponseItem(code, true, detailLevel, null);
+          return sendJson(res, 200, {
+            jsonrpc: '2.0',
+            id: parsed.id || 1,
+            ok: true,
+            tool: toolName,
+            result: {
+              code: item.code,
+              version: item.version,
+              preRenderCertificate: item.preRenderPlan,
+              finopsTelemetry: item.finopsTelemetry,
+              judgeScore: item.judgeReport?.compositeScore,
+              grade: item.judgeReport?.grade
+            }
+          });
+        }
+
+        if (toolName === 'verispec_export_iac') {
+          const item = buildBlueprintResponseItem(code, true, detailLevel, null);
+          const fmt = String(args.format || 'terraform').toLowerCase();
+          const artifact =
+            fmt === 'mermaid'
+              ? item.mermaidCode
+              : fmt === 'dsl'
+                ? item.verispecDsl
+                : fmt === 'rfc'
+                  ? item.livingRfcMarkdown
+                  : item.terraformHcl;
+          return sendJson(res, 200, {
+            jsonrpc: '2.0',
+            id: parsed.id || 1,
+            ok: true,
+            tool: toolName,
+            result: { code: item.code, version: item.version, format: fmt, content: artifact }
+          });
+        }
+
+        return sendJson(res, 400, { ok: false, error: `Unknown MCP tool: ${toolName}` });
+      } catch (err) {
+        return sendJson(res, 500, { ok: false, error: String(err.message || err) });
+      }
+    });
+    return;
+  }
+
+  // 7D. POST /api/v1/diagram/generate -> Public REST Diagramming API (Eraser Diagramming API Parity)
+  if (req.method === 'POST' && url.pathname === '/api/v1/diagram/generate') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body || '{}');
+        const code = String(parsed.code || 'D05').toUpperCase();
+        const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
+        const prompt = String(parsed.prompt || '').trim();
+        if (prompt) {
+          const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
+          const current = history[history.length - 1];
+          const nextGraph = applyPromptMutation(current, prompt, null, '');
+          history.push(nextGraph);
+          saveStoreToDisk({ code, action: 'REST_API_GENERATE' });
+        }
+        const item = buildBlueprintResponseItem(code, true, detailLevel, null);
+        return sendJson(res, 200, {
+          ok: true,
+          apiVersion: '2026-10-01',
+          blueprintCode: item.code,
+          title: item.title,
+          version: item.version,
+          nodeCount: item.nodeCount,
+          edgeCount: item.edgeCount,
+          finopsMonthlyUsd: item.finopsTelemetry?.totalMonthlyUsd,
+          p99LatencyMs: item.finopsTelemetry?.estimatedEndToEndP99Ms,
+          compositeJudgeScore: item.judgeReport?.compositeScore,
+          zeroHitAndTrialGuarantee: item.preRenderPlan?.zeroHitAndTrialGuarantee,
+          svgUrl: `${url.origin}/api/blueprint?code=${item.code}`,
+          drawioUrl: `${url.origin}/api/export-drawio?code=${item.code}&ver=${item.version}`,
+          verispecDsl: item.verispecDsl,
+          terraformHcl: item.terraformHcl,
+          mermaidCode: item.mermaidCode
+        });
+      } catch (err) {
+        return sendJson(res, 500, { ok: false, error: String(err.message || err) });
+      }
+    });
+    return;
+  }
+
   // 8. GET /api/export-drawio?code=D05&ver=v1.0.x -> Downloads standards-compliant .drawio XML
   if (req.method === 'GET' && url.pathname === '/api/export-drawio') {
     const code = (url.searchParams.get('code') || 'D05').toUpperCase();
@@ -1518,8 +1757,12 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // Static files
-  let filePath = path.join(PUBLIC_DIR, url.pathname === '/' ? 'index.html' : url.pathname);
+  // Static files (support /landing and /home SPA routes)
+  const cleanRoutePath =
+    url.pathname === '/' || url.pathname === '/landing' || url.pathname === '/home' || url.pathname === '/dashboard'
+      ? 'index.html'
+      : url.pathname;
+  let filePath = path.join(PUBLIC_DIR, cleanRoutePath);
   if (!filePath.startsWith(PUBLIC_DIR)) {
     res.writeHead(403);
     res.end('Forbidden');

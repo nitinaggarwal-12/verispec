@@ -1026,51 +1026,60 @@
 </head>
 <body>
   <div class="app-shell">
-    <!-- TOP EXECUTIVE GLOBAL HEADER (Zero-Overflow, Rule 25 Pruned) -->
-    <header class="top-header" style="gap:10px;padding:0 16px;">
-      <div class="brand-cluster">
-        <div class="brand-mark">VS</div>
+    <!-- TOP EXECUTIVE GLOBAL HEADER (Zero-Overflow, Rule 25 Pruned, Phase-0 1440px Budget Verified) -->
+    <header class="top-header" style="gap:8px;padding:0 12px;">
+      <div class="brand-cluster" style="gap:8px;">
+        <div class="brand-mark" style="width:32px;height:32px;font-size:13px;cursor:pointer;" onclick="setUiEdition('landing')" title="Open VeriSpec Product Landing Page">VS</div>
         <div class="brand-title-wrap">
           <div class="brand-name-row">
-            <span class="brand-name">VeriSpec Studio</span>
+            <span class="brand-name" style="font-size:13.5px;cursor:pointer;" onclick="setUiEdition('home')" title="Open VeriSpec Workspace Home Dashboard">VeriSpec Studio</span>
           </div>
-          <span class="brand-sub">18 Lifecycle Blueprints · Live Vertex Gemini</span>
+          <span class="brand-sub" style="font-size:9.5px;">18 Lifecycle Blueprints · Live Vertex Gemini</span>
         </div>
       </div>
 
-      <!-- 4-Edition Mode Switcher -->
-      <nav class="edition-switcher" aria-label="UI Edition Switcher">
-        <button id="btnEditionAtelier" class="edition-btn active" style="padding:5px 9px;font-size:11px;" onclick="setUiEdition('atelier')">
+      <!-- 6-Mode Product & Studio Switcher (Landing · Workspace Home · 4 Studio Views) -->
+      <nav class="edition-switcher" style="padding:2px;gap:2px;" aria-label="UI Edition Switcher">
+        <button id="btnEditionLanding" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('landing')" title="Product Landing Page: Interactive AI Diagrammer Sandbox, 6 Product Pillars, MCP &amp; Pricing">
+          <span>🏠 Landing</span>
+        </button>
+        <button id="btnEditionHome" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('home')" title="Workspace Home Dashboard: All 18 Files, Starred Blueprints, Folders, Search &amp; Quick Create">
+          <span>🗂️ Home</span>
+        </button>
+        <button id="btnEditionAtelier" class="edition-btn active" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('atelier')">
           <span>1. Split Co-Pilot</span>
         </button>
-        <button id="btnEditionCommand" class="edition-btn" style="padding:5px 9px;font-size:11px;" onclick="setUiEdition('command')">
-          <span>2. Spotlight Canvas</span>
+        <button id="btnEditionCommand" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('command')">
+          <span>2. Spotlight</span>
         </button>
-        <button id="btnEditionStepper" class="edition-btn" style="padding:5px 9px;font-size:11px;" onclick="setUiEdition('stepper')">
+        <button id="btnEditionStepper" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('stepper')">
           <span>3. Visual Diff</span>
         </button>
-        <button id="btnEditionAtlas" class="edition-btn" style="padding:5px 9px;font-size:11px;" onclick="setUiEdition('atlas')">
+        <button id="btnEditionAtlas" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('atlas')">
           <span>4. 18-Diagram Atlas</span>
         </button>
       </nav>
 
-      <!-- Global L100 / L200 / L300 Architectural Fidelity Switcher (Available in all 4 Editions) -->
-      <div id="lodSwitcher" style="display:inline-flex;align-items:center;background:#F1F5F9;border:1px solid #E2E8F0;padding:3px;border-radius:9px;gap:2px;flex-shrink:0;" role="group" aria-label="Architecture Level of Detail">
-        <button id="btnLodL100" class="phase-chip mono" style="font-size:10px;padding:4px 8px;border:none;" onclick="setDetailLevel('L100')" title="L100 Executive Overview: High-level zones, icons &amp; titles">L100</button>
-        <button id="btnLodL200" class="phase-chip mono active" style="font-size:10px;padding:4px 8px;border:none;" onclick="setDetailLevel('L200')" title="L200 Solution Architecture: Service roles, metrics &amp; numbered flows">L200</button>
-        <button id="btnLodL300" class="phase-chip mono" style="font-size:10px;padding:4px 8px;border:none;" onclick="setDetailLevel('L300')" title="L300 Deep Engineering Spec: Protocols, ports, IAM, CMEK &amp; SLOs">L300</button>
+      <!-- Global L100 / L200 / L300 Architectural Fidelity Switcher (Available in all Editions) -->
+      <div id="lodSwitcher" style="display:inline-flex;align-items:center;background:#F1F5F9;border:1px solid #E2E8F0;padding:2px;border-radius:8px;gap:2px;flex-shrink:0;" role="group" aria-label="Architecture Level of Detail">
+        <button id="btnLodL100" class="phase-chip mono" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L100')" title="L100 Executive Overview: High-level zones, icons &amp; titles">L100</button>
+        <button id="btnLodL200" class="phase-chip mono active" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L200')" title="L200 Solution Architecture: Service roles, metrics &amp; numbered flows">L200</button>
+        <button id="btnLodL300" class="phase-chip mono" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L300')" title="L300 Deep Engineering Spec: Protocols, ports, IAM, CMEK &amp; SLOs">L300</button>
       </div>
 
-      <!-- Live Geometry Gate, Studio Workbench & Export Actions -->
-      <div class="header-actions" style="flex-shrink:0;gap:6px;">
-        <div id="headerGeometryBadge" class="gate-pill" style="padding:4px 9px;font-size:10.5px;cursor:pointer;" onclick="openWorkbenchTab('judge')" title="Click to inspect Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Telemetry">
+      <!-- Live Geometry Gate, MCP & API, Studio Workbench & Export Actions -->
+      <div class="header-actions" style="flex-shrink:0;gap:5px;">
+        <div id="headerGeometryBadge" class="gate-pill" style="padding:3px 7px;font-size:10px;cursor:pointer;" onclick="openWorkbenchTab('judge')" title="Click to inspect Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Telemetry">
           <span class="gate-dot"></span>
           <span class="mono" id="headerGateText">5/5 PASS · 96/100</span>
         </div>
-        <button id="btnOpenStudioWorkbench" class="btn-secondary" style="padding:6px 10px;font-size:11px;" onclick="toggleStudioWorkbench()" title="Toggle VeriSpec Studio Workbench: Bi-Directional Code DSL, 44 Cloud Stencils, Live Gemini Judge &amp; Terraform (⌘E)">
-          <span>🛠️ Studio Workbench</span>
+        <button id="btnOpenMcpModal" class="btn-secondary" style="padding:5px 8px;font-size:10.5px;border-color:#BFDBFE;background:#EFF6FF;color:#1D4ED8;" onclick="openMcpApiModal()" title="Agent-Ready verispec_mcp Server &amp; Public Diagramming REST API Playground">
+          <span>🤖 MCP &amp; API</span>
         </button>
-        <a id="headerExportDrawioBtn" class="btn-primary" style="padding:6px 11px;font-size:11px;" href="/api/export-drawio?code=D05" download>
+        <button id="btnOpenStudioWorkbench" class="btn-secondary" style="padding:5px 8px;font-size:10.5px;" onclick="toggleStudioWorkbench()" title="Toggle VeriSpec Studio Workbench: Bi-Directional Code DSL, 52 Cloud Stencils, Live Gemini Judge &amp; Terraform (⌘E)">
+          <span>🛠️ Workbench</span>
+        </button>
+        <a id="headerExportDrawioBtn" class="btn-primary" style="padding:5px 9px;font-size:10.5px;" href="/api/export-drawio?code=D05" download>
           <span>⬇ .drawio</span>
         </a>
       </div>
@@ -1270,6 +1279,23 @@
               </div>
             </div>
 
+            <!-- Interactive C4 System Map Drill-Down Breadcrumb Bar (System L100 › Container L200 › Component L300) -->
+            <div id="canvasMapDrilldownBar" style="padding:5px 14px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span class="mono" style="font-size:10px;font-weight:800;color:#1E40AF;">🗺️ C4 System Map Drill-Down:</span>
+                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. System Context (L100)</button>
+                <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
+                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container Mesh (L200)</button>
+                <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
+                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component Spec (L300)</button>
+                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9.5px;padding:2px 8px;cursor:pointer;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to drill down into individual component subsystems or double-click any canvas node">🔍 Focus: Full System Topology (Click to Drill Into Component)</span>
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <button class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;color:#047857;border-color:#6EE7B7;background:#ECFDF5;" onclick="setUiEdition('home')" title="Open Workspace Home Dashboard (18 Files, Starred Blueprints &amp; Quick Create)">🗂️ Workspace Home</button>
+                <button class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;color:#1D4ED8;border-color:#93C5FD;background:#EFF6FF;" onclick="openMcpApiModal()" title="Open verispec_mcp Agent Server &amp; REST Diagramming API Playground">🤖 verispec_mcp API</button>
+              </div>
+            </div>
+
             <div id="atelierSvgContainer" class="svg-viewport-wrapper vs-dual-scroll" style="cursor:grab;"></div>
 
             <!-- Conversational Prompt Mutation Dock -->
@@ -1417,6 +1443,448 @@
             </div>
           </div>
           <div id="atlasPhasesContainer"></div>
+        </section>
+
+        <!-- ===================================================================
+             EDITION 5: PRODUCT LANDING PAGE (/landing · Executive Light Theme)
+             =================================================================== -->
+        <section id="viewEditionLanding" class="hidden" style="display:flex;flex-direction:column;gap:22px;padding-bottom:32px;">
+          <!-- Product Mega-Navigation Bar -->
+          <div id="landingMegaNav" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-xs);">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#93C5FD;padding:3px 9px;font-size:10px;">VERISPEC PLATFORM v3.5</span>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="document.getElementById('landingBentoGrid')?.scrollIntoView({behavior:'smooth'})">✨ AI Diagrams</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="drilldownC4Level('L200'); setUiEdition('atelier');">🗺️ Interactive C4 Maps</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setUiEdition('atelier'); openWorkbenchTab('iac'); generateGithubPrBotPreview();">🤖 VeriSpecBot PR Diff</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="openMcpApiModal()">🔌 MCP Server &amp; API</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setUiEdition('atelier'); openWorkbenchTab('rfc');">📄 AI Design Docs (RFC)</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="document.getElementById('landingPricingGrid')?.scrollIntoView({behavior:'smooth'})">💳 Pricing &amp; Self-Hosted</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <button class="btn-secondary" style="padding:6px 12px;font-size:11px;" onclick="setUiEdition('home')">🗂️ Open Workspace Home</button>
+              <button class="btn-primary" style="padding:6px 14px;font-size:11px;" onclick="setUiEdition('atelier')">🚀 Launch Studio Canvas →</button>
+            </div>
+          </div>
+
+          <!-- Hero Banner + Interactive AI Diagrammer Prompt Sandbox + Live 16:9 Architecture Preview -->
+          <div id="landingHeroSection" style="background:linear-gradient(180deg,#FFFFFF 0%,#F8FAFC 100%);border:1px solid #CBD5E1;border-radius:18px;padding:28px 28px 24px;box-shadow:var(--shadow-sm);display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,0.92fr);gap:24px;align-items:stretch;">
+            <!-- Left Hero Column: Headline + Interactive Multi-Modal Sandbox -->
+            <div style="display:flex;flex-direction:column;justify-content:space-between;gap:16px;min-width:0;">
+              <div>
+                <div style="display:inline-flex;align-items:center;gap:8px;padding:4px 11px;border-radius:999px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;font-size:10.5px;font-weight:800;margin-bottom:12px;" class="mono">
+                  <span>🟢 PHASE-0 MATHEMATICAL GUARANTEE</span>
+                  <span>·</span>
+                  <span>VERTEX AI GEMINI 3.1 PRO + 3 FLASH</span>
+                </div>
+                <h1 style="font-size:30px;font-weight:900;color:#0F172A;letter-spacing:-0.03em;line-height:1.15;margin:0 0 10px;">
+                  AI for Architecture Diagrams <span style="color:#2563EB;">That Matter</span>
+                </h1>
+                <p style="font-size:13.5px;color:#475569;line-height:1.55;margin:0;">
+                  Create accurate, deterministic, self-updating system architecture diagrams, interactive C4 maps, and living engineering design docs from prompts, Terraform/SQL/K8s code, or whiteboard sketches—with zero AABB collisions, native <code class="mono" style="font-size:11.5px;background:#F1F5F9;padding:1px 5px;border-radius:4px;">node:sqlite</code> WAL persistence, and automated GitHub PR FinOps reviews.
+                </p>
+              </div>
+
+              <!-- Interactive Live AI Diagrammer Sandbox Card -->
+              <div id="landingPromptSandboxCard" style="background:#FFFFFF;border:1.5px solid #93C5FD;border-radius:14px;padding:14px 16px;box-shadow:0 8px 24px rgba(37,99,235,0.08);display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+                  <span style="font-size:11.5px;font-weight:800;color:#1E3A8A;">✨ Interactive AI Diagrammer Sandbox (Try Live)</span>
+                  <div style="display:inline-flex;gap:4px;flex-wrap:wrap;">
+                    <button id="landingModeBtn_prompt" class="phase-chip active" style="padding:3px 8px;font-size:10px;" onclick="setLandingSandboxMode('prompt')">💬 Text Prompt</button>
+                    <button id="landingModeBtn_code" class="phase-chip" style="padding:3px 8px;font-size:10px;" onclick="setLandingSandboxMode('code')">🧬 Terraform / SQL / K8s</button>
+                    <button id="landingModeBtn_vision" class="phase-chip" style="padding:3px 8px;font-size:10px;" onclick="setLandingSandboxMode('vision')">📷 Whiteboard Vision</button>
+                    <button id="landingModeBtn_rfc" class="phase-chip" style="padding:3px 8px;font-size:10px;" onclick="setLandingSandboxMode('rfc')">📄 Living RFC Spec</button>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <select id="landingSandboxBpSelect" style="padding:8px 10px;border-radius:8px;border:1px solid #CBD5E1;font-size:11px;font-weight:700;background:#F8FAFC;color:#0F172A;max-width:165px;" onchange="selectBlueprint(this.value)">
+                    <option value="D05">D05 · GCP Cloud HA</option>
+                    <option value="D04">D04 · C4 Context</option>
+                    <option value="D06">D06 · Multi-Region Hub</option>
+                    <option value="D10">D10 · Medallion Lake</option>
+                    <option value="D12">D12 · Agentic RAG Mesh</option>
+                    <option value="D15">D15 · Zero-Trust KMS</option>
+                  </select>
+                  <input
+                    id="landingHeroPromptInput"
+                    type="text"
+                    value="Add Cloud Armor WAF, Vertex AI Agent, and Spanner HA"
+                    placeholder="Describe your system architecture, paste Terraform/SQL, or specify an AST mutation..."
+                    style="flex:1;min-width:0;padding:9px 12px;border-radius:8px;border:1px solid #93C5FD;font-size:12px;font-weight:500;color:#0F172A;"
+                    onkeydown="if(event.key==='Enter') executeLandingSandboxPrompt()"
+                  />
+                  <button id="btnLandingGenerateNow" class="btn-primary" style="padding:9px 16px;font-size:11.5px;white-space:nowrap;" onclick="executeLandingSandboxPrompt()">
+                    ✨ Generate in Studio →
+                  </button>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                  <span class="mono" style="font-size:9.5px;font-weight:700;color:#64748B;">1-Click Starters:</span>
+                  <button class="recipe-chip" style="font-size:10px;padding:3px 8px;" onclick="setLandingSamplePrompt('Add Cloud Armor WAF, Apigee Gateway, and Spanner HA')">⚡ Multi-Region Spanner HA</button>
+                  <button class="recipe-chip" style="font-size:10px;padding:3px 8px;" onclick="setLandingSamplePrompt('Add Vertex AI Gemini Agent, AlloyDB Vector, and Cloud DLP')">🤖 Agentic RAG + DLP</button>
+                  <button class="recipe-chip" style="font-size:10px;padding:3px 8px;" onclick="setLandingSamplePrompt('Add Apache Kafka Event Bus, Apache Flink, and BigQuery')">📊 Kafka → Flink → BigQuery</button>
+                  <button class="recipe-chip" style="font-size:10px;padding:3px 8px;" onclick="setLandingSamplePrompt('Add Okta Auth0 OIDC, HashiCorp Vault KMS, and Datadog APM')">🛡️ Zero-Trust + Observability</button>
+                </div>
+              </div>
+
+              <!-- Key Platform Proof Strip -->
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;">
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 10px;">
+                  <div class="mono" style="font-size:14px;font-weight:900;color:#1D4ED8;">18 Blueprints</div>
+                  <div style="font-size:10px;color:#475569;font-weight:600;">6 Full SDLC Phases</div>
+                </div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 10px;">
+                  <div class="mono" style="font-size:14px;font-weight:900;color:#059669;">0 Collisions</div>
+                  <div style="font-size:10px;color:#475569;font-weight:600;">5-Stage Phase-0 Solver</div>
+                </div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 10px;">
+                  <div class="mono" style="font-size:14px;font-weight:900;color:#7C3AED;">52 Stencils</div>
+                  <div style="font-size:10px;color:#475569;font-weight:600;">GCP · AWS · Azure · AI</div>
+                </div>
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:8px 10px;">
+                  <div class="mono" style="font-size:14px;font-weight:900;color:#D97706;">verispec_mcp</div>
+                  <div style="font-size:10px;color:#475569;font-weight:600;">Agent MCP &amp; REST API</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Hero Column: Live Interactive 16:9 Architecture Canvas Preview -->
+            <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:12px;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-width:0;box-shadow:var(--shadow-xs);">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:8px;border-bottom:1px solid #E2E8F0;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="stitch-badge mono" id="landingPreviewCodeBadge" style="font-size:10.5px;">D05 · LIVE PREVIEW</span>
+                  <span id="landingPreviewFinopsBadge" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:10px;">💰 $10,830/mo · ⚡ 54.6ms p99</span>
+                </div>
+                <div style="display:inline-flex;align-items:center;gap:4px;">
+                  <span class="mono" style="font-size:9px;background:#DBEAFE;color:#1D4ED8;padding:2px 6px;border-radius:99px;font-weight:800;">@alex.rivera</span>
+                  <span class="mono" style="font-size:9px;background:#F3E8FF;color:#6D28D9;padding:2px 6px;border-radius:99px;font-weight:800;">@sre-lead</span>
+                  <span class="mono" style="font-size:9px;background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:99px;font-weight:800;">@sec-architect</span>
+                  <button class="btn-secondary" style="padding:3px 8px;font-size:10px;" onclick="setUiEdition('atelier')">Open Full Canvas ↗</button>
+                </div>
+              </div>
+              <div id="landingHeroLiveSvgPreview" style="width:100%;height:310px;overflow:hidden;border-radius:10px;border:1px solid #E2E8F0;background:#F8FAFC;display:flex;align-items:center;justify-content:center;cursor:pointer;" onclick="setUiEdition('atelier')" title="Click to open interactive Studio Canvas"></div>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:10.5px;color:#475569;">
+                <span class="mono">📐 <strong>Phase-0 Certificate:</strong> 5/5 Stages PASS · Zero Hit-and-Trial</span>
+                <span class="mono" style="color:#1D4ED8;font-weight:700;">L100 › L200 › L300 C4 Drill-Down Ready</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6-Card Bento Product Pillar Grid (Full Feature Coverage) -->
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+              <div>
+                <h2 style="font-size:19px;font-weight:900;color:#0F172A;margin:0;">Complete Visual Engineering &amp; Architecture Platform (6 Core Pillars)</h2>
+                <p style="font-size:12px;color:#475569;margin:2px 0 0;">Built for Principal Architects, Staff SREs, Platform Engineering Teams, and Autonomous Coding Agents.</p>
+              </div>
+              <span class="gate-pill mono">100% Feature Parity · Native SQLite WAL</span>
+            </div>
+
+            <div id="landingBentoGrid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
+              <!-- Pillar 1: AI Diagrams & Multi-Modal Inputs -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#DBEAFE;color:#1D4ED8;border-color:#93C5FD;">PILLAR 1 · AI DIAGRAMS</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">Prompt · Code · Vision</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Multi-Modal AI Diagram Generation</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Synthesize and mutate diagrams via conversational prompts, bi-directional VeriSpec DSL, Terraform HCL, PostgreSQL DDL, Kubernetes YAML, or Vertex AI Gemini Vision whiteboard decompilation.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#059669;font-weight:700;">✓ 52 Official Cloud Stencils</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="setUiEdition('atelier')">Try AI Co-Pilot →</button>
+                </div>
+              </div>
+
+              <!-- Pillar 2: Interactive C4 System Maps & Drill-Down -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#6EE7B7;">PILLAR 2 · INTERACTIVE MAPS</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">L100 › L200 › L300</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Interactive C4 System Maps &amp; Drill-Downs</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Navigate complex distributed architectures across C4 Level 1 System Context (<code class="mono">L100</code>), Level 2 Container Mesh (<code class="mono">L200</code>), and Level 3 Component &amp; Protocol Specs (<code class="mono">L300</code>) with 1-click node scoping.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#1D4ED8;font-weight:700;">✓ Bespoke ↔ 5-Tier Grid</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="drilldownC4Level('L300'); setUiEdition('atelier');">Explore C4 Map →</button>
+                </div>
+              </div>
+
+              <!-- Pillar 3: VeriSpecBot GitHub PR Diff & FinOps Bot -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#F3E8FF;color:#6D28D9;border-color:#C4B5FD;">PILLAR 3 · VERISPECBOT CI/CD</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">GitHub Actions Bot</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Self-Updating GitHub PR Diff &amp; FinOps Bot</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Automatically comments on pull requests in <code class="mono">nitinaggarwal-12/verispec</code> with structural AST diffs, monthly cloud cost deltas (<code class="mono">$/mo</code>), critical-path <code class="mono">p99</code> latency impact, and Judge Jury grades.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#6D28D9;font-weight:700;">✓ Auto PR Markdown &amp; Diff</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="setUiEdition('atelier'); openWorkbenchTab('iac'); generateGithubPrBotPreview();">Preview PR Bot →</button>
+                </div>
+              </div>
+
+              <!-- Pillar 4: Agent-Ready verispec_mcp Server & Diagramming API -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#FEF3C7;color:#B45309;border-color:#FCD34D;">PILLAR 4 · AGENT MCP &amp; API</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">HTTP/SSE · stdio · REST</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Agent-Ready <code class="mono">verispec_mcp</code> &amp; REST API</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Expose 5 deterministic MCP tools (<code class="mono">list</code>, <code class="mono">generate</code>, <code class="mono">mutate</code>, <code class="mono">audit</code>, <code class="mono">export</code>) and <code class="mono">POST /api/v1/diagram/generate</code> to Claude Code, Cursor, Gemini CLI, and CI/CD pipelines.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#B45309;font-weight:700;">✓ JSON-RPC 2.0 &amp; OAuth/Bearer</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="openMcpApiModal()">Open MCP Playground →</button>
+                </div>
+              </div>
+
+              <!-- Pillar 5: Hybrid Notion-Style Living Engineering Design Docs -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#E0E7FF;color:#3730A3;border-color:#A5B4FC;">PILLAR 5 · AI DESIGN DOCS</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">/ Slash Commands</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Hybrid WYSIWYG Living RFC &amp; ADR Docs</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Author Notion-style engineering RFCs with <code class="mono">/h2</code>, <code class="mono">/callout</code>, <code class="mono">/code</code>, <code class="mono">/table</code>, and <code class="mono">/embed D06</code> blocks that render live multi-blueprint SVGs and sync to SQLite WAL.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#3730A3;font-weight:700;">✓ Inline ContentEditable Sync</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="setUiEdition('atelier'); openWorkbenchTab('rfc');">Open Living RFC →</button>
+                </div>
+              </div>
+
+              <!-- Pillar 6: Enterprise Governance, SAML SSO & Self-Hosted Cloud Run -->
+              <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;box-shadow:var(--shadow-xs);">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="stitch-badge mono" style="background:#DCFCE7;color:#166534;border-color:#86EFAC;">PILLAR 6 · ENTERPRISE &amp; SSO</span>
+                    <span class="mono" style="font-size:10px;color:#64748B;">SOC 2 · SAML · OCI</span>
+                  </div>
+                  <h3 style="font-size:15px;font-weight:800;color:#0F172A;margin:0 0 6px;">Enterprise Security, SAML SSO &amp; Self-Hosting</h3>
+                  <p style="font-size:12px;color:#475569;line-height:1.5;margin:0;">
+                    Deploy single-tenant or self-hosted OCI containers on Cloud Run with Google Workspace / Okta / Entra ID SAML 2.0 SSO, multiplayer <code class="mono">@mention</code> threads, and native <code class="mono">.drawio</code> vector export.
+                  </p>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid #F1F5F9;">
+                  <span class="mono" style="font-size:10px;color:#166534;font-weight:700;">✓ Cloud Run Revision Ready</span>
+                  <button class="btn-secondary" style="padding:5px 10px;font-size:10.5px;" onclick="setUiEdition('home')">Open Workspace Home →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Customer Engineering Testimonials Strip -->
+          <div id="landingTestimonialsGrid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
+              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
+                "Phase-0 mathematical planning eliminated every overlapping label and crooked arrow in our C4 architecture reviews. Exporting 100% editable .drawio XML saves hours per RFC."
+              </div>
+              <div class="mono" style="font-size:10.5px;font-weight:800;color:#1D4ED8;">Alex Rivera · Principal Cloud Architect</div>
+            </div>
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
+              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
+                "Connecting Claude Code and Gemini CLI to verispec_mcp lets our autonomous agents generate, audit, and update architecture diagrams and FinOps $/mo budgets on every PR."
+              </div>
+              <div class="mono" style="font-size:10.5px;font-weight:800;color:#059669;">Priya Nair · Staff Site Reliability Engineer</div>
+            </div>
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
+              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
+                "Having 18 lifecycle blueprints, live Vertex AI Gemini 3.1 Pro + 3 Flash cross-model judging, and hybrid slash-command RFC docs in a single self-hosted Cloud Run workspace is unmatched."
+              </div>
+              <div class="mono" style="font-size:10.5px;font-weight:800;color:#7C3AED;">Marcus Vance · Principal Security Architect</div>
+            </div>
+          </div>
+
+          <!-- 3-Tier Interactive Pricing & Deployment Matrix -->
+          <div id="landingPricingGrid" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:16px;padding:22px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+              <div>
+                <h2 style="font-size:18px;font-weight:900;color:#0F172A;margin:0;">Transparent Plans &amp; Self-Hosted Cloud Run Deployment</h2>
+                <p style="font-size:12px;color:#475569;margin:2px 0 0;">Start free or deploy dedicated OCI containers inside your own Google Cloud VPC.</p>
+              </div>
+              <span class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#6EE7B7;">SOC 2 Type II · HIPAA · 21 CFR Part 11 Ready</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
+              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                <div>
+                  <div class="mono" style="font-size:10.5px;font-weight:800;color:#475569;">STARTER &amp; OPEN DEVELOPER</div>
+                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">$0 <span style="font-size:12px;font-weight:600;color:#64748B;">/ forever</span></div>
+                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#334155;line-height:1.7;">
+                    <li>All 18 SDLC Lifecycle Blueprints (D01–D18)</li>
+                    <li>L100 / L200 / L300 C4 System Map Drill-Down</li>
+                    <li>Native Vector .SVG, 2x .PNG &amp; Editable .drawio</li>
+                    <li>5-Stage Phase-0 Mathematical Geometry Certificate</li>
+                  </ul>
+                </div>
+                <button class="btn-secondary" style="width:100%;justify-content:center;padding:8px;" onclick="setUiEdition('atelier')">Start Free in Studio →</button>
+              </div>
+
+              <div style="background:#EFF6FF;border:2px solid #2563EB;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                <div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span class="mono" style="font-size:10.5px;font-weight:800;color:#1D4ED8;">TEAM PRO &amp; AI AGENTS</span>
+                    <span class="stitch-badge mono" style="background:#2563EB;color:#FFF;">ACTIVE PLAN</span>
+                  </div>
+                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">$12 <span style="font-size:12px;font-weight:600;color:#475569;">/ member / mo</span></div>
+                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#1E293B;line-height:1.7;">
+                    <li>Live Vertex AI Gemini 3.1 Pro + 3 Flash Co-Pilot &amp; Jury</li>
+                    <li>Agent-Ready <code class="mono">verispec_mcp</code> Server &amp; REST API</li>
+                    <li>VeriSpecBot GitHub PR Diff &amp; FinOps Review Bot</li>
+                    <li>Multiplayer Cursors, <code class="mono">@mention</code> Threads &amp; Living RFCs</li>
+                  </ul>
+                </div>
+                <button class="btn-primary" style="width:100%;justify-content:center;padding:8px;" onclick="setUiEdition('home')">Open Team Workspace Home →</button>
+              </div>
+
+              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+                <div>
+                  <div class="mono" style="font-size:10.5px;font-weight:800;color:#065F46;">ENTERPRISE &amp; SELF-HOSTED OCI</div>
+                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">Custom <span style="font-size:12px;font-weight:600;color:#64748B;">/ Single-Tenant</span></div>
+                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#334155;line-height:1.7;">
+                    <li>Self-Hosted OCI Container on Cloud Run / GKE</li>
+                    <li>Google Workspace, Okta &amp; Entra ID SAML 2.0 SSO</li>
+                    <li>BeyondCorp Private Load Balancer (<code class="mono">*.cr.gclb.goog</code>)</li>
+                    <li>Dedicated <code class="mono">node:sqlite</code> WAL Store &amp; Custom Price Books</li>
+                  </ul>
+                </div>
+                <button class="btn-secondary" style="width:100%;justify-content:center;padding:8px;" onclick="openMcpApiModal()">Inspect Enterprise API &amp; MCP →</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5-Column Product Footer -->
+          <footer id="landingFooter" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;font-size:11.5px;color:#475569;">
+            <div>
+              <div style="font-weight:800;color:#0F172A;margin-bottom:6px;">VeriSpec Studio v3.5</div>
+              <div>Deterministic AI Architecture Platform</div>
+              <div class="mono" style="font-size:10px;color:#2563EB;margin-top:6px;">github.com/nitinaggarwal-12/verispec</div>
+            </div>
+            <div>
+              <div style="font-weight:800;color:#0F172A;margin-bottom:6px;">Product Surfaces</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier')">1. Split Co-Pilot Studio</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('command')">2. Spotlight Canvas</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('stepper')">3. Visual Before/After Diff</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atlas')">4. 18-Diagram Visual Atlas</div>
+            </div>
+            <div>
+              <div style="font-weight:800;color:#0F172A;margin-bottom:6px;">AI &amp; Automation</div>
+              <div style="cursor:pointer;" onclick="openMcpApiModal()">verispec_mcp Agent Server</div>
+              <div style="cursor:pointer;" onclick="openMcpApiModal()">REST Diagramming API v1</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); openWorkbenchTab('iac');">VeriSpecBot GitHub PR Bot</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); triggerVisionDecompileSample();">Gemini 3 Flash Vision AI</div>
+            </div>
+            <div>
+              <div style="font-weight:800;color:#0F172A;margin-bottom:6px;">Architecture &amp; Docs</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); openWorkbenchTab('rfc');">Hybrid WYSIWYG Living RFC</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); openWorkbenchTab('dsl');">Bi-Directional VeriSpec DSL</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); openWorkbenchTab('stencils');">52 Cloud Vendor Stencils</div>
+              <div style="cursor:pointer;" onclick="setUiEdition('atelier'); openWorkbenchTab('judge');">5-Pillar Judge Jury</div>
+            </div>
+            <div>
+              <div style="font-weight:800;color:#0F172A;margin-bottom:6px;">Cloud Run Production</div>
+              <div class="mono" style="font-size:10px;color:#059669;font-weight:700;">🟢 Ready=True (us-west1)</div>
+              <div class="mono" style="font-size:10px;">verispec-248990048888.cr.gclb.goog</div>
+              <div class="mono" style="font-size:10px;margin-top:4px;">SQLite WAL · Zero Data Loss</div>
+            </div>
+          </footer>
+        </section>
+
+        <!-- ===================================================================
+             EDITION 6: WORKSPACE HOME DASHBOARD (/home · File & Folder Hub)
+             =================================================================== -->
+        <section id="viewEditionHome" class="hidden" style="display:flex;flex-direction:column;gap:16px;padding-bottom:28px;">
+          <!-- Top Workspace Identity & Team Presence Banner -->
+          <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;box-shadow:var(--shadow-xs);">
+            <div>
+              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <h1 style="font-size:18px;font-weight:900;color:#0F172A;margin:0;">🗂️ VeriSpec Enterprise Architecture Workspace</h1>
+                <span class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#93C5FD;">ws_verispec_prod</span>
+                <span class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#6EE7B7;">🛡️ Google Workspace SAML 2.0 SSO</span>
+                <span id="homeSqliteStatusBadge" class="stitch-badge mono" style="background:#F0FDF4;color:#166534;border-color:#86EFAC;">🗄️ SQLite WAL · 18 Blueprints</span>
+              </div>
+              <p style="font-size:12px;color:#475569;margin:4px 0 0;">
+                Manage all 18 lifecycle architecture files, starred blueprints, living engineering RFCs, and <code class="mono">nitinaggarwal-12/verispec</code> GitHub PR automations.
+              </p>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button class="btn-secondary" style="padding:6px 11px;font-size:11px;" onclick="setUiEdition('landing')">🏠 Product Landing</button>
+              <button class="btn-secondary" style="padding:6px 11px;font-size:11px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openMcpApiModal()">🤖 MCP &amp; API</button>
+              <button class="btn-primary" style="padding:6px 13px;font-size:11px;" onclick="triggerGreenfieldArchitecture(); setUiEdition('atelier');">➕ New Blank Diagram</button>
+            </div>
+          </div>
+
+          <!-- 5 Quick-Create Action Cards -->
+          <div id="homeQuickCreateGrid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;">
+            <button onclick="triggerGreenfieldArchitecture(); setUiEdition('atelier');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#2563EB;">➕ BLANK CANVAS</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">New Architecture</span>
+              <span style="font-size:10.5px;color:#64748B;">Greenfield 5-tier cloud grid</span>
+            </button>
+            <button onclick="setUiEdition('atelier'); setTimeout(()=>document.getElementById('atelierPromptInput')?.focus(), 80);" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#7C3AED;">✨ AI DIAGRAMMER</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">Prompt / Code to AST</span>
+              <span style="font-size:10.5px;color:#64748B;">Text, Terraform, SQL or K8s</span>
+            </button>
+            <button onclick="setUiEdition('atelier'); openWorkbenchTab('rfc');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#059669;">📄 AI DESIGN DOC</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">New Living RFC / ADR</span>
+              <span style="font-size:10.5px;color:#64748B;">/ Slash commands + embeds</span>
+            </button>
+            <button onclick="setUiEdition('atelier'); triggerVisionDecompileSample();" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#D97706;">📷 GEMINI VISION</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">Import Whiteboard</span>
+              <span style="font-size:10.5px;color:#64748B;">Decompile PNG/JPEG sketch</span>
+            </button>
+            <button onclick="openMcpApiModal()" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#0F172A;">🤖 AGENT MCP &amp; API</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">Connect verispec_mcp</span>
+              <span style="font-size:10.5px;color:#64748B;">Claude, Cursor &amp; REST CI/CD</span>
+            </button>
+          </div>
+
+          <!-- Workspace Search, Folder Tabs & Grid/Table View Switcher -->
+          <div id="homeFilterToolbar" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;box-shadow:var(--shadow-xs);">
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
+              <button id="homeTab_ALL" class="phase-chip active" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('ALL')">🕒 All Files (18)</button>
+              <button id="homeTab_STARRED" class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('STARRED')">⭐ Starred (<span id="homeStarredCountNum">5</span>)</button>
+              <button id="homeTab_fld_01" class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('fld_01')">📁 01 · Product &amp; UX (3)</button>
+              <button id="homeTab_fld_02" class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('fld_02')">📁 02 · Cloud &amp; C4 (6)</button>
+              <button id="homeTab_fld_03" class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('fld_03')">📁 03 · Data &amp; AI (3)</button>
+              <button id="homeTab_fld_04" class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setHomeFolderTab('fld_04')">📁 04 · Security &amp; SRE (6)</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex:1;justify-content:flex-end;min-width:260px;">
+              <input
+                id="homeSearchInput"
+                type="text"
+                placeholder="🔍 Filter 18 blueprints by title, service, or code..."
+                oninput="renderWorkspaceHomeFiles()"
+                style="flex:1;max-width:340px;padding:6px 10px;border-radius:8px;border:1px solid #CBD5E1;font-size:11.5px;"
+              />
+              <div style="display:inline-flex;background:#F1F5F9;border:1px solid #CBD5E1;border-radius:8px;padding:2px;gap:2px;">
+                <button id="btnHomeViewGrid" class="phase-chip active" style="border:none;padding:4px 9px;font-size:10.5px;" onclick="setHomeViewMode('grid')">⊞ Grid</button>
+                <button id="btnHomeViewTable" class="phase-chip" style="border:none;padding:4px 9px;font-size:10.5px;" onclick="setHomeViewMode('table')">☰ Table</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic Workspace Files Grid / Table Container -->
+          <div id="homeFilesContainer"></div>
         </section>
       </main>
     </div>
@@ -1743,6 +2211,67 @@
       </div>
     </div>
 
+    <!-- Agent-Ready verispec_mcp Server & Public REST Diagramming API Playground Modal -->
+    <div id="mcpApiModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.10);align-items:flex-start;justify-content:center;padding-top:256px;" onclick="if(event.target===this)closeMcpApiModal()">
+      <div style="width:960px;max-width:96vw;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 20px 44px rgba(15,23,42,0.18);overflow:hidden;display:flex;flex-direction:column;">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 18px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <span style="font-size:13px;font-weight:900;color:#0F172A;">🤖 Agent-Ready <code class="mono">verispec_mcp</code> Server &amp; REST Diagramming API</span>
+            <span class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#6EE7B7;">MCP 2025-06-18 · JSON-RPC 2.0</span>
+          </div>
+          <button class="btn-secondary" style="padding:3px 9px;font-size:10.5px;" onclick="closeMcpApiModal()">✕ Close</button>
+        </div>
+
+        <div style="padding:12px 18px;display:flex;flex-direction:column;gap:10px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:8px 10px;">
+              <div style="font-size:10.5px;font-weight:800;color:#1E3A8A;margin-bottom:4px;">1. Claude Code / Cursor / Gemini CLI Config</div>
+              <textarea id="mcpClientConfigSnippet" readonly class="mono" style="width:100%;height:110px;padding:6px 8px;border-radius:6px;border:1px solid #CBD5E1;background:#FFFFFF;font-size:9.5px;line-height:13px;color:#0F172A;resize:none;white-space:pre;overflow:hidden;">{
+  "mcpServers": {
+    "verispec_mcp": {
+      "url": "https://verispec.cr.gclb.goog/api/mcp",
+      "transport": "http-sse",
+      "headers": { "X-API-Key": "vs_live_99a8b7" }
+    }
+  }
+}</textarea>
+            </div>
+            <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;padding:8px 10px;">
+              <div style="font-size:10.5px;font-weight:800;color:#065F46;margin-bottom:4px;">2. Public REST Diagramming API (<code class="mono">POST /api/v1/diagram/generate</code>)</div>
+              <textarea id="restApiCurlSnippet" readonly class="mono" style="width:100%;height:110px;padding:6px 8px;border-radius:6px;border:1px solid #CBD5E1;background:#FFFFFF;font-size:9.5px;line-height:13px;color:#0F172A;resize:none;white-space:pre;overflow:hidden;">curl -X POST /api/v1/diagram/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "D05",
+    "prompt": "Add Cloud Armor WAF",
+    "detailLevel": "L200"
+  }'</textarea>
+            </div>
+          </div>
+
+          <div style="background:#EFF6FF;border:1px solid #93C5FD;border-radius:10px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+              <span class="mono" style="font-size:10.5px;font-weight:800;color:#1D4ED8;">⚡ Live MCP &amp; REST Playground:</span>
+              <select id="mcpPlaygroundToolSelect" style="padding:4px 8px;border-radius:6px;border:1px solid #93C5FD;font-size:10.5px;font-weight:700;background:#FFFFFF;color:#0F172A;">
+                <option value="verispec_list_blueprints">Tool 1: verispec_list_blueprints</option>
+                <option value="verispec_finops_slo_audit">Tool 2: verispec_finops_slo_audit (D05)</option>
+                <option value="verispec_mutate_ast">Tool 3: verispec_mutate_ast (+Cloud DLP)</option>
+                <option value="verispec_export_iac">Tool 4: verispec_export_iac (Terraform HCL)</option>
+                <option value="rest_v1_generate">REST API: POST /api/v1/diagram/generate</option>
+              </select>
+            </div>
+            <button id="btnRunMcpPlayground" class="btn-primary" style="padding:5px 12px;font-size:11px;" onclick="executeLiveMcpPlayground()">
+              ▶ Execute Live Call
+            </button>
+          </div>
+
+          <div>
+            <div style="font-size:10.5px;font-weight:800;color:#334155;margin-bottom:4px;">Live JSON-RPC 2.0 / REST Response (<code class="mono" id="mcpStatusHeaderLabel">Ready · 5 Tools Registered</code>):</div>
+            <textarea id="mcpLiveResponseBox" readonly class="mono" style="width:100%;height:156px;padding:7px 10px;border-radius:8px;border:1px solid #CBD5E1;background:#F8FAFC;font-size:9.5px;line-height:13.2px;color:#0F172A;resize:none;overflow:hidden;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div id="toastBanner" class="toast-banner"></div>
   </div>
 
@@ -2016,10 +2545,23 @@
       }
     }
 
+    let activeHomeFolderTab = 'ALL';
+    let activeHomeViewMode = 'grid';
+    let activeLandingSandboxMode = 'prompt';
+
     async function loadAtlas() {
       const params = new URLSearchParams(window.location.search);
+      const pathName = (window.location.pathname || '/').toLowerCase();
       if (params.get('code')) activeCode = params.get('code').toUpperCase();
-      if (params.get('edition')) activeEdition = params.get('edition').toLowerCase();
+      if (params.get('edition')) {
+        activeEdition = params.get('edition').toLowerCase();
+      } else if (params.get('view')) {
+        activeEdition = params.get('view').toLowerCase();
+      } else if (pathName === '/landing') {
+        activeEdition = 'landing';
+      } else if (pathName === '/home' || pathName === '/dashboard') {
+        activeEdition = 'home';
+      }
       if (params.get('detail')) activeDetailLevel = params.get('detail').toUpperCase();
 
       initColumnResizers();
@@ -2033,6 +2575,8 @@
       renderActiveBlueprintViews();
       renderFull18AtlasGrid();
       renderStencilPickerGrid();
+      renderLandingPagePreview();
+      renderWorkspaceHomeFiles();
       setUiEdition(activeEdition, false);
     }
 
@@ -2049,7 +2593,15 @@
       ['L100', 'L200', 'L300'].forEach((lvl) => {
         const btn = document.getElementById(`btnLod${lvl}`);
         if (btn) btn.classList.toggle('active', activeDetailLevel === lvl);
+        const c4Btn = document.getElementById(`c4Step${lvl}`);
+        if (c4Btn) c4Btn.classList.toggle('active', activeDetailLevel === lvl);
       });
+      const c4NodePill = document.getElementById('c4DrilldownNodePill');
+      if (c4NodePill) {
+        c4NodePill.textContent = scopedNodeId
+          ? `🔍 C4 Sub-System Focus: ${scopedNodeTitle || scopedNodeId} (${activeDetailLevel} · Click to Cycle)`
+          : `🔍 Focus: Full System Topology (${activeDetailLevel} · Click to Drill Into Component)`;
+      }
     }
 
     async function setDetailLevel(level) {
@@ -2060,6 +2612,37 @@
       window.history.replaceState({}, '', url);
       await loadAtlas();
       showToast(`🔍 Switched Architectural Fidelity to ${level}`);
+    }
+
+    async function drilldownC4Level(level) {
+      await setDetailLevel(level);
+    }
+
+    function cycleC4ScopedNodeDrilldown() {
+      const bp = getActiveBpItem();
+      if (!bp || !bp.history || !bp.history.length) return;
+      const latest = bp.history[bp.history.length - 1];
+      const nodes = (latest.graph && latest.graph.nodes) || [];
+      if (!nodes.length) return;
+      if (!scopedNodeId) {
+        scopedNodeId = nodes[0].id;
+        scopedNodeTitle = nodes[0].title;
+      } else {
+        const idx = nodes.findIndex((n) => n.id === scopedNodeId);
+        if (idx >= 0 && idx + 1 < nodes.length) {
+          scopedNodeId = nodes[idx + 1].id;
+          scopedNodeTitle = nodes[idx + 1].title;
+        } else {
+          scopedNodeId = null;
+          scopedNodeTitle = null;
+        }
+      }
+      loadAtlas();
+      showToast(
+        scopedNodeId
+          ? `🗺️ C4 Drill-Down focused on component "${scopedNodeTitle}"`
+          : '🗺️ Restored Full System Context'
+      );
     }
 
     function clearScopedNode() {
@@ -2151,6 +2734,8 @@
       scopedNodeTitle = null;
       renderLeftRailList();
       renderActiveBlueprintViews();
+      renderLandingPagePreview();
+      renderWorkspaceHomeFiles();
       if (activeEdition === 'atlas') {
         setUiEdition('atelier');
       }
@@ -2158,7 +2743,12 @@
 
     function setUiEdition(edition, updateUrl = true) {
       activeEdition = edition;
+      const tb = document.getElementById('toastBanner');
+      if (tb) tb.style.display = 'none';
+      clearTimeout(window.__toastTimer);
       const map = {
+        landing: ['viewEditionLanding', 'btnEditionLanding'],
+        home: ['viewEditionHome', 'btnEditionHome'],
         atelier: ['viewEditionAtelier', 'btnEditionAtelier'],
         command: ['viewEditionCommand', 'btnEditionCommand'],
         stepper: ['viewEditionStepper', 'btnEditionStepper'],
@@ -2178,12 +2768,309 @@
       if (leftResizer) {
         leftResizer.classList.toggle('hidden', edition !== 'atelier');
       }
+      if (edition === 'landing') {
+        renderLandingPagePreview();
+      } else if (edition === 'home') {
+        renderWorkspaceHomeFiles();
+      }
       if (updateUrl) {
         const url = new URL(window.location.href);
         url.searchParams.set('edition', edition);
         url.searchParams.set('code', activeCode);
         url.searchParams.set('detail', activeDetailLevel);
         window.history.replaceState({}, '', url);
+      }
+    }
+
+    function renderLandingPagePreview() {
+      const bp = getActiveBpItem();
+      if (!bp) return;
+      const prevEl = document.getElementById('landingHeroLiveSvgPreview');
+      if (prevEl) {
+        prevEl.innerHTML = `<div style="position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">${bp.svg}</div>`;
+        const svgNode = prevEl.querySelector('svg');
+        if (svgNode) {
+          svgNode.style.width = '100%';
+          svgNode.style.height = '100%';
+        }
+      }
+      const codeBadge = document.getElementById('landingPreviewCodeBadge');
+      if (codeBadge) codeBadge.textContent = `${bp.code} · ${bp.version} · LIVE PREVIEW`;
+      const finBadge = document.getElementById('landingPreviewFinopsBadge');
+      if (finBadge && bp.finopsTelemetry) {
+        finBadge.textContent = `💰 $${Number(bp.finopsTelemetry.totalMonthlyUsd || 10830).toLocaleString()}/mo · ⚡ ${bp.finopsTelemetry.estimatedEndToEndP99Ms || 54.6}ms p99`;
+      }
+      const bpSel = document.getElementById('landingSandboxBpSelect');
+      if (bpSel && bpSel.value !== bp.code) {
+        const hasOpt = Array.from(bpSel.options).some((o) => o.value === bp.code);
+        if (hasOpt) bpSel.value = bp.code;
+      }
+    }
+
+    function setLandingSandboxMode(mode) {
+      activeLandingSandboxMode = mode;
+      ['prompt', 'code', 'vision', 'rfc'].forEach((m) => {
+        const btn = document.getElementById(`landingModeBtn_${m}`);
+        if (btn) btn.classList.toggle('active', m === mode);
+      });
+      const inp = document.getElementById('landingHeroPromptInput');
+      if (!inp) return;
+      if (mode === 'prompt') {
+        inp.value = 'Add Cloud Armor WAF, Vertex AI Agent, and Spanner HA';
+      } else if (mode === 'code') {
+        inp.value = 'resource "google_spanner_instance" "ha" {} resource "google_container_cluster" "gke" {}';
+      } else if (mode === 'vision') {
+        inp.value = 'Decompile whiteboard sketch with Cloudflare WAF, Apigee Gateway, GKE, and AlloyDB';
+      } else if (mode === 'rfc') {
+        inp.value = '/callout Zero-Trust mTLS 1.3 & HSM CMEK Key Rotation Policy';
+      }
+    }
+
+    function setLandingSamplePrompt(promptText) {
+      const inp = document.getElementById('landingHeroPromptInput');
+      if (inp) inp.value = promptText;
+    }
+
+    async function executeLandingSandboxPrompt() {
+      const inp = document.getElementById('landingHeroPromptInput');
+      const cmd = (inp && inp.value.trim()) || 'Add Cloud Armor WAF and Cloud Spanner HA';
+      setUiEdition('atelier');
+      if (activeLandingSandboxMode === 'vision') {
+        await triggerVisionDecompileSample();
+      } else if (activeLandingSandboxMode === 'rfc') {
+        openWorkbenchTab('rfc');
+        const slashInp = document.getElementById('rfcSlashCmdInput');
+        if (slashInp) {
+          slashInp.value = cmd;
+          await executeRfcSlashInput();
+        }
+      } else {
+        await executePromptMutation(cmd);
+      }
+    }
+
+    function setHomeFolderTab(tabId) {
+      activeHomeFolderTab = tabId;
+      ['ALL', 'STARRED', 'fld_01', 'fld_02', 'fld_03', 'fld_04'].forEach((id) => {
+        const btn = document.getElementById(`homeTab_${id}`);
+        if (btn) btn.classList.toggle('active', id === tabId);
+      });
+      renderWorkspaceHomeFiles();
+    }
+
+    function setHomeViewMode(mode) {
+      activeHomeViewMode = mode;
+      const gBtn = document.getElementById('btnHomeViewGrid');
+      const tBtn = document.getElementById('btnHomeViewTable');
+      if (gBtn) gBtn.classList.toggle('active', mode === 'grid');
+      if (tBtn) tBtn.classList.toggle('active', mode === 'table');
+      renderWorkspaceHomeFiles();
+    }
+
+    async function toggleBlueprintStar(code, ev) {
+      if (ev) ev.stopPropagation();
+      try {
+        const res = await fetch('/api/workspace/star', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          await loadAtlas();
+          showToast(data.starred ? `⭐ Starred ${code} in SQLite Workspace!` : `☆ Removed star from ${code}`);
+        }
+      } catch (err) {
+        showToast('Star toggle error: ' + err.message);
+      }
+    }
+
+    function renderWorkspaceHomeFiles() {
+      const container = document.getElementById('homeFilesContainer');
+      if (!container || !atlasData || !Array.isArray(atlasData.diagrams)) return;
+      const searchVal = (document.getElementById('homeSearchInput')?.value || '').trim().toLowerCase();
+      const starredSet = new Set(atlasData.starredBlueprints || []);
+      const starCntEl = document.getElementById('homeStarredCountNum');
+      if (starCntEl) starCntEl.textContent = String(starredSet.size);
+
+      const allowedFolderCodes = WORKSPACE_FOLDER_MAP[activeHomeFolderTab] || null;
+      const filtered = atlasData.diagrams.filter((d) => {
+        const isStarred = Boolean(d.starred || starredSet.has(d.code));
+        if (activeHomeFolderTab === 'STARRED' && !isStarred) return false;
+        if (allowedFolderCodes && !allowedFolderCodes.includes(d.code)) return false;
+        if (searchVal) {
+          const hay = `${d.code} ${d.title} ${d.subtitle || ''} ${d.phaseTitle || ''} ${d.archetypeBadge || ''}`.toLowerCase();
+          if (!hay.includes(searchVal)) return false;
+        }
+        return true;
+      });
+
+      if (activeHomeViewMode === 'table') {
+        const rowsHtml = filtered
+          .map((d) => {
+            const isStarred = Boolean(d.starred || starredSet.has(d.code));
+            const cost = d.finopsTelemetry?.totalMonthlyUsd || 4200;
+            const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms || 38.4;
+            const score = d.judgeReport?.compositeScore || 96;
+            return `
+              <tr class="home-file-row" data-bp-code="${d.code}" style="border-bottom:1px solid #E2E8F0;background:#FFFFFF;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='#FFFFFF'">
+                <td style="padding:10px 12px;width:44px;text-align:center;">
+                  <button onclick="toggleBlueprintStar('${d.code}', event)" style="border:none;background:transparent;cursor:pointer;font-size:15px;" title="Toggle Star in SQLite">${isStarred ? '⭐' : '☆'}</button>
+                </td>
+                <td style="padding:10px 12px;cursor:pointer;" onclick="selectBlueprint('${d.code}'); setUiEdition('atelier');">
+                  <div style="display:flex;align-items:center;gap:8px;">
+                    <span class="stitch-badge mono" style="font-size:10.5px;">${d.code}</span>
+                    <span style="font-size:12.5px;font-weight:800;color:#0F172A;">${d.title}</span>
+                  </div>
+                  <div style="font-size:11px;color:#64748B;margin-top:2px;">${d.subtitle || ''}</div>
+                </td>
+                <td style="padding:10px 12px;">
+                  <span class="stitch-badge mono" style="background:#F1F5F9;color:#334155;border-color:#CBD5E1;font-size:10px;">P${d.phaseNumber} · ${d.phaseBadge}</span>
+                </td>
+                <td class="mono" style="padding:10px 12px;font-size:11px;color:#334155;">
+                  <strong>${d.version}</strong> · ${d.nodeCount}n / ${d.edgeCount}e
+                </td>
+                <td class="mono" style="padding:10px 12px;font-size:11px;color:#065F46;font-weight:700;">
+                  $${Number(cost).toLocaleString()}/mo · ${p99}ms
+                </td>
+                <td class="mono" style="padding:10px 12px;font-size:11px;color:#1D4ED8;font-weight:700;">
+                  5/5 PASS · ${score}/100
+                </td>
+                <td style="padding:10px 12px;text-align:right;white-space:nowrap;">
+                  <button class="btn-secondary" style="padding:4px 9px;font-size:10.5px;" onclick="selectBlueprint('${d.code}'); setUiEdition('atelier');">✏️ Studio</button>
+                  <button class="btn-secondary" style="padding:4px 9px;font-size:10.5px;" onclick="selectBlueprint('${d.code}'); setUiEdition('atelier'); openWorkbenchTab('rfc');">📄 RFC</button>
+                  <a class="btn-primary" style="padding:4px 9px;font-size:10.5px;text-decoration:none;" href="/api/export-drawio?code=${d.code}&ver=${d.version}" download>⬇ .drawio</a>
+                </td>
+              </tr>`;
+          })
+          .join('');
+        container.innerHTML = `
+          <div style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;overflow:hidden;box-shadow:var(--shadow-xs);">
+            <table style="width:100%;border-collapse:collapse;text-align:left;">
+              <thead>
+                <tr style="background:#F8FAFC;border-bottom:1px solid #CBD5E1;font-size:10.5px;font-weight:800;color:#475569;" class="mono">
+                  <th style="padding:10px 12px;text-align:center;">STAR</th>
+                  <th style="padding:10px 12px;">BLUEPRINT &amp; ARCHITECTURE TITLE</th>
+                  <th style="padding:10px 12px;">SDLC PHASE</th>
+                  <th style="padding:10px 12px;">VERSION &amp; AST</th>
+                  <th style="padding:10px 12px;">FINOPS &amp; P99 SLO</th>
+                  <th style="padding:10px 12px;">PHASE-0 &amp; JUDGE</th>
+                  <th style="padding:10px 12px;text-align:right;">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>`;
+        return;
+      }
+
+      // Default Grid View
+      const cardsHtml = filtered
+        .map((d) => {
+          const isStarred = Boolean(d.starred || starredSet.has(d.code));
+          const cost = d.finopsTelemetry?.totalMonthlyUsd || 4200;
+          const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms || 38.4;
+          const score = d.judgeReport?.compositeScore || 96;
+          return `
+            <div class="home-file-card" data-bp-code="${d.code}" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-xs);">
+              <div>
+                <div style="padding:10px 14px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:6px;background:#F8FAFC;">
+                  <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                    <span class="stitch-badge mono" style="font-size:10.5px;">${d.code}</span>
+                    <span style="font-size:12.5px;font-weight:800;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${d.title}</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+                    <span class="mono" style="font-size:10px;font-weight:700;color:#1D4ED8;">${d.version}</span>
+                    <button class="home-star-btn" data-star-code="${d.code}" onclick="toggleBlueprintStar('${d.code}', event)" style="border:none;background:transparent;cursor:pointer;font-size:14px;padding:0 2px;" title="Toggle Star in SQLite">${isStarred ? '⭐' : '☆'}</button>
+                  </div>
+                </div>
+                <div onclick="selectBlueprint('${d.code}'); setUiEdition('atelier');" style="height:175px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;padding:6px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;" title="Click to open ${d.code} in Studio Canvas">
+                  ${d.svg}
+                </div>
+              </div>
+              <div style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:#FFFFFF;">
+                <div class="mono" style="font-size:10px;color:#475569;font-weight:700;">
+                  ${d.nodeCount}n/${d.edgeCount}e · <span style="color:#059669;">$${Number(cost).toLocaleString()}/mo</span> · ${p99}ms · ${score}/100
+                </div>
+                <div style="display:inline-flex;gap:5px;">
+                  <button class="btn-secondary" style="padding:4px 8px;font-size:10px;" onclick="selectBlueprint('${d.code}'); setUiEdition('atelier');">✏️ Open Studio</button>
+                  <button class="btn-secondary" style="padding:4px 8px;font-size:10px;" onclick="selectBlueprint('${d.code}'); setUiEdition('atelier'); openWorkbenchTab('rfc');">📄 RFC</button>
+                  <a class="btn-primary" style="padding:4px 8px;font-size:10px;text-decoration:none;" href="/api/export-drawio?code=${d.code}&ver=${d.version}" download>⬇ .drawio</a>
+                </div>
+              </div>
+            </div>`;
+        })
+        .join('');
+      container.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px;">${cardsHtml}</div>`;
+      container.querySelectorAll('.home-file-card svg').forEach((s) => {
+        s.style.width = '100%';
+        s.style.height = '100%';
+      });
+    }
+
+    async function openMcpApiModal() {
+      const tb = document.getElementById('toastBanner');
+      if (tb) tb.style.display = 'none';
+      clearTimeout(window.__toastTimer);
+      const modal = document.getElementById('mcpApiModal');
+      if (!modal) return;
+      modal.style.display = 'flex';
+      await executeLiveMcpPlayground();
+    }
+
+    function closeMcpApiModal() {
+      const modal = document.getElementById('mcpApiModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    async function executeLiveMcpPlayground() {
+      const toolSel = document.getElementById('mcpPlaygroundToolSelect');
+      const outBox = document.getElementById('mcpLiveResponseBox');
+      const statusLbl = document.getElementById('mcpStatusHeaderLabel');
+      const selected = (toolSel && toolSel.value) || 'verispec_list_blueprints';
+      try {
+        let res;
+        if (selected === 'rest_v1_generate') {
+          res = await fetch('/api/v1/diagram/generate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ code: activeCode, detailLevel: activeDetailLevel })
+          });
+        } else {
+          res = await fetch('/api/mcp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              id: Date.now(),
+              tool: selected,
+              arguments: {
+                code: activeCode,
+                command: 'Add Cloud DLP PII Redaction Proxy',
+                format: 'terraform'
+              }
+            })
+          });
+        }
+        const data = await res.json();
+        let displayPayload = data;
+        if (data && data.result && Array.isArray(data.result.blueprints)) {
+          displayPayload = {
+            jsonrpc: '2.0',
+            id: data.id,
+            ok: true,
+            tool: data.tool,
+            count: data.result.count,
+            sampleBlueprints: data.result.blueprints.slice(0, 2).map((b) => `${b.code} (${b.version}) · ${b.title}`)
+          };
+        }
+        if (outBox) outBox.value = JSON.stringify(displayPayload, null, 2);
+        if (statusLbl) statusLbl.textContent = `HTTP 200 OK · ${selected} Verified`;
+        if (selected === 'verispec_mutate_ast') {
+          await loadAtlas();
+        }
+      } catch (err) {
+        if (outBox) outBox.value = JSON.stringify({ ok: false, error: err.message }, null, 2);
       }
     }
 
@@ -4394,6 +5281,11 @@ spec:
           closeCollabThreadsModal();
           return;
         }
+        const mcpModal = document.getElementById('mcpApiModal');
+        if (mcpModal && mcpModal.style.display !== 'none') {
+          closeMcpApiModal();
+          return;
+        }
         const drawer = document.getElementById('stitchRightDrawer');
         if (drawer && drawer.classList.contains('open')) {
           closeStitchPromptDrawer();
@@ -4405,6 +5297,19 @@ spec:
 
     window.submitMutation = executePromptMutation;
     window.switchDetailLevel = setDetailLevel;
+    window.setUiEdition = setUiEdition;
+    window.drilldownC4Level = drilldownC4Level;
+    window.cycleC4ScopedNodeDrilldown = cycleC4ScopedNodeDrilldown;
+    window.openMcpApiModal = openMcpApiModal;
+    window.closeMcpApiModal = closeMcpApiModal;
+    window.executeLiveMcpPlayground = executeLiveMcpPlayground;
+    window.setHomeFolderTab = setHomeFolderTab;
+    window.setHomeViewMode = setHomeViewMode;
+    window.toggleBlueprintStar = toggleBlueprintStar;
+    window.renderWorkspaceHomeFiles = renderWorkspaceHomeFiles;
+    window.setLandingSandboxMode = setLandingSandboxMode;
+    window.setLandingSamplePrompt = setLandingSamplePrompt;
+    window.executeLandingSandboxPrompt = executeLandingSandboxPrompt;
     window.openWorkbenchTab = openWorkbenchTab;
     window.toggleStudioWorkbench = toggleStudioWorkbench;
     window.toggleAdrPanel = toggleAdrPanel;

@@ -798,15 +798,120 @@ async function main() {
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_collab_threads_modal.png'));
 
+    // 7E. Product Landing Page (/landing · viewEditionLanding · 6 Pillars + Interactive AI Sandbox + Live SVG Preview + Pricing)
+    await evaluateInPage(`(async () => {
+      window.closeCollabThreadsModal();
+      window.closeStitchPromptDrawer();
+      await window.clearWhiteboardOverlays();
+      window.setUiEdition('landing');
+      await new Promise(r => setTimeout(r, 300));
+    })()`);
+    const landingAudit = await evaluateInPage(`(() => {
+      const sec = document.getElementById('viewEditionLanding');
+      const visible = sec && !sec.classList.contains('hidden');
+      const bentoCards = document.querySelectorAll('#landingBentoGrid > div').length;
+      const hasHeroSvg = Boolean(document.querySelector('#landingHeroLiveSvgPreview svg'));
+      const hasSandboxInput = Boolean(document.getElementById('landingHeroPromptInput')?.value);
+      const scrollOverflow = document.documentElement.scrollWidth - window.innerWidth;
+      return {
+        visible,
+        bentoCards,
+        hasHeroSvg,
+        hasSandboxInput,
+        scrollOverflow
+      };
+    })()`);
+    console.log('Product Landing Page Audit:', JSON.stringify(landingAudit));
+    if (!landingAudit.visible || landingAudit.bentoCards !== 6 || !landingAudit.hasHeroSvg || !landingAudit.hasSandboxInput || landingAudit.scrollOverflow > 2) {
+      throw new Error(`Product Landing Page Gate Failed: ${JSON.stringify(landingAudit)}`);
+    }
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_landing_page_v35.png'));
+
+    // 7F. Workspace Home Dashboard (/home · viewEditionHome · 5 Quick-Create Cards + 18 Files Grid/Table + Star Persistence)
+    await evaluateInPage(`(async () => {
+      window.setUiEdition('home');
+      window.setHomeFolderTab('ALL');
+      window.setHomeViewMode('grid');
+      await new Promise(r => setTimeout(r, 300));
+    })()`);
+    const homeAudit = await evaluateInPage(`(async () => {
+      const sec = document.getElementById('viewEditionHome');
+      const visible = sec && !sec.classList.contains('hidden');
+      const quickCreateCount = document.querySelectorAll('#homeQuickCreateGrid > button').length;
+      const gridCardCount = document.querySelectorAll('#homeFilesContainer .home-file-card').length;
+      const scrollOverflow = document.documentElement.scrollWidth - window.innerWidth;
+      window.setHomeFolderTab('STARRED');
+      const starredCardCount = document.querySelectorAll('#homeFilesContainer .home-file-card').length;
+      window.setHomeFolderTab('ALL');
+      window.setHomeViewMode('table');
+      const tableRowCount = document.querySelectorAll('#homeFilesContainer .home-file-row').length;
+      window.setHomeViewMode('grid');
+      return {
+        visible,
+        quickCreateCount,
+        gridCardCount,
+        starredCardCount,
+        tableRowCount,
+        scrollOverflow
+      };
+    })()`);
+    console.log('Workspace Home Dashboard Audit:', JSON.stringify(homeAudit));
+    if (
+      !homeAudit.visible ||
+      homeAudit.quickCreateCount !== 5 ||
+      homeAudit.gridCardCount !== 18 ||
+      homeAudit.starredCardCount < 1 ||
+      homeAudit.tableRowCount !== 18 ||
+      homeAudit.scrollOverflow > 2
+    ) {
+      throw new Error(`Workspace Home Dashboard Gate Failed: ${JSON.stringify(homeAudit)}`);
+    }
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_workspace_homepage_v35.png'));
+
+    // 7G. Interactive C4 Map Drill-Down (#canvasMapDrilldownBar) + Agent-Ready verispec_mcp & REST Diagramming API Modal (#mcpApiModal)
+    const mcpAndC4Audit = await evaluateInPage(`(async () => {
+      window.setUiEdition('atelier');
+      await window.drilldownC4Level('L200');
+      await window.openMcpApiModal();
+      await new Promise(r => setTimeout(r, 300));
+      const manifestRes = await fetch('/api/mcp/manifest').then(r => r.json());
+      const restRes = await fetch('/api/v1/diagram/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: 'D05', detailLevel: 'L200' })
+      }).then(r => r.json());
+      const mcpBoxVal = document.getElementById('mcpLiveResponseBox')?.value || '';
+      const hasC4Bar = Boolean(document.getElementById('canvasMapDrilldownBar'));
+      return {
+        hasC4Bar,
+        mcpServerName: manifestRes.serverName,
+        mcpToolsCount: (manifestRes.tools || []).length,
+        restApiOk: Boolean(restRes.ok && restRes.zeroHitAndTrialGuarantee),
+        playgroundHasJsonRpc: mcpBoxVal.includes('"jsonrpc": "2.0"')
+      };
+    })()`);
+    console.log('C4 Map Drill-Down & verispec_mcp / REST API Audit:', JSON.stringify(mcpAndC4Audit));
+    if (
+      !mcpAndC4Audit.hasC4Bar ||
+      mcpAndC4Audit.mcpServerName !== 'verispec_mcp' ||
+      mcpAndC4Audit.mcpToolsCount !== 5 ||
+      !mcpAndC4Audit.restApiOk ||
+      !mcpAndC4Audit.playgroundHasJsonRpc
+    ) {
+      throw new Error(`C4 Map Drill-Down / MCP API Gate Failed: ${JSON.stringify(mcpAndC4Audit)}`);
+    }
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_mcp_and_c4_drilldown_v35.png'));
+
     // Clean up overlays & close modals so D05 default state is pristine
     await evaluateInPage(`(async () => {
+      window.closeMcpApiModal();
       window.closeCollabThreadsModal();
       await window.clearWhiteboardOverlays();
       window.closeStitchPromptDrawer();
     })()`);
     await sleep(250);
 
-    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL & SAAS PARITY GATES PASSED ===');
+    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL + LANDING PAGE + WORKSPACE HOME + MCP PARITY GATES PASSED ===');
   } finally {
     ws.close();
     chromeProc.kill('SIGKILL');

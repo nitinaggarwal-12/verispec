@@ -216,14 +216,17 @@ for (const vc of vendorToolChecks) {
 }
 assert.equal(seenIconKeys.size, vendorToolChecks.length, 'Expected 30 distinct vendor-specific tool icons with zero reuse');
 
-console.log('=== 6. Verifying Invariant 6: Bi-Directional Architecture-as-Code DSL, 5-Format Polyglot (Terraform/SQL/K8s) Reverse Decompiler, FinOps & Living RFC ===');
+console.log('=== 6. Verifying Invariant 6: Bi-Directional Architecture-as-Code DSL, 8-Format Polyglot (Terraform/SQL/K8s/Prisma/OpenAPI/Compose) Reverse Decompiler, FinOps & Living RFC ===');
 const dslText = compileGraphToVeriSpecDsl(baseD05);
 const editedDsl =
   dslText +
   '\n  Amazon S3 Object Lake [icon: aws_s3, vendor: AWS, slo: "11-Nines S3", desc: "Cross-Cloud Archive"]\nVector Search 2.0 > Amazon S3 Object Lake: Parquet Snapshot' +
   '\nresource "aws_redshift_cluster" "cross_cloud_analytics_dw" {\n  cluster_identifier = "verispec-redshift-dw"\n}' +
   '\nCREATE TABLE alloydb_audit_ledger (id UUID PRIMARY KEY, ts TIMESTAMPTZ);' +
-  '\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: payment-saga-worker\nspec:\n  replicas: 6';
+  '\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: payment-saga-worker\nspec:\n  replicas: 6' +
+  '\nmodel CustomerTenantLedger {\n  id String @id\n  orgSlug String @unique\n  planTier String\n}' +
+  '\nopenapi: 3.1.0\npaths:\n  /v1/settlement/authorize:\n    post:\n      summary: Authorize Real-Time Ledger Settlement' +
+  '\nservices:\n  temporal-worker-fleet:\n    image: temporalio/server:1.24';
 const dslMutated = applyVeriSpecDslToGraph(baseD05, editedDsl);
 const dslSvg = renderInteractiveSvg(dslMutated, { showDiff: true, detailLevel: 'L200' });
 const dslContract = verifyGraphToSvgBijectionContract(dslMutated, dslSvg);
@@ -232,6 +235,9 @@ assert.equal(dslMutated.nodes.some((n) => n.title === 'Amazon S3 Object Lake'), 
 assert.equal(dslMutated.nodes.some((n) => n.iconKey === 'aws_redshift'), true, 'Reverse-compiled Terraform HCL aws_redshift_cluster missing from CAG');
 assert.equal(dslMutated.nodes.some((n) => n.title.includes('alloydb_audit_ledger')), true, 'Reverse-compiled SQL DDL CREATE TABLE missing from CAG');
 assert.equal(dslMutated.nodes.some((n) => n.title.includes('payment-saga-worker')), true, 'Reverse-compiled Kubernetes YAML Deployment missing from CAG');
+assert.equal(dslMutated.nodes.some((n) => n.title.includes('CustomerTenantLedger')), true, 'Reverse-compiled Prisma ORM model missing from CAG');
+assert.equal(dslMutated.nodes.some((n) => n.title.includes('/v1/settlement/authorize')), true, 'Reverse-compiled OpenAPI 3.1 endpoint missing from CAG');
+assert.equal(dslMutated.nodes.some((n) => n.title.includes('temporal-worker-fleet')), true, 'Reverse-compiled Docker Compose service missing from CAG');
 const tfHcl = compileGraphToTerraformHcl(dslMutated);
 const mermaidCode = compileGraphToMermaid(dslMutated);
 assert.equal(tfHcl.includes('resource "aws_s3_bucket"'), true, 'Terraform HCL missing aws_s3_bucket resource');
@@ -249,7 +255,7 @@ assert.equal(finops.criticalPathP99Ms > 0, true, 'Critical-path p99 latency must
 const rfcMd = compileGraphToLivingRfcMarkdown(dslMutated, judgeReport);
 assert.equal(rfcMd.includes('## 1. Executive Telemetry & FinOps Summary'), true, 'Living RFC Markdown missing FinOps section');
 assert.equal(rfcMd.includes('## 2. Architecture Decision Record (ADR)'), true, 'Living RFC Markdown missing ADR section');
-console.log(`  [PASS] Bi-Directional DSL + Terraform/SQL/K8s Reverse Decompiler (${dslMutated.nodes.length} nodes) + FinOps ($${finops.totalMonthlyUsd}/mo, ${finops.criticalPathP99Ms}ms p99) + Living RFC + Cross-Model Judge (${judgeReport.overallScore}/100)`);
+console.log(`  [PASS] Bi-Directional DSL + 8-Format Polyglot Reverse Decompiler (${dslMutated.nodes.length} nodes) + FinOps ($${finops.totalMonthlyUsd}/mo, ${finops.criticalPathP99Ms}ms p99) + Living RFC + Cross-Model Judge (${judgeReport.overallScore}/100)`);
 
 console.log('=== 7. Verifying Invariant 7: Phase 0 Pre-Render Mathematical Geometry, Typography & Viewport Budget Solver (Zero Hit-and-Trial) ===');
 for (const vp of [1366, 1440, 1600, 1920]) {

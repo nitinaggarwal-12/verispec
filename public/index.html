@@ -1270,24 +1270,51 @@
               </div>
             </div>
 
-            <!-- Interactive C4 System Map Drill-Down Breadcrumb Bar (System L100 › Container L200 › Component L300) -->
+            <!-- Interactive C4 System Map Drill-Down + Request Flow Walkthrough Player -->
             <div id="canvasMapDrilldownBar" style="padding:5px 14px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-              <div style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;">
-                <span class="mono" style="font-size:10px;font-weight:800;color:#1E40AF;">🗺️ C4 System Map Drill-Down:</span>
-                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. System Context (L100)</button>
+              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <span class="mono" style="font-size:10px;font-weight:800;color:#1E40AF;">🗺️ C4 Drill-Down:</span>
+                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. Context (L100)</button>
                 <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
-                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container Mesh (L200)</button>
+                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container (L200)</button>
                 <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
-                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component Spec (L300)</button>
-                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9.5px;padding:2px 8px;cursor:pointer;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to drill down into individual component subsystems or double-click any canvas node">🔍 Focus: Full System Topology (Click to Drill Into Component)</span>
+                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component (L300)</button>
+                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9.5px;padding:2px 7px;cursor:pointer;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to cycle C4 sub-system focus or double-click any canvas node to edit inline">🔍 Focus: Full Topology</span>
               </div>
-              <div style="display:inline-flex;align-items:center;gap:6px;">
-                <button class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;color:#047857;border-color:#6EE7B7;background:#ECFDF5;" onclick="setUiEdition('home')" title="Open Workspace Home Dashboard (18 Files, Starred Blueprints &amp; Quick Create)">🗂️ Workspace Home</button>
-                <button class="phase-chip mono" style="padding:2px 8px;font-size:9.5px;color:#1D4ED8;border-color:#93C5FD;background:#EFF6FF;" onclick="openMcpApiModal()" title="Open verispec_mcp Agent Server &amp; REST Diagramming API Playground">🤖 verispec_mcp API</button>
+              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">
+                <button id="btnFlowWalkthroughStep" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF;" onclick="stepArchitectureFlowWalkthrough()" title="Step through directed request flow hops one edge at a time">▶️ Flow Hop (0/0)</button>
+                <button id="btnToggleMinimap" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="toggleCanvasMinimap()" title="Toggle Bottom-Right Live SVG Minimap Radar">🧭 Minimap: On</button>
+                <button class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#047857;border-color:#6EE7B7;background:#ECFDF5;" onclick="setUiEdition('home')" title="Open Workspace Home Dashboard">🗂️ Home</button>
+                <button class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#1D4ED8;border-color:#93C5FD;background:#EFF6FF;" onclick="openMcpApiModal()" title="Open verispec_mcp Agent Server &amp; REST Diagramming API Playground">🤖 MCP API</button>
               </div>
             </div>
 
-            <div id="atelierSvgContainer" class="svg-viewport-wrapper vs-dual-scroll" style="cursor:grab;"></div>
+            <!-- Direct Double-Click On-Canvas Inline Node Editor Bar (Hidden until user double-clicks a node) -->
+            <div id="inlineCanvasNodeEditBar" class="hidden" style="padding:6px 14px;background:#EFF6FF;border-bottom:1px solid #93C5FD;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
+              <div style="display:inline-flex;align-items:center;gap:6px;flex:1;flex-wrap:wrap;">
+                <span class="mono" style="font-size:10px;font-weight:800;color:#1D4ED8;">✏️ Inline Node Edit:</span>
+                <input id="inlineEditNodeId" type="hidden" value="" />
+                <input id="inlineEditNodeTitle" type="text" placeholder="Node Title..." style="padding:3px 7px;border-radius:6px;border:1px solid #93C5FD;font-size:11px;font-weight:700;width:190px;" />
+                <input id="inlineEditNodeSubtitle" type="text" placeholder="Tech Subtitle..." style="padding:3px 7px;border-radius:6px;border:1px solid #CBD5E1;font-size:10.5px;width:210px;" />
+                <input id="inlineEditNodePill" type="text" placeholder="Protocol / SLO Pill..." style="padding:3px 7px;border-radius:6px;border:1px solid #CBD5E1;font-size:10.5px;width:150px;" />
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:5px;">
+                <button class="btn-primary" style="padding:3px 10px;font-size:10px;" onclick="submitInlineCanvasNodeEdit()">💾 Save Inline ↵</button>
+                <button class="btn-secondary" style="padding:3px 8px;font-size:10px;" onclick="closeInlineCanvasNodeEdit()">✕ Cancel</button>
+              </div>
+            </div>
+
+            <div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0;">
+              <div id="atelierSvgContainer" class="svg-viewport-wrapper vs-dual-scroll" style="cursor:grab;flex:1;"></div>
+              <!-- Bottom-Right Live SVG Minimap Radar -->
+              <div id="vsCanvasMinimapOverlay" style="position:absolute;right:18px;bottom:18px;width:168px;height:96px;background:rgba(255,255,255,0.94);border:1.5px solid #93C5FD;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.1);padding:4px;pointer-events:none;z-index:8;display:flex;flex-direction:column;justify-content:space-between;">
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:800;color:#1E40AF;padding:0 2px;" class="mono">
+                  <span>RADAR MINIMAP</span>
+                  <span id="minimapZoomLabel">100%</span>
+                </div>
+                <div id="vsCanvasMinimapSvgHost" style="flex:1;overflow:hidden;border-radius:4px;background:#F8FAFC;border:1px solid #E2E8F0;display:flex;align-items:center;justify-content:center;"></div>
+              </div>
+            </div>
 
             <!-- Conversational Prompt Mutation Dock -->
             <div class="prompt-dock">
@@ -1915,23 +1942,26 @@
           </div>
         </div>
 
-        <!-- Bi-Directional VeriSpec Architecture-as-Code DSL & 5-Format Polyglot IaC Decompiler -->
+        <!-- Bi-Directional VeriSpec Architecture-as-Code DSL & 8-Format Polyglot IaC Decompiler -->
         <div style="display:flex;flex-direction:column;flex:1;min-height:240px;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:5px;">
             <div>
-              <span style="font-size:11.5px;font-weight:800;color:#0F172A;">🧬 5-Format Polyglot Code &amp; DSL Decompiler</span>
+              <span style="font-size:11.5px;font-weight:800;color:#0F172A;">🧬 8-Format Polyglot Code &amp; DSL Decompiler</span>
               <span class="mono" style="font-size:9.5px;color:#059669;margin-left:4px;">● 2-Way Sync</span>
             </div>
             <div style="display:flex;gap:4px;flex-wrap:wrap;">
               <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSampleTerraformIntoDslEditor()" title="Append sample Terraform HCL resources">+ Terraform</button>
               <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSampleSqlDdlIntoDslEditor()" title="Append sample SQL DDL CREATE TABLE statements">+ SQL DDL</button>
               <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSampleK8sYamlIntoDslEditor()" title="Append sample Kubernetes YAML Deployment/Ingress manifests">+ K8s YAML</button>
+              <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSamplePrismaIntoDslEditor()" title="Append sample Prisma ORM schema models">+ Prisma</button>
+              <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSampleOpenApiIntoDslEditor()" title="Append sample OpenAPI 3.1 REST paths">+ OpenAPI</button>
+              <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="loadSampleComposeIntoDslEditor()" title="Append sample Docker Compose services">+ Compose</button>
               <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;" onclick="copyTextFromEl('drawerVeriSpecDslBox', 'Copied VeriSpec DSL!')">Copy</button>
               <button class="btn-primary" style="padding:3px 9px;font-size:10px;" onclick="applyVeriSpecDslFromEditor()">⚡ Apply to Canvas</button>
             </div>
           </div>
           <div style="font-size:10px;color:#475569;margin-bottom:5px;">
-            Edit <b>VeriSpec DSL</b>, or paste raw <b>Terraform HCL</b> (<code class="mono">resource "..."</code>), <b>SQL DDL</b> (<code class="mono">CREATE TABLE</code>), or <b>Kubernetes YAML</b> (<code class="mono">kind: Deployment</code>) to reverse-compile directly onto the canvas:
+            Edit <b>VeriSpec DSL</b>, or paste raw <b>Terraform HCL</b>, <b>SQL DDL</b>, <b>Kubernetes YAML</b>, <b>Prisma ORM</b> (<code class="mono">model ...</code>), <b>OpenAPI 3.1</b> (<code class="mono">paths:</code>), or <b>Docker Compose</b> (<code class="mono">services:</code>) to reverse-compile onto the canvas:
           </div>
           <textarea id="drawerVeriSpecDslBox" class="mono vs-dual-scroll" spellcheck="false" style="width:100%;flex:1;min-height:220px;padding:10px;border-radius:8px;border:1px solid #93C5FD;background:#0F172A;color:#F8FAFC;font-size:11px;line-height:1.45;"></textarea>
         </div>
@@ -3119,6 +3149,8 @@
       atelierSvgEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;width:100%;position:relative;">${activeSnap.svg}${renderLiveCollabCursorsOverlayHtml()}</div>`;
       bindSvgNodeClickSelection(atelierSvgEl);
       applyCanvasZoom();
+      if (typeof syncCanvasMinimap === 'function') syncCanvasMinimap();
+      if (typeof syncFlowWalkthroughButton === 'function') syncFlowWalkthroughButton();
 
       const btnRenderMode = document.getElementById('btnToggleRenderMode');
       if (btnRenderMode && activeSnap.graph) {
@@ -3237,6 +3269,17 @@
             decompileImageFile(files[0]);
           }
         });
+        containerEl.addEventListener(
+          'wheel',
+          (ev) => {
+            if (ev.ctrlKey || ev.metaKey) {
+              ev.preventDefault();
+              const delta = ev.deltaY < 0 ? 0.08 : -0.08;
+              adjustCanvasZoom(delta);
+            }
+          },
+          { passive: false }
+        );
       }
 
       if (!window.__vsGlobalMouseBound) {
@@ -3494,9 +3537,9 @@
           scopedNodeId = nid;
           scopedNodeTitle = ntitle;
           populateInlineNodeInspector({ id: nid, title: ntitle, subtitle: nsub, pill: npill, iconKey: nicon });
-          openWorkbenchTab('dsl');
-          const tEl = document.getElementById('inspNodeTitle');
-          if (tEl) tEl.focus();
+          if (typeof openInlineCanvasNodeEdit === 'function') {
+            openInlineCanvasNodeEdit({ id: nid, title: ntitle, subtitle: nsub, pill: npill, iconKey: nicon });
+          }
         });
       });
     }
@@ -5282,6 +5325,208 @@ spec:
     window.toggleCollabThreadStatus = toggleCollabThreadStatus;
     window.generateGithubPrBotPreview = generateGithubPrBotPreview;
     window.setWorkspaceFolderFilter = setWorkspaceFolderFilter;
+
+    // =========================================================================
+    // v3.6 PARITY ENGINE: FLOW WALKTHROUGH PLAYER, LIVE MINIMAP RADAR,
+    // DIRECT ON-CANVAS DOUBLE-CLICK NODE EDITING & 8-FORMAT POLYGLOT SAMPLES
+    // =========================================================================
+    let activeFlowHopIdx = -1;
+    let isCanvasMinimapVisible = true;
+    let activeInlineEditNodeId = null;
+
+    function syncFlowWalkthroughButton() {
+      const btn = document.getElementById('btnFlowWalkthroughStep');
+      const g = getActiveGraph();
+      if (!btn || !g) return;
+      const edges = Array.isArray(g.edges) ? g.edges : [];
+      if (activeFlowHopIdx < 0 || activeFlowHopIdx >= edges.length) {
+        btn.textContent = `▶️ Flow Hop (0/${edges.length})`;
+      } else {
+        btn.textContent = `▶️ Flow Hop (${activeFlowHopIdx + 1}/${edges.length})`;
+      }
+    }
+
+    function stepArchitectureFlowWalkthrough() {
+      const g = getActiveGraph();
+      if (!g || !Array.isArray(g.edges) || g.edges.length === 0) {
+        showToast('ℹ️ No directed edges in current blueprint');
+        return;
+      }
+      const edges = g.edges;
+      activeFlowHopIdx = (activeFlowHopIdx + 1) % (edges.length + 1);
+      if (activeFlowHopIdx === edges.length) {
+        activeFlowHopIdx = -1;
+      }
+      syncFlowWalkthroughButton();
+      const svgEl = document.querySelector('#atelierSvgContainer svg');
+      if (!svgEl) return;
+      const allNodes = svgEl.querySelectorAll('.arch-node');
+      if (activeFlowHopIdx === -1) {
+        allNodes.forEach((n) => {
+          n.style.opacity = '1';
+          n.style.filter = '';
+        });
+        showToast('🔄 Flow Walkthrough reset — showing full architecture');
+        return;
+      }
+      const edge = edges[activeFlowHopIdx];
+      const fromId = edge.from || edge.source;
+      const toId = edge.to || edge.target;
+      allNodes.forEach((n) => {
+        const nid = n.getAttribute('data-node-id');
+        if (nid === fromId || nid === toId) {
+          n.style.opacity = '1';
+          n.style.filter = 'drop-shadow(0 0 8px rgba(37, 99, 235, 0.65))';
+        } else {
+          n.style.opacity = '0.32';
+          n.style.filter = '';
+        }
+      });
+      const nMap = new Map((g.nodes || []).map((n) => [n.id, n.title || n.id]));
+      const fromTitle = nMap.get(fromId) || fromId;
+      const toTitle = nMap.get(toId) || toId;
+      showToast(`▶️ Hop ${activeFlowHopIdx + 1}/${edges.length}: ${fromTitle} → ${toTitle} [${edge.label || 'RPC'}]`);
+    }
+
+    function toggleCanvasMinimap() {
+      isCanvasMinimapVisible = !isCanvasMinimapVisible;
+      const overlay = document.getElementById('vsCanvasMinimapOverlay');
+      const btn = document.getElementById('btnToggleMinimap');
+      if (overlay) {
+        overlay.style.display = isCanvasMinimapVisible ? 'block' : 'none';
+      }
+      if (btn) {
+        btn.textContent = isCanvasMinimapVisible ? '🧭 Minimap: On' : '🧭 Minimap: Off';
+      }
+      if (isCanvasMinimapVisible) syncCanvasMinimap();
+    }
+
+    function syncCanvasMinimap() {
+      const overlay = document.getElementById('vsCanvasMinimapOverlay');
+      const host = document.getElementById('vsCanvasMinimapSvgHost');
+      const zLbl = document.getElementById('minimapZoomLabel');
+      if (zLbl) zLbl.textContent = `${Math.round(canvasZoomScale * 100)}%`;
+      if (!overlay || !host || !isCanvasMinimapVisible) return;
+      const mainSvg = document.querySelector('#atelierSvgContainer svg');
+      if (!mainSvg) return;
+      const clone = mainSvg.cloneNode(true);
+      clone.style.transform = '';
+      clone.style.width = '100%';
+      clone.style.height = '100%';
+      clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      host.innerHTML = '';
+      host.appendChild(clone);
+    }
+
+    function openInlineCanvasNodeEdit(nodeObj) {
+      if (!nodeObj || !nodeObj.id) return;
+      activeInlineEditNodeId = nodeObj.id;
+      const bar = document.getElementById('inlineCanvasNodeEditBar');
+      const idEl = document.getElementById('inlineEditNodeId');
+      const tEl = document.getElementById('inlineEditNodeTitle');
+      const sEl = document.getElementById('inlineEditNodeSubtitle');
+      const pEl = document.getElementById('inlineEditNodePill');
+      if (idEl) idEl.textContent = nodeObj.id;
+      if (tEl) tEl.value = nodeObj.title || '';
+      if (sEl) sEl.value = nodeObj.subtitle || '';
+      if (pEl) pEl.value = nodeObj.pill || '';
+      if (bar) {
+        bar.style.display = 'flex';
+        if (tEl) tEl.focus();
+      }
+    }
+
+    function closeInlineCanvasNodeEdit() {
+      activeInlineEditNodeId = null;
+      const bar = document.getElementById('inlineCanvasNodeEditBar');
+      if (bar) bar.style.display = 'none';
+    }
+
+    async function submitInlineCanvasNodeEdit() {
+      if (!activeInlineEditNodeId) return;
+      const title = (document.getElementById('inlineEditNodeTitle')?.value || '').trim();
+      const subtitle = (document.getElementById('inlineEditNodeSubtitle')?.value || '').trim();
+      const pill = (document.getElementById('inlineEditNodePill')?.value || '').trim();
+      try {
+        const res = await fetch('/api/node/update-inline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: activeBpId,
+            lod: activeLod,
+            nodeId: activeInlineEditNodeId,
+            title,
+            subtitle,
+            pill
+          })
+        });
+        const data = await res.json();
+        if (data.ok) {
+          closeInlineCanvasNodeEdit();
+          await loadAtlas();
+          showToast(`✅ Updated node [${activeInlineEditNodeId}] directly on canvas (${data.version})`);
+        } else {
+          showToast(`⚠️ Inline update failed: ${data.error || 'Unknown error'}`);
+        }
+      } catch (err) {
+        showToast(`⚠️ Network error updating node: ${err.message}`);
+      }
+    }
+
+    function loadSamplePrismaIntoDslEditor() {
+      const box = document.getElementById('drawerVeriSpecDslBox');
+      if (!box) return;
+      const samplePrisma = `\n# --- Sample Prisma ORM Schema (Auto-Decompiled into Zone 4 Data Plane) ---
+model CustomerTenantLedger {
+  id        String   @id @default(uuid())
+  orgSlug   String   @unique
+  planTier  String
+  createdAt DateTime @default(now())
+}
+`;
+      box.value = `${box.value.trim()}\n${samplePrisma}`;
+      showToast('🧬 Appended Prisma ORM model — click "⚡ Apply to Canvas" to decompile');
+    }
+
+    function loadSampleOpenApiIntoDslEditor() {
+      const box = document.getElementById('drawerVeriSpecDslBox');
+      if (!box) return;
+      const sampleOpenApi = `\n# --- Sample OpenAPI 3.1 Spec (Auto-Decompiled into Zone 1 API Gateway) ---
+openapi: 3.1.0
+paths:
+  /v1/settlement/authorize:
+    post:
+      summary: Authorize Real-Time Ledger Settlement
+`;
+      box.value = `${box.value.trim()}\n${sampleOpenApi}`;
+      showToast('🧬 Appended OpenAPI 3.1 endpoint — click "⚡ Apply to Canvas" to decompile');
+    }
+
+    function loadSampleComposeIntoDslEditor() {
+      const box = document.getElementById('drawerVeriSpecDslBox');
+      if (!box) return;
+      const sampleCompose = `\n# --- Sample Docker Compose Service (Auto-Decompiled into Zone 2 Compute) ---
+services:
+  temporal-worker-fleet:
+    image: temporalio/server:1.24
+    ports:
+      - "7233:7233"
+`;
+      box.value = `${box.value.trim()}\n${sampleCompose}`;
+      showToast('🧬 Appended Docker Compose service — click "⚡ Apply to Canvas" to decompile');
+    }
+
+    window.stepArchitectureFlowWalkthrough = stepArchitectureFlowWalkthrough;
+    window.syncFlowWalkthroughButton = syncFlowWalkthroughButton;
+    window.toggleCanvasMinimap = toggleCanvasMinimap;
+    window.syncCanvasMinimap = syncCanvasMinimap;
+    window.openInlineCanvasNodeEdit = openInlineCanvasNodeEdit;
+    window.closeInlineCanvasNodeEdit = closeInlineCanvasNodeEdit;
+    window.submitInlineCanvasNodeEdit = submitInlineCanvasNodeEdit;
+    window.loadSamplePrismaIntoDslEditor = loadSamplePrismaIntoDslEditor;
+    window.loadSampleOpenApiIntoDslEditor = loadSampleOpenApiIntoDslEditor;
+    window.loadSampleComposeIntoDslEditor = loadSampleComposeIntoDslEditor;
+
     window.addEventListener('DOMContentLoaded', () => {
       loadAtlas();
       initLiveSseCollaboration();

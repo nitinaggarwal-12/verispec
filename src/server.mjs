@@ -1528,6 +1528,51 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // 7B-2. POST /api/node/update-inline -> Direct Double-Click On-Canvas Node Title/Subtitle/Pill Inline Edit
+  if (req.method === 'POST' && url.pathname === '/api/node/update-inline') {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body || '{}');
+        const code = String(parsed.code || 'D05').toUpperCase();
+        const nodeId = String(parsed.nodeId || '').trim();
+        const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
+        const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
+        const current = history[history.length - 1];
+        const nextGraph = cloneGraph(current);
+        nextGraph.version = bumpPatchVersion(current.version);
+        const targetNode = (nextGraph.nodes || []).find(
+          (n) => n.id === nodeId || (parsed.oldTitle && n.title === parsed.oldTitle)
+        );
+        if (targetNode) {
+          if (parsed.title) targetNode.title = String(parsed.title).trim();
+          if (parsed.subtitle) targetNode.subtitle = String(parsed.subtitle).trim();
+          if (parsed.pill) targetNode.pill = String(parsed.pill).trim();
+          if (parsed.iconKey) targetNode.iconKey = String(parsed.iconKey).trim();
+          targetNode.changeStatus = 'modified';
+        }
+        nextGraph.lastPrompt = `Inline Canvas Edit on ${nodeId}: "${targetNode?.title || nodeId}"`;
+        nextGraph.diffManifest = {
+          ...(nextGraph.diffManifest || {}),
+          summaryBadge: `Inline Edit · ${targetNode?.title || nodeId} (${nextGraph.version})`,
+          modifiedNodeIds: [targetNode?.id || nodeId]
+        };
+        history.push(nextGraph);
+        saveStoreToDisk({ code, action: 'INLINE_NODE_EDIT', nodeId });
+        return sendJson(res, 200, {
+          ok: true,
+          blueprint: buildBlueprintResponseItem(code, true, detailLevel, null)
+        });
+      } catch (err) {
+        return sendJson(res, 500, { ok: false, error: String(err.message || err) });
+      }
+    });
+    return;
+  }
+
   // 7C. GET /api/mcp/manifest & POST /api/mcp -> Agent-Ready Model Context Protocol (verispec_mcp) Server
   if (req.method === 'GET' && url.pathname === '/api/mcp/manifest') {
     return sendJson(res, 200, {

@@ -222,11 +222,72 @@ export function applyVeriSpecDslToGraph(currentGraph, dslText) {
     });
   }
 
-  // Strip Terraform, SQL, and K8s YAML blocks before running the VeriSpec DSL line parser
+  // 4. Extract Prisma ORM Schema (`model <Name> { ... }`)
+  const prismaModelRe = /\bmodel\s+([A-Za-z0-9_]+)\s*\{([\s\S]*?)\}/g;
+  let prismaMatch;
+  while ((prismaMatch = prismaModelRe.exec(rawText)) !== null) {
+    const modelName = prismaMatch[1].trim();
+    const fieldLines = (prismaMatch[2] || '')
+      .split('\n')
+      .map((l) => l.trim())
+      .filter((l) => l && !l.startsWith('//') && !l.startsWith('@@'));
+    extraPolyglotNodes.push({
+      id: `node_prisma_${modelName.toLowerCase()}`,
+      zoneId: zones[zones.length - 1].id,
+      title: `Prisma Model: ${modelName}`,
+      iconKey: 'postgresql',
+      pill: `${fieldLines.length} Fields · Prisma ORM`,
+      subtitle: `Prisma Schema Entity (${modelName})`
+    });
+  }
+
+  // 5. Extract OpenAPI 3.x / Swagger Paths (`openapi:` or `paths:` with `/v1/...` or `/api/...`)
+  if (/\bopenapi\s*:|\bswagger\s*:|"openapi"\s*:|\bpaths\s*:/i.test(rawText)) {
+    const openApiPathRe = /['"]?(\/[a-zA-Z0-9_-]+(?:\/[a-zA-Z0-9_{}-]+)*)['"]?\s*:/g;
+    let oaMatch;
+    const seenPaths = new Set();
+    while ((oaMatch = openApiPathRe.exec(rawText)) !== null) {
+      const routePath = oaMatch[1].trim();
+      if (seenPaths.has(routePath) || routePath.length < 3) continue;
+      seenPaths.add(routePath);
+      const slug = routePath.replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_|_$/g, '');
+      extraPolyglotNodes.push({
+        id: `node_openapi_${slug}`,
+        zoneId: zones[Math.min(1, zones.length - 1)].id,
+        title: `OpenAPI Endpoint: ${routePath}`,
+        iconKey: 'apigee',
+        pill: 'OpenAPI 3.1 · REST',
+        subtitle: `Contract-First API Route (${routePath})`
+      });
+    }
+  }
+
+  // 6. Extract Docker Compose Services (`container_name:` or `image:` under `services:`)
+  if (/\bservices\s*:/i.test(rawText) && /\bimage\s*:/i.test(rawText)) {
+    const composeSvcRe = /^\s{2}([a-zA-Z0-9_-]+):\s*\n(?:\s{4}[^\n]+\n)*?\s{4}image:\s*([^\s\n#]+)/gm;
+    let dcMatch;
+    while ((dcMatch = composeSvcRe.exec(rawText)) !== null) {
+      const svcName = dcMatch[1].trim();
+      const imgName = dcMatch[2].replace(/['"]/g, '').trim();
+      extraPolyglotNodes.push({
+        id: `node_compose_${svcName.replace(/[^a-zA-Z0-9_]/g, '_')}`,
+        zoneId: zones[Math.min(2, zones.length - 1)].id,
+        title: `Compose Service: ${svcName}`,
+        iconKey: resolveIconKeyFromText(svcName, imgName),
+        pill: `Docker · ${imgName.split(':')[0]}`,
+        subtitle: `Container Image ${imgName}`
+      });
+    }
+  }
+
+  // Strip Terraform, SQL, K8s, Prisma, OpenAPI, and Docker Compose blocks before running the VeriSpec DSL line parser
   const cleanedDslText = rawText
     .replace(/resource\s+"[^"]+"\s+"[^"]+"\s*\{[\s\S]*?\}/g, '')
     .replace(/CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[a-zA-Z0-9_."]+\s*\([\s\S]*?\);/gi, '')
-    .replace(/apiVersion:[\s\S]*?(?=\n---|\n\/\/|\nZONE\s|$)/gi, '');
+    .replace(/\bmodel\s+[A-Za-z0-9_]+\s*\{[\s\S]*?\}/g, '')
+    .replace(/apiVersion:[\s\S]*?(?=\n---|\n\/\/|\nZONE\s|$)/gi, '')
+    .replace(/openapi:[\s\S]*?(?=\n\/\/|\nZONE\s|$)/gi, '')
+    .replace(/services:\s*\n[\s\S]*?(?=\n\/\/|\nZONE\s|$)/gi, '');
 
   currentZoneId = zones[0].id;
   const rawLines = cleanedDslText

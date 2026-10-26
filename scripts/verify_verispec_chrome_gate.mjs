@@ -904,16 +904,42 @@ async function main() {
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_mcp_and_c4_drilldown_v35.png'));
 
+    // 7H. Flow Walkthrough Player (#btnFlowWalkthroughStep), Live SVG Minimap Radar (#vsCanvasMinimapOverlay) & Direct On-Canvas Inline Node Editing (POST /api/node/update-inline)
+    const v36ParityAudit = await evaluateInPage(`(async () => {
+      window.closeMcpApiModal();
+      window.stepArchitectureFlowWalkthrough();
+      const flowBtnText = document.getElementById('btnFlowWalkthroughStep')?.textContent || '';
+      const minimapHostHasSvg = Boolean(document.querySelector('#vsCanvasMinimapSvgHost svg'));
+      // Reset flow walkthrough
+      while (!(document.getElementById('btnFlowWalkthroughStep')?.textContent || '').includes('(0/')) {
+        window.stepArchitectureFlowWalkthrough();
+      }
+      // Test inline node edit bar open & close
+      window.openInlineCanvasNodeEdit({ id: 'orchestrator', title: 'Supervisor Agent', subtitle: 'Gemini 3.8 Pro', pill: 'ADK v2' });
+      const inlineBarVisible = document.getElementById('inlineCanvasNodeEditBar')?.style.display === 'flex';
+      window.closeInlineCanvasNodeEdit();
+      return {
+        flowStepped: flowBtnText.includes('(1/'),
+        minimapHostHasSvg,
+        inlineBarVisible
+      };
+    })()`);
+    console.log('v3.6 Flow Walkthrough, Minimap & Inline Edit Audit:', JSON.stringify(v36ParityAudit));
+    if (!v36ParityAudit.flowStepped || !v36ParityAudit.minimapHostHasSvg || !v36ParityAudit.inlineBarVisible) {
+      throw new Error(`v3.6 Parity Gate Failed: ${JSON.stringify(v36ParityAudit)}`);
+    }
+
     // Clean up overlays & close modals so D05 default state is pristine
     await evaluateInPage(`(async () => {
       window.closeMcpApiModal();
       window.closeCollabThreadsModal();
+      window.closeInlineCanvasNodeEdit();
       await window.clearWhiteboardOverlays();
       window.closeStitchPromptDrawer();
     })()`);
     await sleep(250);
 
-    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL + LANDING PAGE + WORKSPACE HOME + MCP PARITY GATES PASSED ===');
+    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL + LANDING PAGE + WORKSPACE HOME + MCP + V3.6 PARITY GATES PASSED ===');
   } finally {
     ws.close();
     chromeProc.kill('SIGKILL');

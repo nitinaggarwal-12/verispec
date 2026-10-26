@@ -50,7 +50,7 @@
 ## Running Locally & Cloud Run Deployment (`Rule 56`)
 
 - **BeyondCorp URL**: [`https://verispec-248990048888.cr.gclb.goog`](https://verispec-248990048888.cr.gclb.goog)
-- **Direct Cloud Run URL (`us-west1`)**: [`https://verispec-mi7l4h536a-uw.a.run.app`](https://verispec-mi7l4h536a-uw.a.run.app)
+- **Direct Cloud Run URL (`us-west1`, Revision `verispec-00005-gms`, `Ready=True`, `Traffic=100%`)**: [`https://verispec-mi7l4h536a-uw.a.run.app`](https://verispec-mi7l4h536a-uw.a.run.app)
 - **GitHub Repository**: [`https://github.com/nitinaggarwal-12/verispec`](https://github.com/nitinaggarwal-12/verispec)
 
 ```bash

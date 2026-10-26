@@ -700,6 +700,8 @@ async function main() {
       await window.redoBlueprintMutation();
       await new Promise(r => setTimeout(r, 200));
       const verAfterRedo = document.getElementById('activeBpCodeBadge')?.textContent || '';
+      const tb = document.getElementById('toastBanner');
+      if (tb) tb.style.display = 'none';
       return {
         hasSqliteBadge: (document.getElementById('toolbarSqliteBadge')?.textContent || '').includes('SQLite WAL'),
         hasFreehandStroke: Boolean(svg && svg.querySelector('.vs-freehand-stroke')),

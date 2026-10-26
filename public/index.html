@@ -1257,15 +1257,6 @@
                 <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">
                   📄 Living RFC
                 </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('stencils')" title="52 Multi-Cloud Vendor Stencil Picker (GCP, AWS, Azure, AI, Enterprise SaaS)">
-                  🧰 52 Stencils
-                </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('judge')" title="Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Linter">
-                  ⚖️ Judge &amp; Lint
-                </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('iac')" title="Export Multi-Cloud Terraform HCL, GitHub PR Bot &amp; Mermaid">
-                  🏗️ Terraform
-                </button>
                 <label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#334155;cursor:pointer;padding:3px 6px;border-radius:7px;background:#FFFFFF;border:1px solid #CBD5E1;">
                   <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:11px;height:11px;margin:0;" />
                   <span>Diff</span>
@@ -1978,7 +1969,7 @@
             <button class="phase-chip mono" style="padding:3px 7px;font-size:9.5px;color:#7C3AED;border-color:#DDD6FE;" onclick="insertRfcCustomBlock('diagram_embed', 'D10')">+ /embed-D10</button>
           </div>
           <div style="display:flex;gap:5px;">
-            <input id="rfcSlashCommandInput" type="text" placeholder="Type /h2, /callout, /code, /embed-D06 or custom RFC prose and press Enter..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid #CBD5E1;font-size:10.5px;" onkeydown="if(event.key==='Enter') executeRfcSlashInput()" />
+            <input id="rfcSlashCommandInput" type="text" placeholder="Type /h2, /callout, /code, /embed:D06 or RFC prose..." style="flex:1;padding:5px 8px;border-radius:6px;border:1px solid #CBD5E1;font-size:10.5px;" onkeydown="if(event.key==='Enter') executeRfcSlashInput()" />
             <button class="btn-primary" style="padding:4px 9px;font-size:10px;" onclick="executeRfcSlashInput()">Insert ↵</button>
           </div>
         </div>
@@ -4226,8 +4217,8 @@
     async function addSampleFreehandStroke() {
       const g = getActiveGraph();
       const count = (g && Array.isArray(g.freehandStrokes) ? g.freehandStrokes.length : 0);
-      const yBase = 735 - (count % 3) * 18;
-      const d = `M 310 ${yBase} Q 420 ${yBase - 22} 535 ${yBase - 4} T 760 ${yBase - 12}`;
+      const yBase = 716 - (count % 3) * 14;
+      const d = `M 44 ${yBase} Q 112 ${yBase - 14} 176 ${yBase - 4} T 236 ${yBase - 10}`;
       const res = await fetch('/api/whiteboard/op', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -4253,8 +4244,8 @@
         inp && inp.value.trim()
           ? inp.value.trim()
           : 'Verify Multi-Region Paxos quorum & FinOps budget before Q3 launch';
-      const x = 1140 - (count % 2) * 195;
-      const y = 665 - Math.floor(count / 2) * 82;
+      const x = 312 + (count % 2) * 195;
+      const y = 622 - Math.floor(count / 2) * 74;
       const res = await fetch('/api/whiteboard/op', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -41,7 +41,11 @@
 - **GitHub PR Diff & FinOps Bot (`src/engine/githubPrBotEngine.mjs`, `.github/workflows/verispec-pr-bot.yml`, `scripts/verispec_github_pr_bot.mjs`)**: Automated PR review bot and interactive Tab 5 previewer (`POST /api/github/pr-preview`) that computes structural AST node diffs, monthly Cloud FinOps (`$/mo`) & annual (`$/yr`) run-rate deltas, `p99` latency impact, and embedded Mermaid diagrams for `https://github.com/nitinaggarwal-12/verispec`.
 - **Multi-Format Export with Full Whiteboard & Offset Preservation**: Export editable Draw.io `.drawio` XML (including custom node drag offsets `customDx`/`customDy`, 8-way resize overrides `customDw`/`customDh`, whiteboard sticky notes, and review pins), crisp `.SVG`, `2x` Retina `.PNG` (`2880×1620`), `.tf` Terraform HCL, Mermaid `flowchart LR`, and `RFC.md`.
 
-## Running Locally
+## Running Locally & Cloud Run Deployment (`Rule 56`)
+
+- **BeyondCorp URL**: [`https://verispec-248990048888.cr.gclb.goog`](https://verispec-248990048888.cr.gclb.goog)
+- **Direct Cloud Run URL (`us-west1`)**: [`https://verispec-mi7l4h536a-uw.a.run.app`](https://verispec-mi7l4h536a-uw.a.run.app)
+- **GitHub Repository**: [`https://github.com/nitinaggarwal-12/verispec`](https://github.com/nitinaggarwal-12/verispec)
 
 ```bash
 npm start
@@ -52,4 +56,8 @@ npm run pre-render-gate
 
 npm run quality-gate
 # Runs pre-render-gate + 7-Step Headless Chrome E2E multi-viewport DOM & visual verification
+
+npm run deploy:cloudrun
+# Executes quality-gate + Zero-Daemon OCI Container Image Assembler (node:24-bookworm-slim) & Cloud Run 4-Gate Readiness Verifier
 ```
+

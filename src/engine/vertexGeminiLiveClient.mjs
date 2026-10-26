@@ -55,23 +55,43 @@ function saveLedgerToDisk() {
 loadPersistedLedger();
 
 /**
- * Retrieves a valid Google Cloud ADC access token via `gcloud auth print-access-token`,
- * cached in memory for 40 minutes so subsequent Vertex AI calls have 0ms auth overhead.
+ * Retrieves a valid Google Cloud ADC access token via `gcloud auth print-access-token` (local)
+ * or the Cloud Run GCE Metadata Server (`http://metadata.google.internal`), cached for 40 minutes.
  */
-export function getVertexAccessToken() {
+export async function getVertexAccessToken() {
   const now = Date.now();
   if (cachedAccessToken && now - cachedTokenTimestampMs < TOKEN_TTL_MS) {
     return cachedAccessToken;
   }
-  const token = execSync('gcloud auth print-access-token', {
-    encoding: 'utf8',
-    timeout: 6000,
-    stdio: ['ignore', 'pipe', 'ignore']
-  }).trim();
-  if (!token) {
-    throw new Error('Empty token from gcloud auth print-access-token');
+  try {
+    const token = execSync('gcloud auth print-access-token', {
+      encoding: 'utf8',
+      timeout: 5000,
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+    if (token) {
+      cachedAccessToken = token;
+      cachedTokenTimestampMs = now;
+      return cachedAccessToken;
+    }
+  } catch {
+    // Fallback to Cloud Run / GCE Metadata Server
   }
-  cachedAccessToken = token;
+  const metaRes = await fetch(
+    'http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token',
+    {
+      headers: { 'Metadata-Flavor': 'Google' },
+      signal: AbortSignal.timeout(4000)
+    }
+  );
+  if (!metaRes.ok) {
+    throw new Error(`Cloud Run metadata token fetch failed with HTTP ${metaRes.status}`);
+  }
+  const metaJson = await metaRes.json();
+  if (!metaJson.access_token) {
+    throw new Error('Empty access_token from Cloud Run metadata server');
+  }
+  cachedAccessToken = metaJson.access_token;
   cachedTokenTimestampMs = now;
   return cachedAccessToken;
 }
@@ -175,7 +195,7 @@ export async function callVertexGeminiGenerateContent({
   temperature = 0.15,
   timeoutMs = 15000
 } = {}) {
-  const token = getVertexAccessToken();
+  const token = await getVertexAccessToken();
   const safeMaxTokens = Math.min(32768, Math.max(512, maxOutputTokens));
   const attemptTrace = [];
 

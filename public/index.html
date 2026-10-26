@@ -1040,7 +1040,7 @@
 
       <!-- 6-Mode Product & Studio Switcher (Landing · Workspace Home · 4 Studio Views) -->
       <nav class="edition-switcher" style="padding:2px;gap:2px;" aria-label="UI Edition Switcher">
-        <button id="btnEditionLanding" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('landing')" title="Product Landing Page: Interactive AI Diagrammer Sandbox, 6 Product Pillars, MCP &amp; Pricing">
+        <button id="btnEditionLanding" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('landing')" title="Product Landing Page: Interactive AI Diagrammer Sandbox, 6 Product Pillars, C4 Maps &amp; MCP API">
           <span>🏠 Landing</span>
         </button>
         <button id="btnEditionHome" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('home')" title="Workspace Home Dashboard: All 18 Files, Starred Blueprints, Folders, Search &amp; Quick Create">
@@ -1458,7 +1458,7 @@
               <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setUiEdition('atelier'); openWorkbenchTab('iac'); generateGithubPrBotPreview();">🤖 VeriSpecBot PR Diff</button>
               <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="openMcpApiModal()">🔌 MCP Server &amp; API</button>
               <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setUiEdition('atelier'); openWorkbenchTab('rfc');">📄 AI Design Docs (RFC)</button>
-              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="document.getElementById('landingPricingGrid')?.scrollIntoView({behavior:'smooth'})">💳 Pricing &amp; Self-Hosted</button>
+              <button class="phase-chip" style="padding:5px 10px;font-size:11px;" onclick="setUiEdition('atlas')">🏛️ 18-Blueprint Atlas</button>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <button class="btn-secondary" style="padding:6px 12px;font-size:11px;" onclick="setUiEdition('home')">🗂️ Open Workspace Home</button>
@@ -1708,63 +1708,6 @@
                 "Having 18 lifecycle blueprints, live Vertex AI Gemini 3.1 Pro + 3 Flash cross-model judging, and hybrid slash-command RFC docs in a single self-hosted Cloud Run workspace is unmatched."
               </div>
               <div class="mono" style="font-size:10.5px;font-weight:800;color:#7C3AED;">Marcus Vance · Principal Security Architect</div>
-            </div>
-          </div>
-
-          <!-- 3-Tier Interactive Pricing & Deployment Matrix -->
-          <div id="landingPricingGrid" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:16px;padding:22px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-              <div>
-                <h2 style="font-size:18px;font-weight:900;color:#0F172A;margin:0;">Transparent Plans &amp; Self-Hosted Cloud Run Deployment</h2>
-                <p style="font-size:12px;color:#475569;margin:2px 0 0;">Start free or deploy dedicated OCI containers inside your own Google Cloud VPC.</p>
-              </div>
-              <span class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#6EE7B7;">SOC 2 Type II · HIPAA · 21 CFR Part 11 Ready</span>
-            </div>
-            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
-              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
-                <div>
-                  <div class="mono" style="font-size:10.5px;font-weight:800;color:#475569;">STARTER &amp; OPEN DEVELOPER</div>
-                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">$0 <span style="font-size:12px;font-weight:600;color:#64748B;">/ forever</span></div>
-                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#334155;line-height:1.7;">
-                    <li>All 18 SDLC Lifecycle Blueprints (D01–D18)</li>
-                    <li>L100 / L200 / L300 C4 System Map Drill-Down</li>
-                    <li>Native Vector .SVG, 2x .PNG &amp; Editable .drawio</li>
-                    <li>5-Stage Phase-0 Mathematical Geometry Certificate</li>
-                  </ul>
-                </div>
-                <button class="btn-secondary" style="width:100%;justify-content:center;padding:8px;" onclick="setUiEdition('atelier')">Start Free in Studio →</button>
-              </div>
-
-              <div style="background:#EFF6FF;border:2px solid #2563EB;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
-                <div>
-                  <div style="display:flex;align-items:center;justify-content:space-between;">
-                    <span class="mono" style="font-size:10.5px;font-weight:800;color:#1D4ED8;">TEAM PRO &amp; AI AGENTS</span>
-                    <span class="stitch-badge mono" style="background:#2563EB;color:#FFF;">ACTIVE PLAN</span>
-                  </div>
-                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">$12 <span style="font-size:12px;font-weight:600;color:#475569;">/ member / mo</span></div>
-                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#1E293B;line-height:1.7;">
-                    <li>Live Vertex AI Gemini 3.1 Pro + 3 Flash Co-Pilot &amp; Jury</li>
-                    <li>Agent-Ready <code class="mono">verispec_mcp</code> Server &amp; REST API</li>
-                    <li>VeriSpecBot GitHub PR Diff &amp; FinOps Review Bot</li>
-                    <li>Multiplayer Cursors, <code class="mono">@mention</code> Threads &amp; Living RFCs</li>
-                  </ul>
-                </div>
-                <button class="btn-primary" style="width:100%;justify-content:center;padding:8px;" onclick="setUiEdition('home')">Open Team Workspace Home →</button>
-              </div>
-
-              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
-                <div>
-                  <div class="mono" style="font-size:10.5px;font-weight:800;color:#065F46;">ENTERPRISE &amp; SELF-HOSTED OCI</div>
-                  <div style="font-size:24px;font-weight:900;color:#0F172A;margin:4px 0;">Custom <span style="font-size:12px;font-weight:600;color:#64748B;">/ Single-Tenant</span></div>
-                  <ul style="margin:8px 0 0;padding-left:16px;font-size:11.5px;color:#334155;line-height:1.7;">
-                    <li>Self-Hosted OCI Container on Cloud Run / GKE</li>
-                    <li>Google Workspace, Okta &amp; Entra ID SAML 2.0 SSO</li>
-                    <li>BeyondCorp Private Load Balancer (<code class="mono">*.cr.gclb.goog</code>)</li>
-                    <li>Dedicated <code class="mono">node:sqlite</code> WAL Store &amp; Custom Price Books</li>
-                  </ul>
-                </div>
-                <button class="btn-secondary" style="width:100%;justify-content:center;padding:8px;" onclick="openMcpApiModal()">Inspect Enterprise API &amp; MCP →</button>
-              </div>
             </div>
           </div>
 

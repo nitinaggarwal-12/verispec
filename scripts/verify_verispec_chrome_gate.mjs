@@ -798,7 +798,7 @@ async function main() {
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_collab_threads_modal.png'));
 
-    // 7E. Product Landing Page (/landing · viewEditionLanding · 6 Pillars + Interactive AI Sandbox + Live SVG Preview + Pricing)
+    // 7E. Product Landing Page (/landing · viewEditionLanding · 6 Pillars + Interactive AI Sandbox + Live SVG Preview)
     await evaluateInPage(`(async () => {
       window.closeCollabThreadsModal();
       window.closeStitchPromptDrawer();

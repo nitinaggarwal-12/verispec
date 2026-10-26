@@ -79,8 +79,9 @@ const STATE_FILE = path.join(STATE_DIR, `verispec_workspace_state_${PORT_NUM}.js
 // Initialize SQLite WAL Database on startup
 initSqliteWorkspaceStore(PORT_NUM);
 
-// Maintain a multi-turn evolution history map for all 18 lifecycle diagrams
+// Maintain a multi-turn evolution history map and redo stack for all 18 lifecycle diagrams
 const blueprintStateStore = new Map();
+const blueprintRedoStore = new Map();
 const sseClients = new Set();
 
 // Live Multiplayer Presence Map (seeded with 3 active team collaborators + updated via POST /api/collab/cursor)
@@ -94,8 +95,8 @@ const multiplayerPresenceMap = new Map([
       role: 'Principal Cloud Architect',
       color: '#2563EB',
       blueprintCode: 'D05',
-      x: 640,
-      y: 260,
+      x: 240,
+      y: 786,
       activeNodeId: 'node_catalog_bff',
       lastSeen: new Date().toISOString()
     }
@@ -109,8 +110,8 @@ const multiplayerPresenceMap = new Map([
       role: 'Staff SRE',
       color: '#7C3AED',
       blueprintCode: 'D05',
-      x: 1190,
-      y: 410,
+      x: 680,
+      y: 786,
       activeNodeId: 'node_primary_db',
       lastSeen: new Date().toISOString()
     }
@@ -124,8 +125,8 @@ const multiplayerPresenceMap = new Map([
       role: 'Principal Security Architect',
       color: '#059669',
       blueprintCode: 'D05',
-      x: 890,
-      y: 295,
+      x: 1120,
+      y: 786,
       activeNodeId: 'node_dlp_guardrail',
       lastSeen: new Date().toISOString()
     }
@@ -144,6 +145,9 @@ function broadcastWorkspaceEvent(payload = {}) {
 }
 
 function saveStoreToDisk(eventMeta = {}) {
+  if (eventMeta && eventMeta.code && eventMeta.action !== 'UNDO' && eventMeta.action !== 'REDO') {
+    blueprintRedoStore.set(eventMeta.code, []);
+  }
   try {
     saveBlueprintHistoryToSqlite(blueprintStateStore, PORT_NUM);
   } catch (err) {
@@ -382,6 +386,9 @@ function buildBlueprintResponseItem(code, showDiff = true, detailLevel = 'L200',
     nodeCount: latestGraph.nodes.length,
     edgeCount: latestGraph.edges.length,
     zoneCount: latestGraph.zones.length,
+    canUndo: history.length > 1,
+    canRedo: (blueprintRedoStore.get(code) || []).length > 0,
+    redoCount: (blueprintRedoStore.get(code) || []).length,
     diffManifest: latestGraph.diffManifest,
     audit: latestAudit,
     bijectionContract,
@@ -1147,6 +1154,12 @@ const server = http.createServer((req, res) => {
           });
           saveWhiteboardOverlay(code, wb, PORT_NUM);
           saveStoreToDisk({ code, action: 'ADD_STROKE' });
+        } else if (op === 'UNDO_STROKE') {
+          if (wb.freehandStrokes.length > 0) {
+            wb.freehandStrokes.pop();
+            saveWhiteboardOverlay(code, wb, PORT_NUM);
+            saveStoreToDisk({ code, action: 'UNDO_STROKE' });
+          }
         } else if (op === 'ADD_STICKY') {
           const idx = wb.stickyNotes.length;
           wb.stickyNotes.push({
@@ -1162,6 +1175,29 @@ const server = http.createServer((req, res) => {
           });
           saveWhiteboardOverlay(code, wb, PORT_NUM);
           saveStoreToDisk({ code, action: 'ADD_STICKY' });
+        } else if (op === 'MOVE_STICKY') {
+          const stickyId = String(parsed.stickyId || '').trim();
+          const st = wb.stickyNotes.find((s) => s.id === stickyId);
+          if (st) {
+            st.x = Math.max(20, Math.min(1220, Number(parsed.x) || st.x));
+            st.y = Math.max(76, Math.min(710, Number(parsed.y) || st.y));
+            saveWhiteboardOverlay(code, wb, PORT_NUM);
+            saveStoreToDisk({ code, action: 'MOVE_STICKY', stickyId });
+          }
+        } else if (op === 'UPDATE_STICKY') {
+          const stickyId = String(parsed.stickyId || '').trim();
+          const st = wb.stickyNotes.find((s) => s.id === stickyId);
+          if (st) {
+            if (parsed.text !== undefined) st.text = String(parsed.text).trim();
+            if (parsed.color) st.color = String(parsed.color).trim();
+            saveWhiteboardOverlay(code, wb, PORT_NUM);
+            saveStoreToDisk({ code, action: 'UPDATE_STICKY', stickyId });
+          }
+        } else if (op === 'DELETE_STICKY') {
+          const stickyId = String(parsed.stickyId || '').trim();
+          wb.stickyNotes = wb.stickyNotes.filter((s) => s.id !== stickyId);
+          saveWhiteboardOverlay(code, wb, PORT_NUM);
+          saveStoreToDisk({ code, action: 'DELETE_STICKY', stickyId });
         } else if (op === 'BATCH_MOVE_NODES') {
           const nodeIds = Array.isArray(parsed.nodeIds) ? parsed.nodeIds : [];
           const dx = Math.max(-360, Math.min(360, Number(parsed.dx) || 0));
@@ -1385,6 +1421,48 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // 6G. POST /api/undo & POST /api/redo -> Full Undo / Redo Stack across Blueprint Mutations & Whiteboard Overlays
+  if (req.method === 'POST' && (url.pathname === '/api/undo' || url.pathname === '/api/redo')) {
+    let body = '';
+    req.on('data', (chunk) => {
+      body += chunk;
+    });
+    req.on('end', () => {
+      try {
+        const parsed = JSON.parse(body || '{}');
+        const code = String(parsed.code || 'D05').toUpperCase();
+        const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
+        const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
+        const redoStack = blueprintRedoStore.get(code) || [];
+
+        if (url.pathname === '/api/undo') {
+          if (history.length > 1) {
+            const popped = history.pop();
+            redoStack.push(popped);
+            blueprintRedoStore.set(code, redoStack);
+            saveStoreToDisk({ code, action: 'UNDO', version: history[history.length - 1].version });
+          }
+        } else {
+          if (redoStack.length > 0) {
+            const restored = redoStack.pop();
+            history.push(restored);
+            blueprintRedoStore.set(code, redoStack);
+            saveStoreToDisk({ code, action: 'REDO', version: restored.version });
+          }
+        }
+
+        return sendJson(res, 200, {
+          ok: true,
+          action: url.pathname === '/api/undo' ? 'UNDO' : 'REDO',
+          blueprint: buildBlueprintResponseItem(code, true, detailLevel)
+        });
+      } catch (err) {
+        return sendJson(res, 500, { ok: false, error: String(err.message || err) });
+      }
+    });
+    return;
+  }
+
   // 7. POST /api/reset -> Resets a specific blueprint (or all 18) to initial state while preserving bijection
   if (req.method === 'POST' && url.pathname === '/api/reset') {
     let body = '';
@@ -1398,6 +1476,7 @@ const server = http.createServer((req, res) => {
         const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
         if (code && blueprintStateStore.has(code)) {
           resetWhiteboardOverlay(code, PORT_NUM);
+          blueprintRedoStore.set(code, []);
           if (code === 'D05') {
             blueprintStateStore.set('D05', buildPrecomputedEvolutionTimeline());
           } else {
@@ -1427,7 +1506,9 @@ const server = http.createServer((req, res) => {
     const targetGraph =
       (requestedVer && history.find((g) => g.version === requestedVer)) ||
       history[history.length - 1];
-    const xml = compileToDrawioXml(targetGraph);
+    const exportGraph = JSON.parse(JSON.stringify(targetGraph));
+    attachWhiteboardOverlayToGraph(exportGraph, code);
+    const xml = compileToDrawioXml(exportGraph);
     res.writeHead(200, {
       'Content-Type': 'application/xml; charset=utf-8',
       'Content-Disposition': `attachment; filename="VeriSpec_${code}_${targetGraph.version}.drawio"`,

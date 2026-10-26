@@ -5,7 +5,7 @@ import {
   buildPrecomputedEvolutionTimeline,
   extractEntityClausesFromAddPrompt
 } from '../src/engine/canonicalGraphEngine.mjs';
-import { renderInteractiveSvg } from '../src/engine/layoutAndDrawioCompiler.mjs';
+import { renderInteractiveSvg, compileToDrawioXml } from '../src/engine/layoutAndDrawioCompiler.mjs';
 import { LIFECYCLE_BLUEPRINTS_18 } from '../src/engine/lifecycleBlueprints18.mjs';
 import {
   extractRenderedSvgArchNodes,
@@ -323,6 +323,22 @@ const sqliteStat = getSqliteStoreTelemetry();
 assert.equal(sqliteStat.journalMode.toLowerCase(), 'wal', 'SQLite must operate in WAL journal mode');
 assert.equal(sqliteStat.repoUrl, 'https://github.com/nitinaggarwal-12/verispec', 'Workspace repo URL must match nitinaggarwal-12/verispec');
 assert.equal(Array.isArray(sqliteStat.folders) && sqliteStat.folders.length === 4, true, 'Expected 4 workspace folders');
+assert.deepEqual(
+  sqliteStat.folders.map((f) => f.id),
+  ['fld_01', 'fld_02', 'fld_03', 'fld_04'],
+  'SQLite workspace folder IDs must match #railFolderSelect (fld_01..fld_04) 1:1'
+);
+
+// Verify all 18 blueprints emit data-base-x and data-base-y on every <g class="arch-node"> (zero (0,0) drag teleportation)
+for (const bp of LIFECYCLE_BLUEPRINTS_18) {
+  const synced = syncBaseline(bp);
+  const svg = renderInteractiveSvg(synced, { showDiff: true, detailLevel: 'L200' });
+  const nodeMatches = [...svg.matchAll(/<g class="arch-node"[^>]*>/g)];
+  assert.equal(nodeMatches.length >= 4, true, `${bp.code} must render >= 4 .arch-node groups`);
+  for (const m of nodeMatches) {
+    assert.equal(m[0].includes('data-base-x="') && m[0].includes('data-base-y="'), true, `${bp.code} .arch-node missing data-base-x/y: ${m[0]}`);
+  }
+}
 
 saveWhiteboardOverlay('D05', {
   freehandStrokes: [{ id: 'stk_test', d: 'M 100 100 L 200 120', color: '#2563EB', width: 2.5 }],
@@ -335,6 +351,19 @@ assert.equal(loadedWb.freehandStrokes.length, 1, 'Expected 1 persisted freehand 
 assert.equal(loadedWb.stickyNotes.length, 1, 'Expected 1 persisted sticky note in SQLite');
 assert.equal(loadedWb.nodeSizeOverrides.node_vector_index.dw, 20, 'Expected persisted nodeSizeOverrides dw=20');
 assert.equal(loadedWb.edgeWaypoints.edge_0.bendX, 526, 'Expected persisted edgeWaypoints bendX=526');
+
+// Verify Draw.io export preserves custom drag offsets, resize overrides, sticky notes, and review pins
+const drawioTestGraph = JSON.parse(JSON.stringify(gD05));
+drawioTestGraph.nodes[0].customDx = 24;
+drawioTestGraph.nodes[0].customDy = 12;
+drawioTestGraph.nodes[0].customDw = 36;
+drawioTestGraph.nodes[0].customDh = 18;
+drawioTestGraph.stickyNotes = loadedWb.stickyNotes;
+drawioTestGraph.annotations = [{ id: 'pin_test', text: 'Verify Paxos Quorum', x: 420, y: 180 }];
+const exportedDrawioXml = compileToDrawioXml(drawioTestGraph);
+assert.equal(exportedDrawioXml.includes('SQLite WAL Test Sticky'), true, 'Draw.io XML must include whiteboard sticky notes');
+assert.equal(exportedDrawioXml.includes('Verify Paxos Quorum'), true, 'Draw.io XML must include review pins');
+
 // Reset whiteboard overlay back to clean default after test
 saveWhiteboardOverlay('D05', { freehandStrokes: [], stickyNotes: [], nodeSizeOverrides: {}, edgeWaypoints: {} });
 
@@ -344,6 +373,8 @@ saveRfcCustomBlocks('D05', [
 ]);
 const loadedRfcBlocks = getRfcCustomBlocks('D05');
 assert.equal(loadedRfcBlocks.length, 2, 'Expected 2 persisted custom WYSIWYG RFC blocks in SQLite');
+assert.equal(loadedRfcBlocks[0].text, 'Verified SQLite WAL persistence.', 'RFC block must expose .text alias alongside .content');
+assert.equal(loadedRfcBlocks[1].diagramCode, 'D06', 'RFC embed block must expose .diagramCode alias alongside .embedCode');
 
 const threadCountBefore = getCollabThreads('D05').length;
 createCollabThread({
@@ -363,9 +394,10 @@ assert.equal(prBotReport.repoUrl, 'https://github.com/nitinaggarwal-12/verispec'
 assert.equal(prBotReport.prCommentMarkdown.includes('VeriSpec Architecture & FinOps PR Bot'), true);
 assert.equal(prBotReport.prCommentMarkdown.includes('Monthly FinOps Run-Rate'), true);
 console.log(
-  `  [PASS] Native node:sqlite (${sqliteStat.journalMode.toUpperCase()} mode) + Whiteboard Overlays + WYSIWYG RFC Blocks + @mention Threads (${threadCountAfter}) + GitHub PR Bot (+$${prBotReport.deltaMonthlyUsd}/mo)`
+  `  [PASS] Native node:sqlite (${sqliteStat.journalMode.toUpperCase()} mode) + 18/18 Node Drag Base-Coords + Draw.io Sticky/Pin Export + WYSIWYG RFC Dual-Fields + @mention Threads (${threadCountAfter}) + GitHub PR Bot (+$${prBotReport.deltaMonthlyUsd}/mo)`
 );
 
 console.log('=== ALL 10 DETERMINISTIC, SQLITE WAL & LIVE VERTEX AI GEMINI INVARIANTS PASSED ===');
+
 
 

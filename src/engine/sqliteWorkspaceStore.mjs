@@ -93,13 +93,18 @@ const DEFAULT_COLLAB_THREADS = {
 };
 
 function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
+  const execText = `${title} (${code}) is engineered for zero-trust multi-region high availability (99.999% SLA), deterministic Phase-0 layout geometry, and strict FinOps unit-cost governance. Use the "/" slash command menu below to insert custom narrative sections, callouts, code blocks, or embedded cross-lifecycle diagrams.`;
+  const calloutText = 'All inter-zone service-to-service RPCs enforce mTLS 1.3 with SPIFFE workload identities, Cloud DLP inline PII redaction, and Cloud KMS HSM Customer-Managed Encryption Keys (CMEK).';
+  const tradeoffText = 'Selected Cloud Spanner Global HA + Memorystore Redis L2 over single-region PostgreSQL to eliminate cross-region failover data loss (RPO = 0s vs 45s) while bounding read p99 latency under 5ms.';
   return [
     {
       id: `blk_${code.toLowerCase()}_exec`,
       type: 'h2',
       title: '1. Executive Context & Architectural Mandate',
-      content: `${title} (${code}) is engineered for zero-trust multi-region high availability (99.999% SLA), deterministic Phase-0 layout geometry, and strict FinOps unit-cost governance. Use the "/" slash command menu below to insert custom narrative sections, callouts, code blocks, or embedded cross-lifecycle diagrams.`,
+      content: execText,
+      text: execText,
       embedCode: '',
+      diagramCode: '',
       updatedBy: 'Alex Rivera (@alex.rivera)',
       updatedAt: new Date().toISOString()
     },
@@ -107,8 +112,10 @@ function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
       id: `blk_${code.toLowerCase()}_callout`,
       type: 'callout',
       title: 'SRE & Security Compliance Gate (21 CFR Part 11 / SOC2 Type II)',
-      content: 'All inter-zone service-to-service RPCs enforce mTLS 1.3 with SPIFFE workload identities, Cloud DLP inline PII redaction, and Cloud KMS HSM Customer-Managed Encryption Keys (CMEK).',
+      content: calloutText,
+      text: calloutText,
       embedCode: '',
+      diagramCode: '',
       updatedBy: 'Marcus Vance (@sec-architect)',
       updatedAt: new Date().toISOString()
     },
@@ -116,8 +123,10 @@ function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
       id: `blk_${code.toLowerCase()}_tradeoffs`,
       type: 'decision_table',
       title: '2. Key Architectural Trade-Offs & ADR Decisions',
-      content: 'Selected Cloud Spanner Global HA + Memorystore Redis L2 over single-region PostgreSQL to eliminate cross-region failover data loss (RPO = 0s vs 45s) while bounding read p99 latency under 5ms.',
+      content: tradeoffText,
+      text: tradeoffText,
       embedCode: '',
+      diagramCode: '',
       updatedBy: 'Priya Nair (@sre-lead)',
       updatedAt: new Date().toISOString()
     }
@@ -191,12 +200,12 @@ export function initSqliteWorkspaceStore(port = 8080) {
     );
   `);
 
-  // Ensure default workspace metadata row exists
+  // Ensure default workspace metadata row exists with unified folder IDs
   const defaultFolders = [
-    { id: 'fld_discovery', name: '01 · Product Discovery & C4', codes: ['D01', 'D02', 'D03', 'D04'] },
-    { id: 'fld_cloud', name: '02 · Cloud & Hub-Spoke Topologies', codes: ['D05', 'D06', 'D18'] },
-    { id: 'fld_api_data', name: '03 · APIs, ERD & Medallion Lakehouse', codes: ['D07', 'D08', 'D09', 'D10', 'D11', 'D12'] },
-    { id: 'fld_ai_sec', name: '04 · Agentic AI, Zero-Trust & GitOps', codes: ['D13', 'D14', 'D15', 'D16', 'D17'] }
+    { id: 'fld_01', name: '01 · Product Discovery & UX (D01–D03)', codes: ['D01', 'D02', 'D03'] },
+    { id: 'fld_02', name: '02 · Cloud & C4 Architecture (D04–D09)', codes: ['D04', 'D05', 'D06', 'D07', 'D08', 'D09'] },
+    { id: 'fld_03', name: '03 · Data Lakehouse & Agentic AI (D10–D12)', codes: ['D10', 'D11', 'D12'] },
+    { id: 'fld_04', name: '04 · Zero-Trust Security & SRE (D13–D18)', codes: ['D13', 'D14', 'D15', 'D16', 'D17', 'D18'] }
   ];
 
   const upsertWs = dbInstance.prepare(`
@@ -204,6 +213,7 @@ export function initSqliteWorkspaceStore(port = 8080) {
     VALUES (?, ?, ?, ?, ?, ?)
     ON CONFLICT(workspace_id) DO UPDATE SET
       repo_url = excluded.repo_url,
+      folders_json = excluded.folders_json,
       updated_at = excluded.updated_at
   `);
   upsertWs.run(
@@ -393,12 +403,27 @@ export function getRfcCustomBlocks(code, defaultTitle = 'Enterprise Cloud Archit
     .get(cleanCode);
   if (!row) {
     const seeded = buildDefaultRfcBlocks(cleanCode, defaultTitle);
-    saveRfcCustomBlocks(cleanCode, seeded, port);
-    return seeded;
+    return saveRfcCustomBlocks(cleanCode, seeded, port);
   }
   try {
     const parsed = JSON.parse(row.blocks_json);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : buildDefaultRfcBlocks(cleanCode, defaultTitle);
+    if (!Array.isArray(parsed) || parsed.length === 0) {
+      return buildDefaultRfcBlocks(cleanCode, defaultTitle);
+    }
+    return parsed.map((b, idx) => {
+      const bodyText = String(b.content || b.text || '').trim();
+      const emb = b.embedCode || b.diagramCode ? String(b.embedCode || b.diagramCode).toUpperCase() : '';
+      return {
+        ...b,
+        id: String(b.id || `blk_${cleanCode.toLowerCase()}_${idx + 1}`),
+        type: String(b.type || 'paragraph'),
+        title: String(b.title || `Section ${idx + 1}`).trim(),
+        content: bodyText,
+        text: bodyText,
+        embedCode: emb,
+        diagramCode: emb
+      };
+    });
   } catch {
     return buildDefaultRfcBlocks(cleanCode, defaultTitle);
   }
@@ -441,6 +466,7 @@ export function getCollabThreads(code = null, port = 8080) {
     const msgs = JSON.parse(r.messages_json || '[]');
     const firstMsg = msgs[0] || {};
     return {
+      id: r.thread_id,
       threadId: r.thread_id,
       blueprintCode: r.blueprint_code,
       targetNodeId: r.target_node_id || 'canvas_root',

@@ -680,7 +680,7 @@ async function main() {
     console.log('--- Step 7: Verifying SQLite WAL, Whiteboard Tools, Hybrid WYSIWYG RFC, @mention Threads & GitHub PR Bot ---');
     await navigateAndWait('http://localhost:8080/?code=D05&edition=atelier&detail=L200', 450);
 
-    // 7A. Interactive Whiteboard Operations on D05
+    // 7A. Interactive Whiteboard Operations, Undo/Redo & Live Canvas Cursors on D05
     const whiteboardAudit = await evaluateInPage(`(async () => {
       await window.clearWhiteboardOverlays();
       await window.resizeScopedNodeDelta(24, 14);
@@ -689,26 +689,46 @@ async function main() {
       await window.addWhiteboardStickyNote();
       await new Promise(r => setTimeout(r, 300));
       const svg = document.querySelector('#atelierSvgContainer svg');
+      const liveCursors = document.querySelectorAll('#vsLiveCollabCursorsOverlay .vs-collab-cursor-marker');
+      const hasUndoRedoBtns = Boolean(document.getElementById('btnUndoAction') && document.getElementById('btnRedoAction'));
+      const hasVisionUploadBtn = Boolean(document.getElementById('btnVisionUploadFile') && document.getElementById('visionImageFileInput'));
+      // Verify POST /api/undo and POST /api/redo
+      const verBeforeUndo = document.getElementById('activeBpCodeBadge')?.textContent || '';
+      await window.undoBlueprintMutation();
+      await new Promise(r => setTimeout(r, 200));
+      const verAfterUndo = document.getElementById('activeBpCodeBadge')?.textContent || '';
+      await window.redoBlueprintMutation();
+      await new Promise(r => setTimeout(r, 200));
+      const verAfterRedo = document.getElementById('activeBpCodeBadge')?.textContent || '';
       return {
         hasSqliteBadge: (document.getElementById('toolbarSqliteBadge')?.textContent || '').includes('SQLite WAL'),
         hasFreehandStroke: Boolean(svg && svg.querySelector('.vs-freehand-stroke')),
         hasStickyNote: Boolean(svg && svg.querySelector('.vs-sticky-note')),
         hasElbowHandle: Boolean(svg && svg.querySelector('.vs-elbow-handle')),
-        hasResizeHandles: Boolean(svg && svg.querySelector('.vs-resize-handle'))
+        hasResizeHandles: Boolean(svg && svg.querySelector('.vs-resize-handle')),
+        liveCanvasCursorCount: liveCursors.length,
+        hasUndoRedoBtns,
+        hasVisionUploadBtn,
+        undoRedoRoundtripPassed: verBeforeUndo !== verAfterUndo && verBeforeUndo === verAfterRedo
       };
     })()`);
-    console.log('Interactive Whiteboard Audit:', JSON.stringify(whiteboardAudit));
+    console.log('Interactive Whiteboard, Undo/Redo & Live Cursors Audit:', JSON.stringify(whiteboardAudit));
     if (
       !whiteboardAudit.hasSqliteBadge ||
       !whiteboardAudit.hasFreehandStroke ||
       !whiteboardAudit.hasStickyNote ||
       !whiteboardAudit.hasElbowHandle ||
-      !whiteboardAudit.hasResizeHandles
+      !whiteboardAudit.hasResizeHandles ||
+      whiteboardAudit.liveCanvasCursorCount < 3 ||
+      !whiteboardAudit.hasUndoRedoBtns ||
+      !whiteboardAudit.hasVisionUploadBtn ||
+      !whiteboardAudit.undoRedoRoundtripPassed
     ) {
-      throw new Error(`Whiteboard Gate Failed: ${JSON.stringify(whiteboardAudit)}`);
+      throw new Error(`Whiteboard / Undo-Redo / Live Cursors Gate Failed: ${JSON.stringify(whiteboardAudit)}`);
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_v33_saas_parity.png'));
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_whiteboard_lasso_resize_elbow_pen_sticky.png'));
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_critical_fixes_v34.png'));
 
     // 7B. Hybrid WYSIWYG Living RFC Slash Menu & Multi-Diagram Embeds
     const hybridRfcAudit = await evaluateInPage(`(async () => {
@@ -749,22 +769,31 @@ async function main() {
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_github_pr_bot_and_sqlite_wal.png'));
 
-    // 7D. Multiplayer Collaborator Presence & @mention Threads Modal
+    // 7D. Multiplayer Collaborator Presence & @mention Threads Modal (with Inline Reply & Resolve)
     const collabAudit = await evaluateInPage(`(async () => {
       await window.openCollabThreadsModal();
       const inp = document.getElementById('collabNewThreadInput');
       if (inp) inp.value = '@sre-lead @sec-architect Verified multi-region failover and FinOps PR bot on D05!';
       await window.submitNewCollabThread();
       await new Promise(r => setTimeout(r, 250));
+      const firstCard = document.querySelector('#collabThreadsListContainer .collab-thread-card');
+      const threadId = firstCard ? firstCard.getAttribute('data-thread-id') : null;
+      if (threadId) {
+        const replyInp = document.getElementById('collabReplyInput_' + threadId);
+        if (replyInp) replyInp.value = '@nitin LGTM — approved for production rollout!';
+        await window.submitCollabThreadReply(threadId);
+        await new Promise(r => setTimeout(r, 200));
+      }
       const cursorsHtml = document.getElementById('collabActiveCursorsStrip')?.innerHTML || '';
       const threadsHtml = document.getElementById('collabThreadsListContainer')?.innerHTML || '';
       return {
         hasActiveCollaborators: cursorsHtml.includes('Active Collaborators') && cursorsHtml.includes('@sre-lead'),
-        hasPostedThread: threadsHtml.includes('Verified multi-region failover')
+        hasPostedThread: threadsHtml.includes('Verified multi-region failover'),
+        hasInlineReplyAndResolve: threadsHtml.includes('LGTM — approved for production rollout!') && threadsHtml.includes('Resolve')
       };
     })()`);
     console.log('Multiplayer Presence & @mention Threads Audit:', JSON.stringify(collabAudit));
-    if (!collabAudit.hasActiveCollaborators || !collabAudit.hasPostedThread) {
+    if (!collabAudit.hasActiveCollaborators || !collabAudit.hasPostedThread || !collabAudit.hasInlineReplyAndResolve) {
       throw new Error(`Multiplayer @mention Threads Gate Failed: ${JSON.stringify(collabAudit)}`);
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_collab_threads_modal.png'));

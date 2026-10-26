@@ -625,6 +625,7 @@ export function renderInteractiveSvg(graph, options = {}) {
 export function compileToDrawioXml(graph) {
   const layout = compileDiagramLayout(graph);
   const { width, height, zones, nodes, edges } = layout;
+  const sizeOverrides = (graph && graph.nodeSizeOverrides) || {};
 
   const cells = [];
 
@@ -641,9 +642,14 @@ export function compileToDrawioXml(graph) {
 
   for (const n of nodes) {
     const dataUri = getIconDataUri(n.iconKey);
+    const szOv = sizeOverrides[n.id] || {};
+    const effX = Math.round(n.x + (Number(n.customDx) || 0));
+    const effY = Math.round(n.y + (Number(n.customDy) || 0));
+    const effW = Math.max(120, Math.round(n.w + (Number(szOv.dw ?? n.customDw) || 0)));
+    const effH = Math.max(64, Math.round(n.h + (Number(szOv.dh ?? n.customDh) || 0)));
     const labelHtml = `&lt;b&gt;${escapeXml(n.title)}&lt;/b&gt;&lt;br/&gt;&lt;font style=&quot;font-size:10px;color:#475569;&quot;&gt;${escapeXml(n.subtitle)}&lt;/font&gt;&lt;br/&gt;&lt;font style=&quot;font-size:9px;color:#2563EB;&quot;&gt;[${escapeXml(n.pill || '')}]&lt;/font&gt;`;
     cells.push(
-      `<mxCell id="${escapeXml(n.id)}" value="${labelHtml}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#0F172A;align=left;spacingLeft=44;image=${dataUri};imageWidth=24;imageHeight=24;imageAlign=left;" vertex="1" parent="1"><mxGeometry x="${n.x}" y="${n.y}" width="${n.w}" height="${n.h}" as="geometry"/></mxCell>`
+      `<mxCell id="${escapeXml(n.id)}" value="${labelHtml}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#CBD5E1;fontColor=#0F172A;align=left;spacingLeft=44;image=${dataUri};imageWidth=24;imageHeight=24;imageAlign=left;" vertex="1" parent="1"><mxGeometry x="${effX}" y="${effY}" width="${effW}" height="${effH}" as="geometry"/></mxCell>`
     );
   }
 
@@ -663,6 +669,28 @@ export function compileToDrawioXml(graph) {
       `<mxCell id="${escapeXml(e.id)}" value="${wrappedLabel}" style="edgeStyle=none;rounded=0;html=1;strokeColor=${st.stroke};strokeWidth=2;endArrow=block;endFill=1;labelBackgroundColor=#FFFFFF;labelBorderColor=${st.pillBorder};fontColor=${st.pillText};fontSize=9;fontStyle=1;" edge="1" parent="1" source="${escapeXml(e.sourceNodeId)}" target="${escapeXml(e.targetNodeId)}"><mxGeometry relative="1" as="geometry"><mxPoint x="-5" y="-2" as="offset"/>${waypointsXml}</mxGeometry></mxCell>`
     );
   }
+
+  // Export Whiteboard Sticky Notes & Review Pins as native editable Draw.io cells
+  const stickies = Array.isArray(graph.stickyNotes) ? graph.stickyNotes : [];
+  stickies.forEach((st, idx) => {
+    const sx = Math.max(28, Math.min(1220, Number(st.x) || 1140));
+    const sy = Math.max(82, Math.min(680, Number(st.y) || 665));
+    const sw = Math.max(140, Math.min(260, Number(st.w) || 210));
+    const sh = Math.max(48, Math.min(110, Number(st.h) || 56));
+    const stHtml = `&lt;b&gt;${escapeXml(st.author || '@architect')}&lt;/b&gt;&lt;br/&gt;${escapeXml(st.text || '')}`;
+    cells.push(
+      `<mxCell id="${escapeXml(st.id || `sticky_${idx + 1}`)}" value="${stHtml}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=${escapeXml(st.color || '#FEF08A')};strokeColor=${escapeXml(st.borderColor || '#EAB308')};fontColor=#713F12;fontSize=10;align=left;spacingLeft=10;" vertex="1" parent="1"><mxGeometry x="${sx}" y="${sy}" width="${sw}" height="${sh}" as="geometry"/></mxCell>`
+    );
+  });
+
+  const pins = Array.isArray(graph.annotations) ? graph.annotations : [];
+  pins.forEach((pin, idx) => {
+    const ax = Math.max(40, Math.min(1180, Number(pin.x) || 960));
+    const ay = Math.max(82, Math.min(720, Number(pin.y) || 82));
+    cells.push(
+      `<mxCell id="${escapeXml(pin.id || `pin_${idx + 1}`)}" value="${escapeXml(`📌 #${idx + 1}: ${pin.text || ''}`)}" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF3C7;strokeColor=#D97706;fontColor=#92400E;fontStyle=1;fontSize=9;align=left;spacingLeft=8;" vertex="1" parent="1"><mxGeometry x="${ax}" y="${ay}" width="236" height="28" as="geometry"/></mxCell>`
+    );
+  });
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <mxfile host="embed.diagrams.net" modified="${new Date().toISOString()}" agent="VeriSpec Studio" version="24.0.0">

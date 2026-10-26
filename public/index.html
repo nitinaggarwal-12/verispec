@@ -1005,9 +1005,8 @@
 
     .toast-banner {
       position: fixed;
-      top: 66px;
-      left: 50%;
-      transform: translateX(-50%);
+      bottom: 18px;
+      left: 24px;
       padding: 8px 16px;
       border-radius: 999px;
       background: #0F172A;
@@ -1211,51 +1210,61 @@
                   <span id="collabThreadCountLabel" class="mono" style="font-size:9.5px;font-weight:800;color:#0F172A;">💬 2 Threads</span>
                 </div>
               </div>
-              <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                <button id="btnOpenCommandPalette" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">
+              <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
+                <button id="btnUndoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="undoBlueprintMutation()" title="Undo Last Mutation (⌘Z)">
+                  ↶
+                </button>
+                <button id="btnRedoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="redoBlueprintMutation()" title="Redo Mutation (⌘⇧Z)">
+                  ↷
+                </button>
+                <button id="btnOpenCommandPalette" class="btn-secondary" style="padding:3px 6px;font-size:10px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">
                   ⌘K Command
                 </button>
-                <button id="btnGreenfieldSynth" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="triggerGreenfieldArchitecture()" title="Synthesize a brand-new Custom Greenfield Cloud Architecture from scratch">
+                <button id="btnGreenfieldSynth" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerGreenfieldArchitecture()" title="Synthesize a brand-new Custom Greenfield Cloud Architecture from scratch">
                   ✨ Greenfield
                 </button>
-                <button id="btnVisionDecompile" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="triggerVisionDecompileSample()" title="Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision (gemini-3-flash-preview)">
+                <input id="visionImageFileInput" type="file" accept="image/*" style="display:none;" onchange="handleVisionImageUpload(event)" />
+                <button id="btnVisionDecompile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerVisionDecompileSample()" title="Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision (or drag/paste image onto canvas)">
                   📷 Vision
                 </button>
-                <button id="btnToggleRenderMode" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="toggleBlueprintRenderMode()" title="Dynamically switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Architecture Grid">
+                <button id="btnVisionUploadFile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="document.getElementById('visionImageFileInput')?.click()" title="Upload PNG/JPEG/WebP Whiteboard Image for Gemini Vision Decompilation">
+                  📂 Upload
+                </button>
+                <button id="btnToggleRenderMode" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="toggleBlueprintRenderMode()" title="Dynamically switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Architecture Grid">
                   📐 Layout: Bespoke
                 </button>
-                <button id="btnToggleNodeDrag" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">
+                <button id="btnToggleNodeDrag" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">
                   ✋ Drag: Off
                 </button>
-                <button id="btnSnapPhase0Math" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">
+                <button id="btnSnapPhase0Math" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">
                   📐 Snap Math
                 </button>
-                <button id="btnAddReviewPin" class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">
+                <button id="btnAddReviewPin" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">
                   📌 Pin Note
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, Terraform/SQL/K8s Ingestion &amp; Node Inspector">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, Terraform/SQL/K8s Ingestion &amp; Node Inspector">
                   🧬 Code DSL
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">
                   📄 Living RFC
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="openWorkbenchTab('stencils')" title="52 Multi-Cloud Vendor Stencil Picker (GCP, AWS, Azure, AI, Enterprise SaaS)">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('stencils')" title="52 Multi-Cloud Vendor Stencil Picker (GCP, AWS, Azure, AI, Enterprise SaaS)">
                   🧰 52 Stencils
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="openWorkbenchTab('judge')" title="Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Linter">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('judge')" title="Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Linter">
                   ⚖️ Judge &amp; Lint
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="openWorkbenchTab('iac')" title="Export Multi-Cloud Terraform HCL, GitHub PR Bot &amp; Mermaid">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('iac')" title="Export Multi-Cloud Terraform HCL, GitHub PR Bot &amp; Mermaid">
                   🏗️ Terraform
                 </button>
-                <label style="display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:#334155;cursor:pointer;padding:4px 7px;border-radius:7px;background:#FFFFFF;border:1px solid #CBD5E1;">
-                  <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:12px;height:12px;margin:0;" />
+                <label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#334155;cursor:pointer;padding:3px 6px;border-radius:7px;background:#FFFFFF;border:1px solid #CBD5E1;">
+                  <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:11px;height:11px;margin:0;" />
                   <span>Diff</span>
                 </label>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="downloadCurrentSvg()" title="Download Vector .SVG">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="downloadCurrentSvg()" title="Download Vector .SVG">
                   ⬇ .SVG
                 </button>
-                <button class="btn-secondary" style="padding:4px 8px;font-size:10.5px;" onclick="downloadCurrentPng2x()" title="Download High-Resolution 2x Retina .PNG">
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="downloadCurrentPng2x()" title="Download High-Resolution 2x Retina .PNG">
                   ⬇ .PNG
                 </button>
               </div>
@@ -2102,14 +2111,23 @@
       renderLeftRailList();
     }
 
+    const WORKSPACE_FOLDER_MAP = {
+      fld_01: ['D01', 'D02', 'D03'],
+      fld_02: ['D04', 'D05', 'D06', 'D07', 'D08', 'D09'],
+      fld_03: ['D10', 'D11', 'D12'],
+      fld_04: ['D13', 'D14', 'D15', 'D16', 'D17', 'D18']
+    };
+
     function renderLeftRailList() {
       const listEl = document.getElementById('blueprintRailList');
       if (!listEl || !atlasData) return;
-      const rail = document.getElementById('leftLifecycleRail');
-      const isCollapsed = rail && rail.classList.contains('collapsed');
-      const filtered = atlasData.diagrams.filter(
-        (d) => activePhaseFilter === 'ALL' || d.phaseId === activePhaseFilter
-      );
+      const folderSelect = document.getElementById('railFolderSelect');
+      const currentFolder = (typeof activeWorkspaceFolder === 'string' && activeWorkspaceFolder) || (folderSelect && folderSelect.value) || 'ALL';
+      const allowedCodes = WORKSPACE_FOLDER_MAP[currentFolder] || null;
+      const filtered = atlasData.diagrams.filter((d) => {
+        if (allowedCodes && !allowedCodes.includes(d.code)) return false;
+        return activePhaseFilter === 'ALL' || d.phaseId === activePhaseFilter;
+      });
       const itemsHtml = filtered
         .map(
           (d) => `
@@ -2169,6 +2187,30 @@
       }
     }
 
+    function renderLiveCollabCursorsOverlayHtml() {
+      const collabs = (atlasData && Array.isArray(atlasData.activeCollaborators) && atlasData.activeCollaborators) || [
+        { id: 'usr_alex', name: 'Alex Rivera', handle: '@alex.rivera', color: '#2563EB', x: 240, y: 786 },
+        { id: 'usr_priya', name: 'Priya Nair', handle: '@priya.sre', color: '#059669', x: 680, y: 786 },
+        { id: 'usr_marcus', name: 'Marcus Vance', handle: '@marcus.sec', color: '#7C3AED', x: 1120, y: 786 }
+      ];
+      return `
+        <div id="vsLiveCollabCursorsOverlay" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;">
+          ${collabs
+            .map((c) => {
+              const leftPct = Math.max(6, Math.min(86, ((Number(c.x) || 240) / 1440) * 100)).toFixed(1);
+              const topPct = Math.max(6, Math.min(95.5, ((Number(c.y) || 786) / 820) * 100)).toFixed(1);
+              return `
+                <div class="vs-collab-cursor-marker" data-collab-handle="${c.handle}" style="position:absolute;left:${leftPct}%;top:${topPct}%;display:inline-flex;align-items:center;gap:3px;transform:translate(-2px,-2px);transition:left 0.35s ease,top 0.35s ease;opacity:0.92;">
+                  <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};border:1.5px solid #FFFFFF;box-shadow:0 1px 3px rgba(15,23,42,0.25);"></span>
+                  <span class="mono" style="font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:999px;background:${c.color};color:#FFFFFF;white-space:nowrap;box-shadow:0 2px 5px rgba(15,23,42,0.18);">${c.handle}</span>
+                </div>
+              `;
+            })
+            .join('')}
+        </div>
+      `;
+    }
+
     function renderActiveBlueprintViews() {
       const item = getActiveBpItem();
       if (!item) return;
@@ -2177,6 +2219,18 @@
       const verIdx = activeVersionIdx >= 0 && activeVersionIdx < history.length ? activeVersionIdx : history.length - 1;
       const activeSnap = history[verIdx] || history[history.length - 1];
       const baselineSnap = history[0];
+
+      // Sync Undo / Redo Toolbar Buttons
+      const btnUndo = document.getElementById('btnUndoAction');
+      const btnRedo = document.getElementById('btnRedoAction');
+      if (btnUndo) {
+        const canUndo = Boolean(item.canUndo || history.length > 1);
+        btnUndo.style.opacity = canUndo ? '1' : '0.45';
+      }
+      if (btnRedo) {
+        const canRedo = Boolean(item.canRedo);
+        btnRedo.style.opacity = canRedo ? '1' : '0.45';
+      }
 
       // Update Header Export Link (version-exact) & Gate Telemetry
       const exportLink = document.getElementById('headerExportDrawioBtn');
@@ -2240,7 +2294,8 @@
       timelineEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;display:flex;flex-direction:column;gap:10px;">${cardsHtml}</div>`;
 
       const atelierSvgEl = document.getElementById('atelierSvgContainer');
-      atelierSvgEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;width:100%;">${activeSnap.svg}</div>`;
+      atelierSvgEl.style.position = 'relative';
+      atelierSvgEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;width:100%;position:relative;">${activeSnap.svg}${renderLiveCollabCursorsOverlayHtml()}</div>`;
       bindSvgNodeClickSelection(atelierSvgEl);
       applyCanvasZoom();
 
@@ -2269,7 +2324,8 @@
         )
         .join('');
       const cmdSvgEl = document.getElementById('commandSvgContainer');
-      cmdSvgEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:1080px;width:100%;">${activeSnap.svg}</div>`;
+      cmdSvgEl.style.position = 'relative';
+      cmdSvgEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:1080px;width:100%;position:relative;">${activeSnap.svg}</div>`;
       bindSvgNodeClickSelection(cmdSvgEl);
 
       // Update Edition 3 (Stitch 4-Step & Visual Diff)
@@ -2285,24 +2341,128 @@
       updateDrawerContents(item, activeSnap);
     }
 
+    let nodeDragOriginX = 0;
+    let nodeDragOriginY = 0;
+    let activeWhiteboardDragState = null;
+
+    function clientToSvgCoords(svgEl, clientX, clientY) {
+      if (!svgEl) return { x: 400, y: 240 };
+      const rect = svgEl.getBoundingClientRect();
+      const vb = (svgEl.getAttribute('viewBox') || '0 0 1440 820').split(/\s+/).map(Number);
+      const vbW = vb[2] || 1440;
+      const vbH = vb[3] || 820;
+      const x = Math.round(((clientX - rect.left) / Math.max(1, rect.width)) * vbW);
+      const y = Math.round(((clientY - rect.top) / Math.max(1, rect.height)) * vbH);
+      return {
+        x: Math.max(12, Math.min(1420, x)),
+        y: Math.max(48, Math.min(800, y))
+      };
+    }
+
     function bindSvgNodeClickSelection(containerEl) {
       if (!containerEl) return;
-      if (!containerEl.__panBound && containerEl.id === 'atelierSvgContainer') {
+      if (!containerEl.__panBound) {
         containerEl.__panBound = true;
         containerEl.addEventListener('mousedown', (ev) => {
-          if (ev.target.closest('.arch-node')) return;
+          const svgEl = containerEl.querySelector('svg');
+          if (ev.target.closest('.arch-node') || ev.target.closest('.vs-sticky-note') || ev.target.closest('.vs-resize-handle') || ev.target.closest('.vs-elbow-handle')) {
+            return;
+          }
+          if (activeWhiteboardTool === 'pen' && svgEl) {
+            ev.preventDefault();
+            const pt = clientToSvgCoords(svgEl, ev.clientX, ev.clientY);
+            const pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            pathEl.setAttribute('id', 'vsLivePenDraftPath');
+            pathEl.setAttribute('d', `M ${pt.x} ${pt.y}`);
+            pathEl.setAttribute('fill', 'none');
+            pathEl.setAttribute('stroke', '#2563EB');
+            pathEl.setAttribute('stroke-width', '2.5');
+            pathEl.setAttribute('stroke-linecap', 'round');
+            svgEl.appendChild(pathEl);
+            activeWhiteboardDragState = { mode: 'pen', svgEl, pathEl, points: [pt] };
+            return;
+          }
+          if (activeWhiteboardTool === 'lasso' && svgEl) {
+            ev.preventDefault();
+            const pt = clientToSvgCoords(svgEl, ev.clientX, ev.clientY);
+            const rectEl = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rectEl.setAttribute('id', 'vsLiveLassoMarquee');
+            rectEl.setAttribute('x', String(pt.x));
+            rectEl.setAttribute('y', String(pt.y));
+            rectEl.setAttribute('width', '2');
+            rectEl.setAttribute('height', '2');
+            rectEl.setAttribute('fill', 'rgba(37, 99, 235, 0.08)');
+            rectEl.setAttribute('stroke', '#2563EB');
+            rectEl.setAttribute('stroke-width', '1.5');
+            rectEl.setAttribute('stroke-dasharray', '5,4');
+            svgEl.appendChild(rectEl);
+            activeWhiteboardDragState = { mode: 'lasso', svgEl, rectEl, startPt: pt, currentPt: pt };
+            return;
+          }
           isDraggingCanvas = true;
           dragStartX = ev.clientX - canvasPanX;
           dragStartY = ev.clientY - canvasPanY;
           containerEl.style.cursor = 'grabbing';
         });
+
+        // Allow dropping any image file directly onto the canvas for Gemini Vision Decompilation
+        containerEl.addEventListener('dragover', (ev) => {
+          ev.preventDefault();
+        });
+        containerEl.addEventListener('drop', (ev) => {
+          ev.preventDefault();
+          const files = ev.dataTransfer && ev.dataTransfer.files;
+          if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+            decompileImageFile(files[0]);
+          }
+        });
+      }
+
+      if (!window.__vsGlobalMouseBound) {
+        window.__vsGlobalMouseBound = true;
         window.addEventListener('mousemove', (ev) => {
-          if (activeDraggingNodeEl && isNodeDragEnabled) {
-            const dx = Math.round((ev.clientX - nodeDragStartClientX) / (canvasZoomScale || 1));
-            const dy = Math.round((ev.clientY - nodeDragStartClientY) / (canvasZoomScale || 1));
-            activeDraggingNodeEl.setAttribute('transform', `translate(${dx}, ${dy})`);
-            activeDraggingNodeEl.__liveDragDx = nodeDragBaseDx + dx;
-            activeDraggingNodeEl.__liveDragDy = nodeDragBaseDy + dy;
+          if (activeWhiteboardDragState) {
+            const st = activeWhiteboardDragState;
+            const pt = clientToSvgCoords(st.svgEl, ev.clientX, ev.clientY);
+            if (st.mode === 'pen' && st.pathEl) {
+              st.points.push(pt);
+              const dStr = st.points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+              st.pathEl.setAttribute('d', dStr);
+            } else if (st.mode === 'lasso' && st.rectEl) {
+              st.currentPt = pt;
+              const rx = Math.min(st.startPt.x, pt.x);
+              const ry = Math.min(st.startPt.y, pt.y);
+              const rw = Math.max(4, Math.abs(pt.x - st.startPt.x));
+              const rh = Math.max(4, Math.abs(pt.y - st.startPt.y));
+              st.rectEl.setAttribute('x', String(rx));
+              st.rectEl.setAttribute('y', String(ry));
+              st.rectEl.setAttribute('width', String(rw));
+              st.rectEl.setAttribute('height', String(rh));
+            } else if (st.mode === 'sticky' && st.stickyEl) {
+              const dx = Math.round((ev.clientX - st.startClientX) / (canvasZoomScale || 1));
+              const dy = Math.round((ev.clientY - st.startClientY) / (canvasZoomScale || 1));
+              st.liveX = Math.max(16, Math.min(1250, st.baseX + dx));
+              st.liveY = Math.max(52, Math.min(730, st.baseY + dy));
+              st.stickyEl.setAttribute('transform', `translate(${st.liveX}, ${st.liveY})`);
+            } else if (st.mode === 'elbow' && st.handleEl) {
+              st.liveX = pt.x;
+              st.liveY = pt.y;
+              st.handleEl.setAttribute('cx', String(pt.x));
+              st.handleEl.setAttribute('cy', String(pt.y));
+            } else if (st.mode === 'resize') {
+              st.liveDw = Math.round((ev.clientX - st.startClientX) / (canvasZoomScale || 1));
+              st.liveDh = Math.round((ev.clientY - st.startClientY) / (canvasZoomScale || 1));
+            }
+            return;
+          }
+          if (activeDraggingNodeEl) {
+            const rawDx = Math.round((ev.clientX - nodeDragStartClientX) / (canvasZoomScale || 1));
+            const rawDy = Math.round((ev.clientY - nodeDragStartClientY) / (canvasZoomScale || 1));
+            const snappedDx = Math.round((nodeDragBaseDx + rawDx) / 12) * 12;
+            const snappedDy = Math.round((nodeDragBaseDy + rawDy) / 12) * 12;
+            activeDraggingNodeEl.setAttribute('transform', `translate(${nodeDragOriginX + snappedDx}, ${nodeDragOriginY + snappedDy})`);
+            activeDraggingNodeEl.__liveDragDx = snappedDx;
+            activeDraggingNodeEl.__liveDragDy = snappedDy;
             return;
           }
           if (!isDraggingCanvas) return;
@@ -2310,8 +2470,70 @@
           canvasPanY = Math.max(-240, Math.min(240, ev.clientY - dragStartY));
           applyCanvasZoom();
         });
+
         window.addEventListener('mouseup', async () => {
-          if (activeDraggingNodeEl && isNodeDragEnabled) {
+          if (activeWhiteboardDragState) {
+            const st = activeWhiteboardDragState;
+            activeWhiteboardDragState = null;
+            if (st.mode === 'pen' && st.points && st.points.length > 1) {
+              const dStr = st.points.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `L ${p.x} ${p.y}`)).join(' ');
+              await fetch('/api/whiteboard/op', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: activeCode, op: 'ADD_STROKE', d: dStr, color: '#2563EB', width: 2.5 })
+              });
+              showToast(`✏️ Saved Freehand Pen Stroke (${st.points.length} pts) to SQLite WAL`);
+              await loadAtlas();
+            } else if (st.mode === 'lasso' && st.startPt && st.currentPt) {
+              const rx = Math.min(st.startPt.x, st.currentPt.x);
+              const ry = Math.min(st.startPt.y, st.currentPt.y);
+              const rw = Math.abs(st.currentPt.x - st.startPt.x);
+              const rh = Math.abs(st.currentPt.y - st.startPt.y);
+              if (st.rectEl) st.rectEl.remove();
+              if (rw > 12 && rh > 12 && st.svgEl) {
+                const hitIds = [];
+                st.svgEl.querySelectorAll('.arch-node').forEach((nEl) => {
+                  const nx = Number(nEl.getAttribute('data-base-x') || 0) + Number(nEl.getAttribute('data-custom-dx') || 0);
+                  const ny = Number(nEl.getAttribute('data-base-y') || 0) + Number(nEl.getAttribute('data-custom-dy') || 0);
+                  if (nx + 100 >= rx && nx <= rx + rw && ny + 40 >= ry && ny <= ry + rh) {
+                    const id = nEl.getAttribute('data-node-id');
+                    if (id) hitIds.push(id);
+                  }
+                });
+                const g = getActiveGraph();
+                const targetIds = hitIds.length > 0 ? hitIds : (g && g.nodes ? g.nodes.slice(0, 2).map((n) => n.id) : []);
+                if (targetIds.length > 0) {
+                  await fetch('/api/whiteboard/op', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: activeCode, op: 'BATCH_MOVE_NODES', nodeIds: targetIds, dx: 12, dy: 0 })
+                  });
+                  showToast(`⬚ Marquee Lasso selected & nudged ${targetIds.length} nodes (+12px grid snap)`);
+                  await loadAtlas();
+                }
+              }
+            } else if (st.mode === 'sticky' && st.stickyId && typeof st.liveX === 'number') {
+              await fetch('/api/whiteboard/op', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: activeCode, op: 'MOVE_STICKY', id: st.stickyId, x: st.liveX, y: st.liveY })
+              });
+              showToast(`🟨 Moved Sticky Note to (${st.liveX}, ${st.liveY}) · Persisted to SQLite`);
+              await loadAtlas();
+            } else if (st.mode === 'elbow' && st.edgeKey && typeof st.liveX === 'number') {
+              await fetch('/api/whiteboard/op', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: activeCode, op: 'ELBOW_WAYPOINT', edgeKey: st.edgeKey, bendX: st.liveX, bendY: st.liveY })
+              });
+              showToast(`〰️ Moved Orthogonal Elbow Waypoint (${st.edgeKey}) to (${st.liveX}, ${st.liveY})`);
+              await loadAtlas();
+            } else if (st.mode === 'resize' && (Math.abs(st.liveDw || 0) > 4 || Math.abs(st.liveDh || 0) > 4)) {
+              await resizeScopedNodeDelta(st.liveDw || 0, st.liveDh || 0);
+            }
+            return;
+          }
+          if (activeDraggingNodeEl) {
             const draggedEl = activeDraggingNodeEl;
             const nid = activeDraggingNodeId;
             const finalDx = typeof draggedEl.__liveDragDx === 'number' ? draggedEl.__liveDragDx : nodeDragBaseDx;
@@ -2325,7 +2547,7 @@
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ code: activeCode, nodeId: nid, customDx: finalDx, customDy: finalDy })
                 });
-                showToast(`✋ Moved node "${nid}" to custom offset (${finalDx}px, ${finalDy}px) — click "📐 Snap Math" anytime to re-align`);
+                showToast(`✋ Moved node "${nid}" to 12px grid offset (${finalDx}px, ${finalDy}px) — click "📐 Snap Math" anytime to re-align`);
                 await loadAtlas();
               } catch (err) {
                 console.warn('Drag save error:', err);
@@ -2335,10 +2557,75 @@
           }
           if (!isDraggingCanvas) return;
           isDraggingCanvas = false;
-          containerEl.style.cursor = 'grab';
+          const aEl = document.getElementById('atelierSvgContainer');
+          if (aEl) aEl.style.cursor = 'grab';
           applyCanvasZoom();
         });
       }
+
+      // Bind Sticky Notes (Drag to move + Double-Click to edit text inline)
+      containerEl.querySelectorAll('.vs-sticky-note').forEach((sEl) => {
+        sEl.addEventListener('mousedown', (ev) => {
+          ev.stopPropagation();
+          const stickyId = sEl.getAttribute('data-sticky-id');
+          const baseX = Number(sEl.getAttribute('data-sticky-x') || 1140);
+          const baseY = Number(sEl.getAttribute('data-sticky-y') || 665);
+          activeWhiteboardDragState = {
+            mode: 'sticky',
+            stickyEl: sEl,
+            stickyId,
+            baseX,
+            baseY,
+            startClientX: ev.clientX,
+            startClientY: ev.clientY,
+            liveX: baseX,
+            liveY: baseY
+          };
+        });
+        sEl.addEventListener('dblclick', (ev) => {
+          ev.stopPropagation();
+          const stickyId = sEl.getAttribute('data-sticky-id');
+          const curText = sEl.getAttribute('data-sticky-text') || '';
+          const inp = document.getElementById('atelierPromptInput');
+          if (inp) {
+            inp.value = curText;
+            inp.focus();
+            inp.setAttribute('data-editing-sticky-id', stickyId);
+            showToast('🟨 Editing Sticky Note in bottom prompt bar — press Enter to save or type new text');
+          }
+        });
+      });
+
+      // Bind 8-Way Resize Handles
+      containerEl.querySelectorAll('.vs-resize-handle').forEach((rEl) => {
+        rEl.addEventListener('mousedown', (ev) => {
+          ev.stopPropagation();
+          activeWhiteboardDragState = {
+            mode: 'resize',
+            startClientX: ev.clientX,
+            startClientY: ev.clientY,
+            liveDw: 0,
+            liveDh: 0
+          };
+        });
+      });
+
+      // Bind Orthogonal Elbow Waypoint Handles
+      containerEl.querySelectorAll('.vs-elbow-handle').forEach((eEl) => {
+        eEl.addEventListener('mousedown', (ev) => {
+          ev.stopPropagation();
+          const svgEl = containerEl.querySelector('svg');
+          const edgeKey = eEl.getAttribute('data-edge-key') || 'edge_0';
+          activeWhiteboardDragState = {
+            mode: 'elbow',
+            svgEl,
+            handleEl: eEl,
+            edgeKey,
+            liveX: Number(eEl.getAttribute('cx') || 526),
+            liveY: Number(eEl.getAttribute('cy') || 210)
+          };
+        });
+      });
 
       const nodeGroups = containerEl.querySelectorAll('.arch-node');
       nodeGroups.forEach((g) => {
@@ -2346,12 +2633,14 @@
           g.style.cursor = 'move';
         }
         g.addEventListener('mousedown', (ev) => {
-          if (!isNodeDragEnabled) return;
+          if (!isNodeDragEnabled && !ev.shiftKey) return;
           ev.stopPropagation();
           activeDraggingNodeEl = g;
           activeDraggingNodeId = g.getAttribute('data-node-id');
           nodeDragStartClientX = ev.clientX;
           nodeDragStartClientY = ev.clientY;
+          nodeDragOriginX = Number(g.getAttribute('data-base-x') || 0);
+          nodeDragOriginY = Number(g.getAttribute('data-base-y') || 0);
           nodeDragBaseDx = Number(g.getAttribute('data-custom-dx') || 0);
           nodeDragBaseDy = Number(g.getAttribute('data-custom-dy') || 0);
         });
@@ -2603,6 +2892,19 @@
       if (!inputEl) return;
       const val = inputEl.value.trim();
       if (!val) return;
+      const editingStickyId = inputEl.getAttribute('data-editing-sticky-id');
+      if (editingStickyId) {
+        inputEl.removeAttribute('data-editing-sticky-id');
+        inputEl.value = '';
+        await fetch('/api/whiteboard/op', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: activeCode, op: 'UPDATE_STICKY', id: editingStickyId, text: val })
+        });
+        showToast(`🟨 Updated Sticky Note text on ${activeCode} · Persisted to SQLite WAL`);
+        await loadAtlas();
+        return;
+      }
       inputEl.value = '';
       await executePromptMutation(val);
     }
@@ -2760,34 +3062,12 @@
 
     function setWorkspaceFolderFilter(folderId) {
       activeWorkspaceFolder = folderId || 'ALL';
-      const folderMap = {
-        fld_01: ['D01', 'D02', 'D03'],
-        fld_02: ['D04', 'D05', 'D06', 'D07', 'D08', 'D09'],
-        fld_03: ['D10', 'D11', 'D12'],
-        fld_04: ['D13', 'D14', 'D15', 'D16', 'D17', 'D18']
-      };
-      const allowedCodes = folderMap[activeWorkspaceFolder] || null;
-      const listEl = document.getElementById('blueprintRailList');
-      if (!listEl || !atlasData) return;
-      const filtered = atlasData.diagrams.filter((d) => {
-        if (allowedCodes && !allowedCodes.includes(d.code)) return false;
-        return activePhaseFilter === 'ALL' || d.phaseId === activePhaseFilter;
-      });
-      const itemsHtml = filtered
-        .map(
-          (d) => `
-        <button class="bp-nav-item ${d.code === activeCode ? 'active' : ''}" onclick="selectBlueprint('${d.code}')" title="${d.code}: ${d.title} (${d.version})">
-          <span class="bp-code-pill mono">${d.code}</span>
-          <span class="bp-item-meta rail-hide-on-collapse">
-            <span class="bp-item-title">${d.title}</span>
-            <span class="bp-item-sub">${d.version} · ${d.nodeCount} Nodes · ${d.edgeCount} Edges · ${d.archetypeBadge || 'AST'}</span>
-          </span>
-        </button>
-      `
-        )
-        .join('');
-      listEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;display:flex;flex-direction:column;gap:3px;">${itemsHtml}</div>`;
-      showToast(`📁 Filtered Workspace Folder: ${activeWorkspaceFolder} (${filtered.length} diagrams)`);
+      renderLeftRailList();
+      const allowedCodes = WORKSPACE_FOLDER_MAP[activeWorkspaceFolder] || null;
+      const count = atlasData && atlasData.diagrams
+        ? atlasData.diagrams.filter((d) => (!allowedCodes || allowedCodes.includes(d.code)) && (activePhaseFilter === 'ALL' || d.phaseId === activePhaseFilter)).length
+        : 18;
+      showToast(`📁 Filtered Workspace Folder: ${activeWorkspaceFolder} (${count} diagrams)`);
     }
 
     function getCustomRfcBlocksForCode(code) {
@@ -2821,11 +3101,13 @@
 
       const customBlocksHtml = customBlocks
         .map((blk) => {
-          if (blk.type === 'diagram_embed') {
-            const embCode = (blk.diagramCode || 'D06').toUpperCase();
+          const blkText = blk.text || blk.content || '';
+          const safeTitleAttr = String(blk.title || '').replace(/"/g, '&quot;');
+          if (blk.type === 'diagram_embed' || blk.type === 'embed') {
+            const embCode = (blk.diagramCode || blk.embedCode || 'D06').toUpperCase();
             const embBp = (atlasData && atlasData.diagrams && atlasData.diagrams.find((d) => d.code === embCode)) || item;
             return `
-              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="diagram_embed" data-rfc-diagram-code="${embCode}" style="border:1.5px solid #93C5FD;border-radius:8px;padding:7px;background:#F8FAFC;">
+              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="diagram_embed" data-rfc-diagram-code="${embCode}" data-rfc-block-title="${safeTitleAttr}" style="border:1.5px solid #93C5FD;border-radius:8px;padding:7px;background:#F8FAFC;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
                   <span class="mono" style="font-size:9px;font-weight:800;color:#1D4ED8;">📐 EMBEDDED MULTI-DIAGRAM BLOCK · ${embBp.code}: ${embBp.title} (${embBp.version})</span>
                   <button class="phase-chip mono" style="padding:1px 5px;font-size:8.5px;color:#B91C1C;" onclick="deleteRfcCustomBlock('${blk.id}')">✕</button>
@@ -2837,32 +3119,34 @@
             `;
           }
           if (blk.type === 'h2') {
+            const cleanH2 = String(blkText || blk.title || 'New Section Heading').replace(/^#+\s*/, '');
             return `
-              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="h2" style="border-bottom:1px solid #CBD5E1;padding-bottom:3px;display:flex;align-items:center;justify-content:space-between;">
-                <div contenteditable="true" class="rfc-editable-text" style="font-size:12px;font-weight:800;color:#0F172A;outline:none;flex:1;">${blk.text || blk.title || 'New Section Heading'}</div>
+              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="h2" data-rfc-block-title="${safeTitleAttr}" style="border-bottom:1px solid #CBD5E1;padding-bottom:3px;display:flex;align-items:center;justify-content:space-between;">
+                <div contenteditable="true" class="rfc-editable-text" onblur="saveAllEditableRfcBlocks()" style="font-size:12px;font-weight:800;color:#0F172A;outline:none;flex:1;">${cleanH2}</div>
                 <button class="phase-chip mono" style="padding:1px 5px;font-size:8.5px;color:#B91C1C;" onclick="deleteRfcCustomBlock('${blk.id}')">✕</button>
               </div>
             `;
           }
           if (blk.type === 'code') {
             return `
-              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="code" style="background:#0F172A;color:#F8FAFC;border-radius:7px;padding:7px 9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;">
+              <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="code" data-rfc-block-title="${safeTitleAttr}" style="background:#0F172A;color:#F8FAFC;border-radius:7px;padding:7px 9px;font-family:'JetBrains Mono',monospace;font-size:9.5px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;color:#93C5FD;font-size:8.5px;">
                   <span>CODE SNIPPET BLOCK (EDITABLE)</span>
                   <button class="phase-chip mono" style="padding:0 5px;font-size:8px;color:#FCA5A5;background:transparent;border:none;" onclick="deleteRfcCustomBlock('${blk.id}')">✕</button>
                 </div>
-                <div contenteditable="true" class="rfc-editable-text" style="outline:none;white-space:pre-wrap;">${blk.text || 'gcloud spanner instances create verispec-ha --config=multi-region'}</div>
+                <div contenteditable="true" class="rfc-editable-text" onblur="saveAllEditableRfcBlocks()" style="outline:none;white-space:pre-wrap;">${blkText || 'gcloud spanner instances create verispec-ha --config=multi-region'}</div>
               </div>
             `;
           }
           const isCallout = blk.type === 'callout';
+          const dispTitle = blk.title || (isCallout ? '📌 ADR Callout Block' : '📝 Editable Narrative Block');
           return `
-            <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="${blk.type || 'paragraph'}" style="background:${isCallout ? '#FFFBEB' : '#F8FAFC'};border:1px solid ${isCallout ? '#FDE68A' : '#E2E8F0'};border-radius:8px;padding:7px 9px;">
+            <div class="rfc-wysiwyg-block" data-rfc-block-id="${blk.id}" data-rfc-block-type="${blk.type || 'paragraph'}" data-rfc-block-title="${String(dispTitle).replace(/"/g, '&quot;')}" style="background:${isCallout ? '#FFFBEB' : '#F8FAFC'};border:1px solid ${isCallout ? '#FDE68A' : '#E2E8F0'};border-radius:8px;padding:7px 9px;">
               <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;">
-                <span style="font-size:9.5px;font-weight:800;color:${isCallout ? '#92400E' : '#334155'};">${blk.title || (isCallout ? '📌 ADR Callout Block' : '📝 Editable Narrative Block')}</span>
+                <span style="font-size:9.5px;font-weight:800;color:${isCallout ? '#92400E' : '#334155'};">${dispTitle}</span>
                 <button class="phase-chip mono" style="padding:1px 5px;font-size:8.5px;color:#B91C1C;" onclick="deleteRfcCustomBlock('${blk.id}')">✕</button>
               </div>
-              <div contenteditable="true" class="rfc-editable-text" style="font-size:10px;color:#0F172A;line-height:1.45;outline:none;">${blk.text || ''}</div>
+              <div contenteditable="true" class="rfc-editable-text" onblur="saveAllEditableRfcBlocks()" style="font-size:10px;color:#0F172A;line-height:1.45;outline:none;">${blkText}</div>
             </div>
           `;
         })
@@ -2938,37 +3222,47 @@
       const blocks = [...getCustomRfcBlocksForCode(activeCode)];
       const newId = `blk_${activeCode}_${Date.now()}`;
       if (type === 'diagram_embed') {
+        const dCode = diagramCode || 'D06';
         blocks.push({
           id: newId,
           type: 'diagram_embed',
-          diagramCode: diagramCode || 'D06',
-          title: `Embedded Architecture Blueprint (${diagramCode || 'D06'})`
+          diagramCode: dCode,
+          embedCode: dCode,
+          title: `Embedded Architecture Blueprint (${dCode})`
         });
       } else if (type === 'h2') {
+        const txt = customText || '## Failure Mode & Multi-Region DR Verification';
         blocks.push({
           id: newId,
           type: 'h2',
-          text: customText || '## Failure Mode & Multi-Region DR Verification'
+          text: txt,
+          content: txt
         });
       } else if (type === 'code') {
+        const txt = customText || 'terraform apply -var="multi_region_ha=true" -auto-approve';
         blocks.push({
           id: newId,
           type: 'code',
-          text: customText || 'terraform apply -var="multi_region_ha=true" -auto-approve'
+          text: txt,
+          content: txt
         });
       } else if (type === 'callout') {
+        const txt = customText || 'Approved by Principal Architecture Review Board — zero single-point-of-failure dependencies.';
         blocks.push({
           id: newId,
           type: 'callout',
           title: '📌 Security & FinOps Review Gate',
-          text: customText || 'Approved by Principal Architecture Review Board — zero single-point-of-failure dependencies.'
+          text: txt,
+          content: txt
         });
       } else {
+        const txt = customText || 'Traffic is routed through Anycast Global Load Balancing with Cloud Armor WAF rate-limiting.';
         blocks.push({
           id: newId,
           type: 'paragraph',
           title: '📝 Engineering Specification Block',
-          text: customText || 'Traffic is routed through Anycast Global Load Balancing with Cloud Armor WAF rate-limiting.'
+          text: txt,
+          content: txt
         });
       }
       await persistRfcBlocksArray(activeCode, blocks);
@@ -3005,12 +3299,17 @@
         const id = el.getAttribute('data-rfc-block-id');
         const type = el.getAttribute('data-rfc-block-type') || 'paragraph';
         const diagramCode = el.getAttribute('data-rfc-diagram-code') || undefined;
+        const title = el.getAttribute('data-rfc-block-title') || undefined;
         const textEl = el.querySelector('.rfc-editable-text');
+        const txtVal = textEl ? textEl.textContent.trim() : '';
         return {
           id,
           type,
+          title,
           diagramCode,
-          text: textEl ? textEl.textContent.trim() : ''
+          embedCode: diagramCode,
+          text: txtVal,
+          content: txtVal
         };
       });
       await persistRfcBlocksArray(activeCode, updated);
@@ -3227,12 +3526,16 @@
             listEl.innerHTML = `<div style="font-size:11px;color:#64748B;">No @mention threads on ${activeCode} yet. Start one below!</div>`;
           } else {
             listEl.innerHTML = threads
-              .map(
-                (t) => `
-                <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;gap:5px;">
-                  <div style="display:flex;align-items:center;justify-content:space-between;">
+              .map((t) => {
+                const isResolved = t.status === 'RESOLVED';
+                return `
+                <div class="collab-thread-card" data-thread-id="${t.id}" style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:9px;padding:9px 11px;display:flex;flex-direction:column;gap:5px;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
                     <span style="font-size:11px;font-weight:800;color:#0F172A;">${t.author} <span class="mono" style="font-size:9.5px;color:#2563EB;">[${t.blueprintCode} · ${t.targetId}]</span></span>
-                    <span class="mono" style="font-size:9px;color:#059669;background:#DCFCE7;padding:1px 6px;border-radius:4px;">${t.status}</span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <span class="mono" style="font-size:9px;color:${isResolved ? '#059669' : '#B45309'};background:${isResolved ? '#DCFCE7' : '#FEF3C7'};padding:1px 6px;border-radius:4px;">${t.status}</span>
+                      <button class="phase-chip mono" style="padding:1px 6px;font-size:8.5px;" onclick="toggleCollabThreadStatus('${t.id}', '${t.status}')">${isResolved ? '↺ Reopen' : '✓ Resolve'}</button>
+                    </div>
                   </div>
                   <div style="font-size:11px;color:#1E293B;line-height:1.4;">${t.text}</div>
                   ${(t.replies || [])
@@ -3241,14 +3544,56 @@
                         `<div style="margin-left:10px;padding:5px 8px;background:#FFFFFF;border-left:2.5px solid #2563EB;border-radius:4px;font-size:10px;color:#334155;"><b>${r.author}:</b> ${r.text}</div>`
                     )
                     .join('')}
+                  <div style="display:flex;gap:5px;margin-top:3px;">
+                    <input id="collabReplyInput_${t.id}" type="text" placeholder="Reply with @mention..." style="flex:1;padding:4px 8px;font-size:10px;border:1px solid #CBD5E1;border-radius:5px;outline:none;" onkeydown="if(event.key==='Enter') submitCollabThreadReply('${t.id}')" />
+                    <button class="btn-secondary mono" style="padding:3px 8px;font-size:9.5px;" onclick="submitCollabThreadReply('${t.id}')">Reply ↵</button>
+                  </div>
                 </div>
-              `
-              )
+              `;
+              })
               .join('');
           }
         }
       } catch (_err) {
         // ignore
+      }
+    }
+
+    async function submitCollabThreadReply(threadId) {
+      const inp = document.getElementById(`collabReplyInput_${threadId}`);
+      if (!inp || !inp.value.trim()) return;
+      const text = inp.value.trim();
+      inp.value = '';
+      const res = await fetch('/api/collab/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          threadId,
+          author: 'Principal Architect (@nitin)',
+          text
+        })
+      });
+      if (res.ok) {
+        await renderCollabModalContents();
+        await loadAtlas();
+        showToast('💬 Posted reply to @mention thread · Persisted to SQLite WAL');
+      }
+    }
+
+    async function toggleCollabThreadStatus(threadId, currentStatus) {
+      const nextStatus = currentStatus === 'RESOLVED' ? 'OPEN' : 'RESOLVED';
+      const res = await fetch('/api/collab/reply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          threadId,
+          status: nextStatus
+        })
+      });
+      if (res.ok) {
+        await renderCollabModalContents();
+        await loadAtlas();
+        showToast(`💬 Marked thread as ${nextStatus} · Persisted to SQLite WAL`);
       }
     }
 
@@ -3777,6 +4122,52 @@ spec:
       }
     }
 
+    async function decompileImageFile(file) {
+      if (!file) return;
+      showToast(`📷 Reading "${file.name}" for Live Vertex AI Gemini Multimodal Vision Decompiler...`);
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const dataUrl = String(reader.result || '');
+          const base64Image = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
+          const mimeType = file.type || 'image/png';
+          const inp = document.getElementById('atelierPromptInput');
+          const hintPrompt =
+            inp && inp.value.trim()
+              ? inp.value.trim()
+              : `Decompile uploaded architecture diagram (${file.name}) into multi-tier cloud services and connectors`;
+          const res = await fetch('/api/vision-decompile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              code: activeCode,
+              mimeType,
+              base64Image,
+              hintPrompt
+            })
+          });
+          const data = await res.json();
+          if (data.ok && data.blueprint) {
+            activeVersionIdx = -1;
+            const modelUsed = (data.visionDecompile && data.visionDecompile.modelUsed) || 'gemini-3-flash-preview';
+            showToast(`📷 Vision Decompiled "${file.name}" (${modelUsed}) → ${data.blueprint.version} (${data.blueprint.graph.nodes.length} nodes)!`);
+            await loadAtlas();
+          }
+        } catch (err) {
+          showToast('Vision upload error: ' + err.message);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleVisionImageUpload(ev) {
+      const file = ev && ev.target && ev.target.files && ev.target.files[0];
+      if (file) {
+        decompileImageFile(file);
+        ev.target.value = '';
+      }
+    }
+
     async function triggerVisionDecompileSample() {
       showToast('📷 Executing Live Vertex AI Gemini Multimodal Vision Decompiler...');
       const samplePngBase64 =
@@ -3809,6 +4200,42 @@ spec:
       }
     }
 
+    async function undoBlueprintMutation() {
+      try {
+        const res = await fetch('/api/undo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: activeCode, detailLevel: activeDetailLevel })
+        });
+        const data = await res.json();
+        if (data.ok && data.blueprint) {
+          activeVersionIdx = -1;
+          await loadAtlas();
+          showToast(`↶ Undid last mutation on ${activeCode} → restored ${data.blueprint.version}`);
+        }
+      } catch (err) {
+        showToast('Undo error: ' + err.message);
+      }
+    }
+
+    async function redoBlueprintMutation() {
+      try {
+        const res = await fetch('/api/redo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: activeCode, detailLevel: activeDetailLevel })
+        });
+        const data = await res.json();
+        if (data.ok && data.blueprint) {
+          activeVersionIdx = -1;
+          await loadAtlas();
+          showToast(`↷ Redid mutation on ${activeCode} → restored ${data.blueprint.version}`);
+        }
+      } catch (err) {
+        showToast('Redo error: ' + err.message);
+      }
+    }
+
     function openCommandPaletteModal() {
       const modal = document.getElementById('commandPaletteModal');
       if (!modal) return;
@@ -3831,8 +4258,11 @@ spec:
       if (!resultsEl) return;
       const q = String(query || '').trim().toLowerCase();
       const actions = [
+        { id: 'act_undo', badge: '↶ UNDO (⌘Z)', title: 'Undo Last Blueprint Mutation', sub: 'POST /api/undo · Restore previous version in history', run: () => undoBlueprintMutation() },
+        { id: 'act_redo', badge: '↷ REDO (⌘⇧Z)', title: 'Redo Blueprint Mutation', sub: 'POST /api/redo · Re-apply undone version', run: () => redoBlueprintMutation() },
         { id: 'act_greenfield', badge: '✨ GREENFIELD', title: 'Synthesize New Greenfield Architecture from Scratch', sub: 'POST /api/greenfield · Dynamic 5-Tier Cloud Grid', run: () => triggerGreenfieldArchitecture() },
         { id: 'act_vision', badge: '📷 VISION AI', title: 'Decompile Whiteboard / Architecture Image via Gemini Vision', sub: 'POST /api/vision-decompile · gemini-3-flash-preview multimodal', run: () => triggerVisionDecompileSample() },
+        { id: 'act_vision_upload', badge: '📂 UPLOAD IMG', title: 'Upload PNG/JPEG/WebP Image File for Vision Decompilation', sub: 'FileReader base64 → POST /api/vision-decompile', run: () => document.getElementById('visionImageFileInput')?.click() },
         { id: 'act_layout', badge: '🔀 LAYOUT MODE', title: 'Toggle Bespoke Archetype ↔ Dynamic 5-Tier Cloud Grid', sub: 'POST /api/switch-render-mode · Instant structural adaptability', run: () => toggleBlueprintRenderMode() },
         { id: 'act_drag', badge: '✋ NODE DRAG', title: 'Toggle Freeform On-Canvas Node Dragging', sub: 'Drag any SVG node card with custom (dx, dy) offset', run: () => toggleNodeDragMode() },
         { id: 'act_snap', badge: '📐 SNAP MATH', title: 'Re-Snap All Nodes to Phase-0 Zero-Overlap Coordinates', sub: 'POST /api/node-update (resetAllOffsets: true)', run: () => snapNodesToPhase0Math() },
@@ -3912,13 +4342,41 @@ spec:
       }
     }
 
-    // Global Keyboard Shortcuts (Cmd+K / '/' Command Palette, Cmd+E toggle VeriSpec Studio Workbench, Esc close/clear)
+    // Global Clipboard Image Paste (Cmd+V) for Gemini Vision Decompiler
+    window.addEventListener('paste', (ev) => {
+      const items = ev.clipboardData && ev.clipboardData.items;
+      if (!items) return;
+      for (let i = 0; i < items.length; i += 1) {
+        if (items[i].type && items[i].type.startsWith('image/')) {
+          const file = items[i].getAsFile();
+          if (file) {
+            ev.preventDefault();
+            decompileImageFile(file);
+            return;
+          }
+        }
+      }
+    });
+
+    // Global Keyboard Shortcuts (Cmd+K / '/' Command Palette, Cmd+Z Undo, Cmd+Shift+Z Redo, Delete/Backspace Node Delete, Cmd+E Workbench, Esc)
     window.addEventListener('keydown', (ev) => {
       const tag = (ev.target && ev.target.tagName) || '';
       const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (ev.target && ev.target.isContentEditable);
       if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k') {
         ev.preventDefault();
         openCommandPaletteModal();
+      } else if (!inInput && (ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key.toLowerCase() === 'z') {
+        ev.preventDefault();
+        redoBlueprintMutation();
+      } else if (!inInput && (ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'y') {
+        ev.preventDefault();
+        redoBlueprintMutation();
+      } else if (!inInput && (ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'z') {
+        ev.preventDefault();
+        undoBlueprintMutation();
+      } else if (!inInput && (ev.key === 'Delete' || ev.key === 'Backspace') && scopedNodeId) {
+        ev.preventDefault();
+        deleteSelectedNode();
       } else if (!inInput && ev.key === '/') {
         ev.preventDefault();
         openCommandPaletteModal();
@@ -3961,6 +4419,10 @@ spec:
     window.addCanvasReviewPin = addCanvasReviewPin;
     window.triggerGreenfieldArchitecture = triggerGreenfieldArchitecture;
     window.triggerVisionDecompileSample = triggerVisionDecompileSample;
+    window.handleVisionImageUpload = handleVisionImageUpload;
+    window.decompileImageFile = decompileImageFile;
+    window.undoBlueprintMutation = undoBlueprintMutation;
+    window.redoBlueprintMutation = redoBlueprintMutation;
     window.openCommandPaletteModal = openCommandPaletteModal;
     window.closeCommandPaletteModal = closeCommandPaletteModal;
     window.setWhiteboardTool = setWhiteboardTool;
@@ -3977,6 +4439,8 @@ spec:
     window.openCollabThreadsModal = openCollabThreadsModal;
     window.closeCollabThreadsModal = closeCollabThreadsModal;
     window.submitNewCollabThread = submitNewCollabThread;
+    window.submitCollabThreadReply = submitCollabThreadReply;
+    window.toggleCollabThreadStatus = toggleCollabThreadStatus;
     window.generateGithubPrBotPreview = generateGithubPrBotPreview;
     window.setWorkspaceFolderFilter = setWorkspaceFolderFilter;
     window.addEventListener('DOMContentLoaded', () => {

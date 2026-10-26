@@ -253,21 +253,46 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
       const gNode = graphNodeMap.get(bNode.id);
       if (!gNode) {
         // Node was removed via REMOVE_NODE or SPLIT_NODE -> omit from SVG!
-      } else if (gNode.changeStatus === 'modified' || (gNode.title && gNode.title !== bNode.title)) {
-        // Node was replaced/upgraded in-place -> update title & highlight stroke!
-        let updatedBlock = bNode.block;
-        if (updatedBlock.includes('data-node-title="')) {
-          updatedBlock = updatedBlock.replace(/data-node-title="[^"]*"/, `data-node-title="${esc(gNode.title)}"`);
-        } else {
-          updatedBlock = updatedBlock.replace('<g class="arch-node"', `<g class="arch-node" data-node-title="${esc(gNode.title)}"`);
-        }
-        updatedBlock = updatedBlock
-          .replace(/data-change-status="[^"]*"/, 'data-change-status="modified"')
-          .replace(esc(bNode.title), esc(gNode.title))
-          .replace(/stroke="#[0-9A-Fa-f]{6}"/, 'stroke="#7C3AED"');
-        rebuiltInner += updatedBlock;
       } else {
-        rebuiltInner += bNode.block;
+        let updatedBlock = bNode.block;
+        if (gNode.changeStatus === 'modified' || (gNode.title && gNode.title !== bNode.title)) {
+          // Node was replaced/upgraded in-place -> update title & highlight stroke!
+          if (updatedBlock.includes('data-node-title="')) {
+            updatedBlock = updatedBlock.replace(/data-node-title="[^"]*"/, `data-node-title="${esc(gNode.title)}"`);
+          } else {
+            updatedBlock = updatedBlock.replace('<g class="arch-node"', `<g class="arch-node" data-node-title="${esc(gNode.title)}"`);
+          }
+          updatedBlock = updatedBlock
+            .replace(/data-change-status="[^"]*"/, 'data-change-status="modified"')
+            .replace(esc(bNode.title), esc(gNode.title))
+            .replace(/stroke="#[0-9A-Fa-f]{6}"/, 'stroke="#7C3AED"');
+        }
+        // For raw bespoke <g class="arch-node"> blocks that were not emitted by drawNodeBox, inject data-base-x/y and apply customDx/customDy
+        if (!updatedBlock.includes('data-base-x="')) {
+          const cdx = Number(gNode.customDx) || 0;
+          const cdy = Number(gNode.customDy) || 0;
+          const trMatch = updatedBlock.match(/^<g\s+class="arch-node"[^>]*?\stransform="translate\(\s*([-\d.]+)\s*,\s*([-\d.]+)\s*\)"/);
+          if (trMatch) {
+            const bx = Number(trMatch[1]) || 0;
+            const by = Number(trMatch[2]) || 0;
+            updatedBlock = updatedBlock
+              .replace(
+                /^<g\s+class="arch-node"/,
+                `<g class="arch-node" data-base-x="${bx}" data-base-y="${by}" data-custom-dx="${cdx}" data-custom-dy="${cdy}"`
+              )
+              .replace(
+                /transform="translate\(\s*[-\d.]+\s*,\s*[-\d.]+\s*\)"/,
+                `transform="translate(${bx + cdx}, ${by + cdy})"`
+              );
+          } else {
+            const extraTransform = cdx !== 0 || cdy !== 0 ? ` transform="translate(${cdx}, ${cdy})"` : '';
+            updatedBlock = updatedBlock.replace(
+              /^<g\s+class="arch-node"/,
+              `<g class="arch-node" data-base-x="0" data-base-y="0" data-custom-dx="${cdx}" data-custom-dy="${cdy}"${extraTransform}`
+            );
+          }
+        }
+        rebuiltInner += updatedBlock;
       }
       cursor = bNode.endIdx;
     }
@@ -420,20 +445,32 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
   if (stickies.length > 0) {
     const stickiesMarkup = stickies
       .map((st, idx) => {
-        const sx = Math.max(28, Math.min(1220, Number(st.x) || 1180));
+        const sx = Math.max(28, Math.min(1196, Number(st.x) || 1140));
         const sy = Math.max(82, Math.min(680, Number(st.y) || 92 + idx * 66));
-        const sw = Math.max(140, Math.min(260, Number(st.w) || 196));
-        const sh = Math.max(48, Math.min(110, Number(st.h) || 56));
+        const sw = Math.max(180, Math.min(260, Number(st.w) || 224));
+        const sh = Math.max(58, Math.min(110, Number(st.h) || 62));
         const bg = st.color || '#FEF08A';
         const border = st.borderColor || '#EAB308';
         const headFit = fitText(`🟨 ${st.author || 'Architect Note'}`, sw - 20, 8.5, 7.2, 0.58);
-        const bodyFit = fitText(String(st.text || 'Sticky architecture note'), sw - 20, 9.5, 7.5, 0.56);
+        const rawWords = String(st.text || 'Sticky architecture note').trim().split(/\s+/);
+        let line1 = '';
+        let line2 = '';
+        for (const w of rawWords) {
+          if ((line1 + ' ' + w).trim().length <= 36) {
+            line1 = (line1 + ' ' + w).trim();
+          } else {
+            line2 = (line2 + ' ' + w).trim();
+          }
+        }
+        const fit1 = fitText(line1, sw - 20, 9.2, 7.6, 0.55);
+        const fit2 = line2 ? fitText(line2, sw - 20, 9.2, 7.6, 0.55) : null;
         return `
-          <g class="vs-sticky-note" data-sticky-id="${esc(st.id || `sticky_${idx}`)}" transform="translate(${sx}, ${sy})" style="cursor:move;">
+          <g class="vs-sticky-note" data-sticky-id="${esc(st.id || `sticky_${idx}`)}" data-sticky-x="${sx}" data-sticky-y="${sy}" data-sticky-text="${esc(st.text || '')}" transform="translate(${sx}, ${sy})" style="cursor:move;">
             <rect x="2" y="3" width="${sw}" height="${sh}" rx="8" fill="#0F172A" fill-opacity="0.08"/>
             <rect x="0" y="0" width="${sw}" height="${sh}" rx="8" fill="${esc(bg)}" stroke="${esc(border)}" stroke-width="1.5"/>
-            <text x="10" y="17" font-family="JetBrains Mono, monospace" font-size="${headFit.fontSize}" font-weight="800" fill="#713F12">${esc(headFit.text)}</text>
-            <text x="10" y="36" font-size="${bodyFit.fontSize}" font-weight="600" fill="#1E293B">${esc(bodyFit.text)}</text>
+            <text x="10" y="16" font-family="JetBrains Mono, monospace" font-size="${headFit.fontSize}" font-weight="800" fill="#713F12">${esc(headFit.text)}</text>
+            <text x="10" y="33" font-size="${fit1.fontSize}" font-weight="600" fill="#1E293B">${esc(fit1.text)}</text>
+            ${fit2 ? `<text x="10" y="48" font-size="${fit2.fontSize}" font-weight="600" fill="#1E293B">${esc(fit2.text)}</text>` : ''}
           </g>
         `;
       })

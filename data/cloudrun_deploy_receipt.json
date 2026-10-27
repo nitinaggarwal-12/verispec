@@ -6,11 +6,11 @@
   "buildProject": "nitina-ggarwal-sandbox-647724",
   "runProject": "ramp-portal-dev",
   "region": "us-west1",
-  "latestReadyRevisionName": "verispec-00007-8zk",
-  "latestCreatedRevisionName": "verispec-00007-8zk",
+  "latestReadyRevisionName": "verispec-00008-dq2",
+  "latestCreatedRevisionName": "verispec-00008-dq2",
   "readyStatus": "True",
   "trafficPercent": 100,
-  "image": "us-west1-docker.pkg.dev/ramp-portal-dev/cloud-run-source-deploy/verispec:v20261027-013546-v36",
-  "startupProbeLog": "Default STARTUP TCP/HTTP probe succeeded for verispec-00007-8zk",
-  "verifiedAt": "2026-10-27T01:36:12Z"
+  "image": "us-west1-docker.pkg.dev/ramp-portal-dev/cloud-run-source-deploy/verispec:v20261027-025159-v37",
+  "startupProbeLog": "Default STARTUP TCP probe succeeded after 1 attempt for container \"verispec-1\" on port 8080.",
+  "verifiedAt": "2026-10-27T02:52:25Z"
 }

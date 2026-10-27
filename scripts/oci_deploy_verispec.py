@@ -207,7 +207,7 @@ def main() -> None:
     service_name = "verispec"
     dest_host = "us-west1-docker.pkg.dev"
     dest_repo = f"ramp-portal-dev/cloud-run-source-deploy/{service_name}"
-    tag = f"v{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-v36"
+    tag = f"v{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-v37"
     token = get_gcloud_token()
 
     print("\n==================================================================")
@@ -236,7 +236,6 @@ def main() -> None:
         (str(ROOT_DIR / "scripts"), "app/scripts"),
         (str(ROOT_DIR / ".github"), "app/.github"),
         (str(ROOT_DIR / ".agents"), "app/.agents"),
-        (str(ROOT_DIR / ".local_state"), "app/.local_state"),
     ]
 
     print("==> [2/4] Building & uploading /app overlay layer...")

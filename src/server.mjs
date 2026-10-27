@@ -65,7 +65,8 @@ import {
   replyToCollabThread,
   getStarredBlueprints,
   toggleStarredBlueprint,
-  getSqliteStoreTelemetry
+  getSqliteStoreTelemetry,
+  resetSqliteWorkspaceToCanonicalBaseline
 } from './engine/sqliteWorkspaceStore.mjs';
 import {
   generateGitHubPrBotReport
@@ -97,8 +98,8 @@ const multiplayerPresenceMap = new Map([
       role: 'Principal Cloud Architect',
       color: '#2563EB',
       blueprintCode: 'D05',
-      x: 240,
-      y: 786,
+      x: 320,
+      y: 195,
       activeNodeId: 'node_catalog_bff',
       lastSeen: new Date().toISOString()
     }
@@ -110,10 +111,10 @@ const multiplayerPresenceMap = new Map([
       name: 'Priya Nair',
       handle: '@sre-lead',
       role: 'Staff SRE',
-      color: '#7C3AED',
+      color: '#059669',
       blueprintCode: 'D05',
-      x: 680,
-      y: 786,
+      x: 740,
+      y: 340,
       activeNodeId: 'node_primary_db',
       lastSeen: new Date().toISOString()
     }
@@ -125,10 +126,10 @@ const multiplayerPresenceMap = new Map([
       name: 'Marcus Vance',
       handle: '@sec-architect',
       role: 'Principal Security Architect',
-      color: '#059669',
+      color: '#7C3AED',
       blueprintCode: 'D05',
       x: 1120,
-      y: 786,
+      y: 485,
       activeNodeId: 'node_dlp_guardrail',
       lastSeen: new Date().toISOString()
     }
@@ -264,6 +265,7 @@ function syncSeedGraphWithRenderedArchetype(bp) {
 function initializeStore(forceReset = false) {
   if (forceReset) {
     resetWhiteboardOverlay(null, PORT_NUM);
+    blueprintRedoStore.clear();
   }
   if (!forceReset && loadStoreFromDisk()) {
     return;
@@ -277,6 +279,9 @@ function initializeStore(forceReset = false) {
     } else {
       blueprintStateStore.set(bp.code, [syncSeedGraphWithRenderedArchetype(bp)]);
     }
+  }
+  if (forceReset) {
+    resetSqliteWorkspaceToCanonicalBaseline(blueprintStateStore, PORT_NUM);
   }
   saveStoreToDisk();
 }

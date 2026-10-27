@@ -749,10 +749,10 @@
       width: 100%;
       background: #FFFFFF;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
-      padding: 8px;
-      min-height: 420px;
+      padding: 6px 10px;
+      min-height: 440px;
       position: relative;
     }
 
@@ -760,10 +760,11 @@
       width: 100%;
       min-width: var(--canvas-svg-min-width, 100%);
       height: auto;
-      max-height: 520px;
+      max-height: calc(100vh - 205px);
       border-radius: 10px;
       border: 1px solid #E2E8F0;
       flex-shrink: 0;
+      display: block;
     }
 
     /* Bottom Conversational Co-Pilot Prompt Dock */
@@ -1178,114 +1179,84 @@
 
           <!-- Right Column: Interactive 16:9 Vector Canvas + Bottom Co-Pilot Bar -->
           <div class="canvas-stage-card">
-            <div class="canvas-toolbar">
-              <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-                <button id="toolbarLineageToggleBtn" class="btn-secondary" style="padding:4px 9px;font-size:10.5px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;" onclick="toggleAdrPanel()" title="Expand / Collapse Prompt Evolution Lineage Panel">
+            <div class="canvas-toolbar" style="padding:6px 12px;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
+                <button id="toolbarLineageToggleBtn" class="btn-secondary" style="padding:3px 8px;font-size:10px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;" onclick="toggleAdrPanel()" title="Expand / Collapse Prompt Evolution Lineage Panel">
                   <span id="toolbarLineageToggleText">🕘 Lineage (3) ▶</span>
                 </button>
-                <span id="activeBpCodeBadge" class="stitch-badge mono" style="font-size:11.5px;padding:4px 10px;">D05 · v1.0.3</span>
-                <span id="activeBpMetaStats" class="mono" style="font-size:11px;font-weight:700;color:#475569;">12 Nodes · 11 Edges · L200</span>
-                <span id="atelierFinOpsPill" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:10.5px;padding:3px 8px;" title="Deterministic Cloud FinOps Monthly Run-Rate &amp; Critical-Path p99 Latency">💰 $10,830/mo · ⚡ 54.6ms p99</span>
-                <span id="toolbarSqliteBadge" class="stitch-badge mono" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0;font-size:10px;padding:3px 7px;cursor:pointer;" onclick="openWorkbenchTab('iac')" title="Native node:sqlite (WAL Mode) Persistent Database &amp; GitHub Repo Status">🗄️ SQLite WAL</span>
+                <span id="activeBpCodeBadge" class="stitch-badge mono" style="font-size:11px;padding:3px 9px;">D05 · v1.0.3</span>
+                <span id="activeBpMetaStats" class="mono" style="font-size:10.5px;font-weight:700;color:#475569;white-space:nowrap;">12 Nodes · 11 Edges</span>
+                <span id="atelierFinOpsPill" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:10px;padding:2px 7px;" title="Deterministic Cloud FinOps Monthly Run-Rate &amp; Critical-Path p99 Latency">💰 $10,830/mo · ⚡ 54.6ms</span>
+                <span id="toolbarSqliteBadge" class="stitch-badge mono" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0;font-size:9.5px;padding:2px 7px;cursor:pointer;" onclick="openWorkbenchTab('iac')" title="Native node:sqlite (WAL Mode) Persistent Database &amp; GitHub Repo Status">☁️ Saved · SQLite WAL</span>
                 <!-- Interactive Canvas Zoom & Pan Controls -->
-                <div style="display:inline-flex;align-items:center;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:7px;padding:2px 4px;gap:4px;">
-                  <button class="phase-chip mono" style="border:none;padding:2px 6px;font-size:11px;" onclick="adjustCanvasZoom(-0.15)" title="Zoom Out">−</button>
-                  <span id="canvasZoomLabel" class="mono" style="font-size:10px;font-weight:700;color:#334155;min-width:34px;text-align:center;cursor:pointer;" onclick="resetCanvasZoom()" title="Reset Zoom &amp; Pan to 100%">100%</span>
-                  <button class="phase-chip mono" style="border:none;padding:2px 6px;font-size:11px;" onclick="adjustCanvasZoom(0.15)" title="Zoom In">+</button>
+                <div style="display:inline-flex;align-items:center;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:7px;padding:1px 4px;gap:3px;">
+                  <button class="phase-chip mono" style="border:none;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(-0.15)" title="Zoom Out">−</button>
+                  <span id="canvasZoomLabel" class="mono" style="font-size:9.5px;font-weight:700;color:#334155;min-width:32px;text-align:center;cursor:pointer;" onclick="resetCanvasZoom()" title="Reset Zoom &amp; Pan to 100%">100%</span>
+                  <button class="phase-chip mono" style="border:none;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(0.15)" title="Zoom In">+</button>
                 </div>
-                <!-- Changeable Horizontal & Vertical Scrollbar Thickness Slider -->
-                <div style="display:inline-flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:7px;padding:2px 7px;" title="Adjust Horizontal &amp; Vertical Scrollbar Width (6px – 20px)">
+                <!-- Hidden Scrollbar Width Slider (accessible via Workbench Drawer & programmatic API) -->
+                <div style="display:none;" title="Adjust Horizontal &amp; Vertical Scrollbar Width (6px – 20px)">
                   <span class="mono" style="font-size:9.5px;font-weight:700;color:#475569;">Scroll W</span>
                   <input id="toolbarScrollWidthSlider" type="range" min="6" max="20" value="11" style="width:48px;accent-color:#2563EB;cursor:pointer;height:4px;" oninput="setScrollbarThickness(this.value)" />
                   <span id="toolbarScrollWidthVal" class="mono" style="font-size:9.5px;font-weight:700;color:#1D4ED8;min-width:24px;">11px</span>
                 </div>
                 <!-- Interactive Canvas Whiteboard Dock (Lasso, 8-Way Resize, Elbow Drag, Freehand Pen, Sticky Notes) -->
-                <div id="vsWhiteboardToolbar" style="display:inline-flex;align-items:center;gap:3px;background:#FFFFFF;border:1px solid #93C5FD;border-radius:8px;padding:2px 5px;">
-                  <span class="mono" style="font-size:9px;font-weight:800;color:#1D4ED8;padding:0 3px;">WB:</span>
-                  <button id="btnWbToolLasso" class="phase-chip" style="padding:2px 6px;font-size:10px;" onclick="setWhiteboardTool('lasso')" title="Marquee Lasso Multi-Select &amp; Batch Move Nodes">⬚ Lasso</button>
-                  <button id="btnWbToolResize" class="phase-chip" style="padding:2px 6px;font-size:10px;" onclick="setWhiteboardTool('resize')" title="8-Way Node Resize Handles (+W / +H)">↔️ Resize</button>
-                  <button id="btnWbToolElbow" class="phase-chip" style="padding:2px 6px;font-size:10px;" onclick="setWhiteboardTool('elbow')" title="Orthogonal Connector Elbow Bend-Point Drag">〰️ Elbow</button>
-                  <button id="btnWbToolPen" class="phase-chip" style="padding:2px 6px;font-size:10px;" onclick="setWhiteboardTool('pen')" title="Freehand SVG Pen &amp; Marker Drawing">✏️ Pen</button>
-                  <button id="btnWbToolSticky" class="phase-chip" style="padding:2px 6px;font-size:10px;" onclick="addWhiteboardStickyNote()" title="Drop Interactive Sticky Note Card onto Canvas">🟨 Sticky</button>
-                  <button id="btnWbToolClear" class="phase-chip" style="padding:2px 5px;font-size:9.5px;color:#B91C1C;" onclick="clearWhiteboardOverlays()" title="Clear Whiteboard Strokes, Stickies, Size &amp; Elbow Overrides">🧹</button>
+                <div id="vsWhiteboardToolbar" style="display:inline-flex;align-items:center;gap:2px;background:#FFFFFF;border:1px solid #93C5FD;border-radius:8px;padding:2px 4px;">
+                  <span class="mono" style="font-size:8.5px;font-weight:800;color:#1D4ED8;padding:0 2px;">WB:</span>
+                  <button id="btnWbToolLasso" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('lasso')" title="Marquee Lasso Multi-Select &amp; Batch Move Nodes">⬚ Lasso</button>
+                  <button id="btnWbToolResize" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('resize')" title="8-Way Node Resize Handles (+W / +H)">↔️ Resize</button>
+                  <button id="btnWbToolElbow" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('elbow')" title="Orthogonal Connector Elbow Bend-Point Drag">〰️ Elbow</button>
+                  <button id="btnWbToolPen" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('pen')" title="Freehand SVG Pen &amp; Marker Drawing">✏️ Pen</button>
+                  <button id="btnWbToolSticky" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="addWhiteboardStickyNote()" title="Drop Interactive Sticky Note Card onto Canvas">🟨 Sticky</button>
+                  <button id="btnWbToolClear" class="phase-chip" style="padding:2px 4px;font-size:9px;color:#B91C1C;" onclick="clearWhiteboardOverlays()" title="Clear Whiteboard Strokes, Stickies, Size &amp; Elbow Overrides">🧹</button>
                 </div>
                 <!-- Multiplayer Collaborator Presence & @mention Threads Trigger -->
-                <div id="vsCollabPresenceBar" style="display:inline-flex;align-items:center;gap:4px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:999px;padding:2px 7px;cursor:pointer;" onclick="openCollabThreadsModal()" title="Live Multiplayer Collaborator Cursors &amp; Anchored @mention Comment Threads">
+                <div id="vsCollabPresenceBar" style="display:inline-flex;align-items:center;gap:4px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:999px;padding:2px 7px;cursor:pointer;" onclick="openCollabThreadsModal()" onmouseenter="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='1';" onmouseleave="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='0';" title="Hover to preview Live Collaborator Cursors · Click to open Anchored @mention Comment Threads">
                   <span style="display:inline-flex;align-items:center;">
-                    <span class="mono" style="width:18px;height:18px;border-radius:50%;background:#2563EB;color:#FFF;font-size:8.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;">AR</span>
-                    <span class="mono" style="width:18px;height:18px;border-radius:50%;background:#059669;color:#FFF;font-size:8.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">PN</span>
-                    <span class="mono" style="width:18px;height:18px;border-radius:50%;background:#7C3AED;color:#FFF;font-size:8.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">MV</span>
+                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#2563EB;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;">AR</span>
+                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#059669;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">PN</span>
+                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#7C3AED;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">MV</span>
                   </span>
-                  <span id="collabThreadCountLabel" class="mono" style="font-size:9.5px;font-weight:800;color:#0F172A;">💬 2 Threads</span>
+                  <span id="collabThreadCountLabel" class="mono" style="font-size:9.5px;font-weight:800;color:#0F172A;white-space:nowrap;">💬 2 Threads</span>
                 </div>
               </div>
-              <div style="display:flex;align-items:center;gap:3px;flex-wrap:wrap;">
-                <button id="btnUndoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="undoBlueprintMutation()" title="Undo Last Mutation (⌘Z)">
-                  ↶
-                </button>
-                <button id="btnRedoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="redoBlueprintMutation()" title="Redo Mutation (⌘⇧Z)">
-                  ↷
-                </button>
-                <button id="btnOpenCommandPalette" class="btn-secondary" style="padding:3px 6px;font-size:10px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">
-                  ⌘K Command
-                </button>
-                <button id="btnGreenfieldSynth" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerGreenfieldArchitecture()" title="Synthesize a brand-new Custom Greenfield Cloud Architecture from scratch">
-                  ✨ Greenfield
-                </button>
+              <div style="display:flex;align-items:center;gap:3px;flex-wrap:nowrap;">
+                <button id="btnUndoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="undoBlueprintMutation()" title="Undo Last Mutation (⌘Z)">↶</button>
+                <button id="btnRedoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="redoBlueprintMutation()" title="Redo Mutation (⌘⇧Z)">↷</button>
+                <button id="btnOpenCommandPalette" class="btn-secondary" style="padding:3px 6px;font-size:10px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">⌘K</button>
+                <button id="btnGreenfieldSynth" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerGreenfieldArchitecture()" title="Synthesize a brand-new Custom Greenfield Cloud Architecture from scratch">✨ Greenfield</button>
                 <input id="visionImageFileInput" type="file" accept="image/*" style="display:none;" onchange="handleVisionImageUpload(event)" />
-                <button id="btnVisionDecompile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerVisionDecompileSample()" title="Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision (or drag/paste image onto canvas)">
-                  📷 Vision
-                </button>
-                <button id="btnVisionUploadFile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="document.getElementById('visionImageFileInput')?.click()" title="Upload PNG/JPEG/WebP Whiteboard Image for Gemini Vision Decompilation">
-                  📂 Upload
-                </button>
-                <button id="btnToggleRenderMode" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="toggleBlueprintRenderMode()" title="Dynamically switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Architecture Grid">
-                  📐 Layout: Bespoke
-                </button>
-                <button id="btnToggleNodeDrag" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">
-                  ✋ Drag: Off
-                </button>
-                <button id="btnSnapPhase0Math" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">
-                  📐 Snap Math
-                </button>
-                <button id="btnAddReviewPin" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">
-                  📌 Pin Note
-                </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, Terraform/SQL/K8s Ingestion &amp; Node Inspector">
-                  🧬 Code DSL
-                </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">
-                  📄 Living RFC
-                </button>
-                <label style="display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#334155;cursor:pointer;padding:3px 6px;border-radius:7px;background:#FFFFFF;border:1px solid #CBD5E1;">
-                  <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:11px;height:11px;margin:0;" />
-                  <span>Diff</span>
-                </label>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="downloadCurrentSvg()" title="Download Vector .SVG">
-                  ⬇ .SVG
-                </button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="downloadCurrentPng2x()" title="Download High-Resolution 2x Retina .PNG">
-                  ⬇ .PNG
-                </button>
+                <button id="btnVisionDecompile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerVisionDecompileSample()" title="Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision">📷 Vision</button>
+                <button id="btnVisionUploadFile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="document.getElementById('visionImageFileInput')?.click()" title="Upload PNG/JPEG/WebP Whiteboard Image for Gemini Vision Decompilation">📂</button>
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, 8-Format Polyglot Ingestion &amp; Node Inspector">🧬 Code DSL</button>
+                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">📄 Living RFC</button>
               </div>
             </div>
 
-            <!-- Interactive C4 System Map Drill-Down + Request Flow Walkthrough Player -->
-            <div id="canvasMapDrilldownBar" style="padding:5px 14px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
-              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                <span class="mono" style="font-size:10px;font-weight:800;color:#1E40AF;">🗺️ C4 Drill-Down:</span>
-                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. Context (L100)</button>
-                <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
-                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container (L200)</button>
-                <span style="color:#94A3B8;font-size:11px;font-weight:700;">›</span>
-                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component (L300)</button>
-                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9.5px;padding:2px 7px;cursor:pointer;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to cycle C4 sub-system focus or double-click any canvas node to edit inline">🔍 Focus: Full Topology</span>
+            <!-- Row 2: C4 System Map Drill-Down + Request Flow Hop Player + Canvas Layout & Export Controls -->
+            <div id="canvasMapDrilldownBar" style="padding:4px 12px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
+              <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0;">
+                <span class="mono" style="font-size:9.5px;font-weight:800;color:#1E40AF;">🗺️ C4:</span>
+                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. Context</button>
+                <span style="color:#94A3B8;font-size:10px;font-weight:700;">›</span>
+                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container</button>
+                <span style="color:#94A3B8;font-size:10px;font-weight:700;">›</span>
+                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component</button>
+                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9px;padding:2px 6px;cursor:pointer;white-space:nowrap;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to cycle C4 sub-system focus or double-click any canvas node to edit inline">🔍 Focus: Full Topology</span>
               </div>
-              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;">
-                <button id="btnFlowWalkthroughStep" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF;" onclick="stepArchitectureFlowWalkthrough()" title="Step through directed request flow hops one edge at a time">▶️ Flow Hop (0/0)</button>
-                <button id="btnToggleMinimap" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="toggleCanvasMinimap()" title="Toggle Bottom-Right Live SVG Minimap Radar">🧭 Minimap: On</button>
-                <button class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#047857;border-color:#6EE7B7;background:#ECFDF5;" onclick="setUiEdition('home')" title="Open Workspace Home Dashboard">🗂️ Home</button>
-                <button class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#1D4ED8;border-color:#93C5FD;background:#EFF6FF;" onclick="openMcpApiModal()" title="Open verispec_mcp Agent Server &amp; REST Diagramming API Playground">🤖 MCP API</button>
+              <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0;">
+                <button id="btnFlowWalkthroughStep" class="phase-chip mono" style="padding:2px 6px;font-size:9px;color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF;" onclick="stepArchitectureFlowWalkthrough()" title="Step through directed request flow hops one edge at a time">▶️ Flow Hop (0/0)</button>
+                <button id="btnToggleMinimap" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleCanvasMinimap()" title="Toggle Bottom-Right Live SVG Minimap Radar">🧭 Minimap</button>
+                <button id="btnToggleRenderMode" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleBlueprintRenderMode()" title="Switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Grid">🔀 Layout: Bespoke</button>
+                <button id="btnToggleNodeDrag" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">✋ Drag: Off</button>
+                <button id="btnSnapPhase0Math" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">📐 Snap</button>
+                <button id="btnAddReviewPin" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">📌 Pin</button>
+                <label style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:#334155;cursor:pointer;padding:2px 5px;border-radius:6px;background:#FFFFFF;border:1px solid #CBD5E1;">
+                  <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:10px;height:10px;margin:0;" />
+                  <span>Diff</span>
+                </label>
+                <button class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="downloadCurrentSvg()" title="Download Vector .SVG">⬇ .SVG</button>
+                <button class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="downloadCurrentPng2x()" title="Download High-Resolution 2x Retina .PNG">⬇ .PNG</button>
               </div>
             </div>
 
@@ -1306,8 +1277,8 @@
 
             <div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0;">
               <div id="atelierSvgContainer" class="svg-viewport-wrapper vs-dual-scroll" style="cursor:grab;flex:1;"></div>
-              <!-- Bottom-Right Live SVG Minimap Radar -->
-              <div id="vsCanvasMinimapOverlay" style="position:absolute;right:18px;bottom:18px;width:168px;height:96px;background:rgba(255,255,255,0.94);border:1.5px solid #93C5FD;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.1);padding:4px;pointer-events:none;z-index:8;display:flex;flex-direction:column;justify-content:space-between;">
+              <!-- Bottom-Right Live SVG Minimap Radar (Auto-shown on Zoom > 105% or when toggled On) -->
+              <div id="vsCanvasMinimapOverlay" style="position:absolute;right:18px;bottom:18px;width:168px;height:96px;background:rgba(255,255,255,0.95);border:1.5px solid #93C5FD;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.1);padding:4px;pointer-events:none;z-index:8;display:none;flex-direction:column;justify-content:space-between;">
                 <div style="display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:800;color:#1E40AF;padding:0 2px;" class="mono">
                   <span>RADAR MINIMAP</span>
                   <span id="minimapZoomLabel">100%</span>
@@ -2563,8 +2534,8 @@
       const c4NodePill = document.getElementById('c4DrilldownNodePill');
       if (c4NodePill) {
         c4NodePill.textContent = scopedNodeId
-          ? `🔍 C4 Sub-System Focus: ${scopedNodeTitle || scopedNodeId} (${activeDetailLevel} · Click to Cycle)`
-          : `🔍 Focus: Full System Topology (${activeDetailLevel} · Click to Drill Into Component)`;
+          ? `🔍 Focus: ${scopedNodeTitle || scopedNodeId}`
+          : `🔍 Focus: Full Topology`;
       }
     }
 
@@ -2665,6 +2636,27 @@
       fld_04: ['D13', 'D14', 'D15', 'D16', 'D17', 'D18']
     };
 
+    const BP_SHORT_DOMAIN_LABELS = {
+      D01: 'Stream',
+      D02: 'Event',
+      D03: 'Mesh',
+      D04: 'ZeroTr',
+      D05: 'Cloud',
+      D06: 'Paymt',
+      D07: 'Graph',
+      D08: 'Agent',
+      D09: 'Multi',
+      D10: 'Kube',
+      D11: 'FinOps',
+      D12: 'Chaos',
+      D13: 'Lake',
+      D14: 'Search',
+      D15: 'Edge',
+      D16: 'Audit',
+      D17: 'Observ',
+      D18: 'DR/HA'
+    };
+
     function renderLeftRailList() {
       const listEl = document.getElementById('blueprintRailList');
       if (!listEl || !atlasData) return;
@@ -2679,7 +2671,10 @@
         .map(
           (d) => `
         <button class="bp-nav-item ${d.code === activeCode ? 'active' : ''}" onclick="selectBlueprint('${d.code}')" title="${d.code}: ${d.title} (${d.version})">
-          <span class="bp-code-pill mono">${d.code}</span>
+          <span class="bp-code-pill mono" style="display:inline-flex;flex-direction:column;align-items:center;line-height:1.1;padding:3px 5px;min-width:44px;">
+            <span>${d.code}</span>
+            <span style="font-size:7.5px;font-weight:700;letter-spacing:0.02em;opacity:0.84;font-family:var(--font-sans);">${BP_SHORT_DOMAIN_LABELS[d.code] || 'Arch'}</span>
+          </span>
           <span class="bp-item-meta rail-hide-on-collapse">
             <span class="bp-item-title">${d.title}</span>
             <span class="bp-item-sub">${d.version} · ${d.nodeCount} Nodes · ${d.edgeCount} Edges · ${d.archetypeBadge || 'AST'}</span>
@@ -3040,18 +3035,18 @@
 
     function renderLiveCollabCursorsOverlayHtml() {
       const collabs = (atlasData && Array.isArray(atlasData.activeCollaborators) && atlasData.activeCollaborators) || [
-        { id: 'usr_alex', name: 'Alex Rivera', handle: '@alex.rivera', color: '#2563EB', x: 240, y: 786 },
-        { id: 'usr_priya', name: 'Priya Nair', handle: '@priya.sre', color: '#059669', x: 680, y: 786 },
-        { id: 'usr_marcus', name: 'Marcus Vance', handle: '@marcus.sec', color: '#7C3AED', x: 1120, y: 786 }
+        { id: 'usr_alex', name: 'Alex Rivera', handle: '@alex.rivera', color: '#2563EB', x: 320, y: 195 },
+        { id: 'usr_priya', name: 'Priya Nair', handle: '@sre-lead', color: '#059669', x: 740, y: 340 },
+        { id: 'usr_marcus', name: 'Marcus Vance', handle: '@sec-architect', color: '#7C3AED', x: 1120, y: 485 }
       ];
       return `
-        <div id="vsLiveCollabCursorsOverlay" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;">
+        <div id="vsLiveCollabCursorsOverlay" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;opacity:0;transition:opacity 0.2s ease;">
           ${collabs
             .map((c) => {
-              const leftPct = Math.max(6, Math.min(86, ((Number(c.x) || 240) / 1440) * 100)).toFixed(1);
-              const topPct = Math.max(6, Math.min(95.5, ((Number(c.y) || 786) / 820) * 100)).toFixed(1);
+              const leftPct = Math.max(8, Math.min(84, ((Number(c.x) || 320) / 1440) * 100)).toFixed(1);
+              const topPct = Math.max(10, Math.min(82, ((Number(c.y) || 240) / 820) * 100)).toFixed(1);
               return `
-                <div class="vs-collab-cursor-marker" data-collab-handle="${c.handle}" style="position:absolute;left:${leftPct}%;top:${topPct}%;display:inline-flex;align-items:center;gap:3px;transform:translate(-2px,-2px);transition:left 0.35s ease,top 0.35s ease;opacity:0.92;">
+                <div class="vs-collab-cursor-marker" data-collab-handle="${c.handle}" style="position:absolute;left:${leftPct}%;top:${topPct}%;display:inline-flex;align-items:center;gap:3px;transform:translate(-2px,-2px);transition:left 0.35s ease,top 0.35s ease;opacity:0.94;">
                   <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.color};border:1.5px solid #FFFFFF;box-shadow:0 1px 3px rgba(15,23,42,0.25);"></span>
                   <span class="mono" style="font-size:8.5px;font-weight:800;padding:1px 5px;border-radius:999px;background:${c.color};color:#FFFFFF;white-space:nowrap;box-shadow:0 2px 5px rgba(15,23,42,0.18);">${c.handle}</span>
                 </div>
@@ -3098,7 +3093,7 @@
       document.getElementById('activeBpCodeBadge').textContent = `${item.code} · ${activeSnap.version}`;
       const metaStatsEl = document.getElementById('activeBpMetaStats');
       if (metaStatsEl) {
-        metaStatsEl.textContent = `${activeSnap.graph.nodes.length} Nodes · ${activeSnap.graph.edges.length} Edges · ${activeDetailLevel}`;
+        metaStatsEl.textContent = `${activeSnap.graph.nodes.length} Nodes · ${activeSnap.graph.edges.length} Edges`;
       }
       document.getElementById('atelierVersionCountBadge').textContent = `${history.length} ${history.length === 1 ? 'Version' : 'Versions'}`;
       syncAdrPanelButtons();
@@ -4549,7 +4544,7 @@ Include:
         }
         const sqBadge = document.getElementById('toolbarSqliteBadge');
         if (sqBadge && sq.tableCounts) {
-          sqBadge.textContent = `🗄️ SQLite WAL (${sq.tableCounts.blueprintVersions}v)`;
+          sqBadge.textContent = '☁️ Saved · SQLite WAL';
         }
       }
       if (atlasData && Array.isArray(atlasData.collabThreads)) {
@@ -5331,7 +5326,7 @@ spec:
     // DIRECT ON-CANVAS DOUBLE-CLICK NODE EDITING & 8-FORMAT POLYGLOT SAMPLES
     // =========================================================================
     let activeFlowHopIdx = -1;
-    let isCanvasMinimapVisible = true;
+    let isCanvasMinimapVisible = false;
     let activeInlineEditNodeId = null;
 
     function syncFlowWalkthroughButton() {
@@ -5396,9 +5391,9 @@ spec:
         overlay.style.display = isCanvasMinimapVisible ? 'block' : 'none';
       }
       if (btn) {
-        btn.textContent = isCanvasMinimapVisible ? '🧭 Minimap: On' : '🧭 Minimap: Off';
+        btn.textContent = isCanvasMinimapVisible ? '🧭 Minimap: On' : '🧭 Minimap';
       }
-      if (isCanvasMinimapVisible) syncCanvasMinimap();
+      syncCanvasMinimap();
     }
 
     function syncCanvasMinimap() {
@@ -5406,16 +5401,19 @@ spec:
       const host = document.getElementById('vsCanvasMinimapSvgHost');
       const zLbl = document.getElementById('minimapZoomLabel');
       if (zLbl) zLbl.textContent = `${Math.round(canvasZoomScale * 100)}%`;
-      if (!overlay || !host || !isCanvasMinimapVisible) return;
+      if (!overlay || !host) return;
       const mainSvg = document.querySelector('#atelierSvgContainer svg');
-      if (!mainSvg) return;
-      const clone = mainSvg.cloneNode(true);
-      clone.style.transform = '';
-      clone.style.width = '100%';
-      clone.style.height = '100%';
-      clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      host.innerHTML = '';
-      host.appendChild(clone);
+      if (mainSvg) {
+        const clone = mainSvg.cloneNode(true);
+        clone.style.transform = '';
+        clone.style.width = '100%';
+        clone.style.height = '100%';
+        clone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+        host.innerHTML = '';
+        host.appendChild(clone);
+      }
+      const shouldShow = isCanvasMinimapVisible || canvasZoomScale > 1.05;
+      overlay.style.display = shouldShow ? 'block' : 'none';
     }
 
     function openInlineCanvasNodeEdit(nodeObj) {

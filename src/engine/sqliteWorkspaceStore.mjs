@@ -658,3 +658,35 @@ export function getSqliteStoreTelemetry(port = 8080) {
   };
 }
 
+export function resetSqliteWorkspaceToCanonicalBaseline(blueprintStateStore = null, port = 8080) {
+  const db = initSqliteWorkspaceStore(port);
+  db.exec(`DELETE FROM whiteboard_overlays;`);
+  db.exec(`DELETE FROM rfc_custom_blocks;`);
+  db.exec(`DELETE FROM collab_threads;`);
+  const insertThread = db.prepare(`
+    INSERT OR REPLACE INTO collab_threads (
+      thread_id, blueprint_code, target_node_id, anchor_x, anchor_y, status, author, avatar_color, messages_json, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+  for (const threads of Object.values(DEFAULT_COLLAB_THREADS)) {
+    for (const t of threads) {
+      insertThread.run(
+        t.threadId,
+        t.blueprintCode,
+        t.targetNodeId || null,
+        t.anchorX,
+        t.anchorY,
+        t.status,
+        t.author,
+        t.avatarColor,
+        JSON.stringify(t.messages),
+        new Date().toISOString()
+      );
+    }
+  }
+  if (blueprintStateStore && typeof blueprintStateStore.entries === 'function') {
+    saveBlueprintHistoryToSqlite(blueprintStateStore, port);
+  }
+  return getSqliteStoreTelemetry(port);
+}
+

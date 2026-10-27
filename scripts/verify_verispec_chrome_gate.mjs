@@ -929,17 +929,62 @@ async function main() {
       throw new Error(`v3.6 Parity Gate Failed: ${JSON.stringify(v36ParityAudit)}`);
     }
 
-    // Clean up overlays & close modals so D05 default state is pristine
-    await evaluateInPage(`(async () => {
+    // 7I. Reset SQLite workspace to canonical D05 · v1.0.3 baseline & verify v3.7 UX Remediation Gate
+    const v37UxAudit = await evaluateInPage(`(async () => {
       window.closeMcpApiModal();
       window.closeCollabThreadsModal();
       window.closeInlineCanvasNodeEdit();
       await window.clearWhiteboardOverlays();
       window.closeStitchPromptDrawer();
+      if (typeof window.clearScopedNode === 'function') {
+        window.clearScopedNode();
+      }
+      await fetch('/api/reset', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      });
+      window.selectBlueprint('D05');
+      await window.loadAtlas();
+      await new Promise(r => setTimeout(r, 300));
+      const tb = document.getElementById('toastBanner');
+      if (tb) tb.style.display = 'none';
+      const svgEl = document.querySelector('#atelierSvgContainer svg');
+      const svgRect = svgEl ? svgEl.getBoundingClientRect() : { width: 0, height: 0 };
+      const codeBadge = (document.getElementById('activeBpCodeBadge')?.textContent || '').trim();
+      const metaStats = (document.getElementById('activeBpMetaStats')?.textContent || '').trim();
+      const sqliteBadge = (document.getElementById('toolbarSqliteBadge')?.textContent || '').trim();
+      const minimapEl = document.getElementById('vsCanvasMinimapOverlay');
+      const minimapHiddenAt100Zoom = Boolean(minimapEl && getComputedStyle(minimapEl).display === 'none');
+      const collabOverlay = document.getElementById('vsLiveCollabCursorsOverlay');
+      const collabOverlayHiddenByDefault = Boolean(collabOverlay && Number(getComputedStyle(collabOverlay).opacity) === 0);
+      const firstPillText = (document.querySelector('#blueprintRailList .bp-code-pill')?.textContent || '').replace(/\\s+/g, ' ').trim();
+      return {
+        codeBadge,
+        metaStats,
+        sqliteBadge,
+        svgWidthPx: Math.round(svgRect.width),
+        svgHeightPx: Math.round(svgRect.height),
+        minimapHiddenAt100Zoom,
+        collabOverlayHiddenByDefault,
+        firstPillText
+      };
     })()`);
-    await sleep(250);
+    console.log('v3.7 UX Remediation & Pristine Baseline Audit:', JSON.stringify(v37UxAudit));
+    if (
+      v37UxAudit.codeBadge !== 'D05 · v1.0.3' ||
+      v37UxAudit.metaStats !== '12 Nodes · 11 Edges' ||
+      v37UxAudit.sqliteBadge !== '☁️ Saved · SQLite WAL' ||
+      v37UxAudit.svgWidthPx < 1050 ||
+      !v37UxAudit.minimapHiddenAt100Zoom ||
+      !v37UxAudit.collabOverlayHiddenByDefault ||
+      !v37UxAudit.firstPillText.includes('Stream')
+    ) {
+      throw new Error(`v3.7 UX Remediation Gate Failed: ${JSON.stringify(v37UxAudit)}`);
+    }
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_ux_remediation_v37.png'));
 
-    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL + LANDING PAGE + WORKSPACE HOME + MCP + V3.6 PARITY GATES PASSED ===');
+    console.log('=== ALL 18 BASELINE + LIVE PROMPT MUTATION + COLLAPSIBLE DEFAULT + DUAL SCROLLBARS + LIVE VERTEX GEMINI + ADAPTABILITY + SQLITE WAL + LANDING PAGE + WORKSPACE HOME + MCP + V3.6/V3.7 UX PARITY GATES PASSED ===');
   } finally {
     ws.close();
     chromeProc.kill('SIGKILL');

@@ -207,7 +207,7 @@ def main() -> None:
     service_name = "verispec"
     dest_host = "us-west1-docker.pkg.dev"
     dest_repo = f"ramp-portal-dev/cloud-run-source-deploy/{service_name}"
-    tag = f"v{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-v34"
+    tag = f"v{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}-v36"
     token = get_gcloud_token()
 
     print("\n==================================================================")
@@ -414,7 +414,7 @@ def main() -> None:
 
     receipt = {
         "serviceName": service_name,
-        "version": "v3.5",
+        "version": "v3.6",
         "beyondCorpUrl": f"https://{service_name}-248990048888.cr.gclb.goog",
         "directCloudRunUrl": direct_url,
         "buildProject": "nitina-ggarwal-sandbox-647724",

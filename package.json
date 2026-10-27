@@ -1,6 +1,6 @@
 {
   "name": "verispec",
-  "version": "1.0.0",
+  "version": "3.6.0",
   "description": "VeriSpec — Stateful Prompt-Driven Iterative Architecture Diagramming Studio",
   "type": "module",
   "scripts": {

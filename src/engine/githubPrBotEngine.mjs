@@ -9,7 +9,7 @@ export function generateGitHubPrBotReport(baselineGraph, currentGraph, judgeRepo
   const repoSlug = repoUrl.replace(/^https?:\/\/github\.com\//i, '').replace(/\.git$/i, '');
   const prNumber = Number(options.prNumber || 42);
   const baseBranch = options.baseBranch || 'main';
-  const headBranch = options.headBranch || `feat/verispec-${String(currentGraph.code || 'd05').toLowerCase()}-${String(currentGraph.version || 'v1.0.3').replace(/\./g, '-')}`;
+  const headBranch = options.headBranch || `feat/verispec-${String(currentGraph.code || 'd05').toLowerCase()}-${String(currentGraph.version || 'Turn-3').toLowerCase().replace(/[^a-z0-9_-]/g, '-')}`;
 
   const baseFinOps = estimateArchitectureFinOpsAndLatency(baselineGraph);
   const currFinOps = estimateArchitectureFinOpsAndLatency(currentGraph);
@@ -25,9 +25,13 @@ export function generateGitHubPrBotReport(baselineGraph, currentGraph, judgeRepo
   const deltaAnnualUsd = deltaMonthlyUsd * 12;
   const deltaP99Ms = Number(((currFinOps.criticalPathP99Ms || 0) - (baseFinOps.criticalPathP99Ms || 0)).toFixed(1));
 
-  const score = judgeReport?.overallScore ?? 96;
+  const score = judgeReport?.overallScore ?? 0;
   const proCall = judgeReport?.liveVertexAiTelemetry?.proJudgeCall || {};
   const flashCall = judgeReport?.liveVertexAiTelemetry?.flashCriticCall || {};
+  const hasLiveJury = Boolean(proCall.responseId && flashCall.responseId);
+  const juryGateCell = hasLiveJury
+    ? `🟢 \`pro=${proCall.responseId}\` · \`flash=${flashCall.responseId}\``
+    : `⚪ \`deterministic_offline\` (no live Vertex AI \`responseId\` recorded)`;
   const mermaidDiff = compileGraphToMermaid(currentGraph);
 
   const deltaRows = [
@@ -61,7 +65,7 @@ export function generateGitHubPrBotReport(baselineGraph, currentGraph, judgeRepo
     `| **Monthly FinOps Run-Rate** | $${Number(baseFinOps.totalMonthlyUsd || 0).toLocaleString()}/mo | **$${Number(currFinOps.totalMonthlyUsd || 0).toLocaleString()}/mo** | **\`${signUsd}\`** (\`$${deltaAnnualUsd >= 0 ? '+' : ''}${deltaAnnualUsd.toLocaleString()}/yr\`) |`,
     `| **Critical-Path p99 Latency** | ${baseFinOps.criticalPathP99Ms} ms | **${currFinOps.criticalPathP99Ms} ms** | \`${signLat}\` (Composite SLA: **${currFinOps.compositeSla || '99.999%'}**) |`,
     `| **Phase-0 Mathematical Gate** | 5/5 Stages PASS | **${preRenderPlan?.stagesPassed || '5/5 STAGES PASS'}** | 🟢 \`0 Overlaps · 1:1 AST<->SVG Bijection\` |`,
-    `| **Live Vertex AI Gemini Jury** | Certified | **${score}/100 CERTIFIED** | 🟢 \`pro=${proCall.responseId || 'verified'}\` · \`flash=${flashCall.responseId || 'verified'}\` |`,
+    `| **Vertex AI Gemini Jury** | ${hasLiveJury ? 'Live Certified' : 'Offline Heuristic'} | **${score}/100 ${hasLiveJury ? 'CERTIFIED' : 'STATIC RUBRIC'}** | ${juryGateCell} |`,
     ``,
     `### 2. Structural AST Component Diff`,
     ``,
@@ -74,7 +78,7 @@ export function generateGitHubPrBotReport(baselineGraph, currentGraph, judgeRepo
     '```',
     ``,
     `---`,
-    `*Generated deterministically by **VeriSpec Studio v3.3** · Synced with [\`${repoSlug}\`](${repoUrl})*`
+    `*Generated deterministically by **VeriSpec Studio** · Synced with [\`${repoSlug}\`](${repoUrl})*`
   ].join('\n');
 
   const pctNum = baseFinOps.totalMonthlyUsd > 0 ? Math.round((deltaMonthlyUsd / baseFinOps.totalMonthlyUsd) * 100) : 0;

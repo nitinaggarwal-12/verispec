@@ -29,9 +29,7 @@ import {
   compileGraphToMermaid,
   evaluateArchitectureWithJudgeJury,
   GEMINI_FLASH_MODEL_ID,
-  GEMINI_PRO_MODEL_ID,
-  GEMINI_ARGON_MODEL_ID,
-  OMNI_ORCHESTRATOR_ID
+  GEMINI_PRO_MODEL_ID
 } from './verispecDslAndJudgeEngine.mjs';
 import {
   planUiViewportBudget,
@@ -70,7 +68,7 @@ export function prepareCanonicalBlueprintGraph(bp) {
         shape: existing?.shape || 'service_card',
         iconKey: existing?.iconKey || '',
         slotOrder: idx,
-        addedInVersion: g.version || 'v1.0.1',
+        addedInVersion: g.version || 'Baseline',
         changeStatus: 'baseline'
       };
     });
@@ -174,19 +172,82 @@ function runBlueprintSliceInWorker(blueprintCodes) {
 }
 
 /**
- * PLANE 2 & 4: Parallel Orthogonal Compiler & Multi-Judge Jury Fan-Out (`Promise.all`)
+ * Genuine Topological Connectivity & Single-Point-of-Failure (SPOF) Graph Verifier
+ */
+export function verifyTopologicalConnectivityAndSpof(graph) {
+  const nodes = graph.nodes || [];
+  const edges = graph.edges || [];
+  const inDegree = new Map(nodes.map((n) => [n.id, 0]));
+  const outDegree = new Map(nodes.map((n) => [n.id, 0]));
+
+  for (const e of edges) {
+    const s = e.sourceNodeId || e.from;
+    const t = e.targetNodeId || e.to;
+    if (outDegree.has(s)) outDegree.set(s, outDegree.get(s) + 1);
+    if (inDegree.has(t)) inDegree.set(t, inDegree.get(t) + 1);
+  }
+
+  const orphanNodeIds =
+    nodes.length > 1
+      ? nodes.filter((n) => (inDegree.get(n.id) || 0) === 0 && (outDegree.get(n.id) || 0) === 0).map((n) => n.id)
+      : [];
+  const bottleneckSpofIds = nodes
+    .filter((n) => (inDegree.get(n.id) || 0) >= 2 && (outDegree.get(n.id) || 0) >= 2 && !/ha|quorum|spanner|autopilot|mesh|cluster|multi/i.test(`${n.title} ${n.subtitle || ''} ${n.pill || ''}`))
+    .map((n) => n.id);
+  const connectedCount = nodes.length - orphanNodeIds.length;
+  const connectivityRatio = nodes.length > 0 ? Number((connectedCount / nodes.length).toFixed(3)) : 1;
+
+  return {
+    judgeRole: 'Topological Connectivity & SPOF Graph Verifier',
+    nodeCount: nodes.length,
+    edgeCount: edges.length,
+    orphanNodeIds,
+    bottleneckSpofIds,
+    connectivityRatio,
+    passed: orphanNodeIds.length === 0
+  };
+}
+
+/**
+ * Genuine AST <-> DSL & Terraform HCL 1:1 Roundtrip Parity Verifier
+ */
+export function verifyIacAndDslRoundtripParity(graph, dslText, terraformHcl) {
+  const nodes = graph.nodes || [];
+  const missingInDsl = nodes
+    .filter((n) => !dslText.includes(`id: ${n.id}`))
+    .map((n) => n.id);
+  const missingInTerraform = nodes
+    .filter((n) => {
+      const slug = n.id.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
+      return !terraformHcl.includes(`"${slug}"`);
+    })
+    .map((n) => n.id);
+
+  return {
+    judgeRole: 'IaC & DSL 1:1 Roundtrip Parity Verifier',
+    generatorModelId: GEMINI_FLASH_MODEL_ID,
+    crossJudgeModelId: GEMINI_PRO_MODEL_ID,
+    disjointFromGenerator: GEMINI_PRO_MODEL_ID !== GEMINI_FLASH_MODEL_ID,
+    missingInDsl,
+    missingInTerraform,
+    passed: missingInDsl.length === 0 && missingInTerraform.length === 0
+  };
+}
+
+/**
+ * PLANE 2 & 4: Parallel Orthogonal Compiler & Deterministic Verifier Fan-Out (`Promise.all`)
  * Executes all 4 orthogonal compilers (DSL, Terraform HCL, Mermaid, Draw.io XML) and
- * all 4 independent Judge tracks concurrently over a locked immutable AST snapshot.
+ * real topological/geometry/IaC verifiers concurrently over a locked immutable AST snapshot.
  */
 export async function compileAndJudgeBlueprintInParallel(graph, options = {}) {
   const detailLevel = String(options.detailLevel || 'L200').toUpperCase();
   const showDiff = options.showDiff !== undefined ? options.showDiff : true;
   const scopedNodeId = options.scopedNodeId || null;
 
-  // Render primary SVG first (shared immutable input for downstream judges)
+  // Render primary SVG first (shared immutable input for downstream verifiers)
   const svg = renderInteractiveSvg(graph, { showDiff, detailLevel, scopedNodeId });
 
-  // Fan out 8 orthogonal pure computations concurrently via Promise.all
+  // Fan out real orthogonal computations concurrently via Promise.all
   const [
     bijectionContract,
     preRenderPlan,
@@ -194,8 +255,7 @@ export async function compileAndJudgeBlueprintInParallel(graph, options = {}) {
     terraformHcl,
     mermaidCode,
     drawioXml,
-    frontierSecurityAudit,
-    crossFamilySemanticAudit
+    topologicalConnectivityAudit
   ] = await Promise.all([
     Promise.resolve().then(() => verifyGraphToSvgBijectionContract(graph, svg)),
     Promise.resolve().then(() => compilePreRenderPlanCertificate(graph, svg, { detailLevel })),
@@ -203,31 +263,21 @@ export async function compileAndJudgeBlueprintInParallel(graph, options = {}) {
     Promise.resolve().then(() => compileGraphToTerraformHcl(graph)),
     Promise.resolve().then(() => compileGraphToMermaid(graph)),
     Promise.resolve().then(() => compileToDrawioXml(graph)),
-    Promise.resolve().then(() => ({
-      judgeRole: 'Frontier Topological & SPOF Judge',
-      modelId: GEMINI_ARGON_MODEL_ID,
-      endpoint: 'locations/global',
-      thinkingConfig: { thinkingLevel: 'HIGH' },
-      disjointFromGenerator: GEMINI_ARGON_MODEL_ID !== GEMINI_FLASH_MODEL_ID
-    })),
-    Promise.resolve().then(() => ({
-      judgeRole: 'Cross-Family Semantic Faithfulness Judge',
-      modelId: GEMINI_PRO_MODEL_ID,
-      endpoint: 'locations/global',
-      thinkingConfig: { thinkingLevel: 'HIGH' },
-      disjointFromGenerator: GEMINI_PRO_MODEL_ID !== GEMINI_FLASH_MODEL_ID
-    }))
+    Promise.resolve().then(() => verifyTopologicalConnectivityAndSpof(graph))
   ]);
+
+  const iacParityAudit = verifyIacAndDslRoundtripParity(graph, verispecDsl, terraformHcl);
 
   const judgeReport = evaluateArchitectureWithJudgeJury(graph, svg, bijectionContract);
   judgeReport.parallelJuryTracks = [
-    frontierSecurityAudit,
-    crossFamilySemanticAudit,
+    topologicalConnectivityAudit,
+    iacParityAudit,
     {
-      judgeRole: 'Visual Layout & AABB Judge',
-      modelId: OMNI_ORCHESTRATOR_ID,
+      judgeRole: 'Visual Layout, AABB & Obstacle Intersection Verifier',
       aabbOverlaps: preRenderPlan.stage3TopologyBounds.aabbOverlaps,
-      zeroHitAndTrialGuarantee: preRenderPlan.zeroHitAndTrialGuarantee
+      obstacleIntersections: preRenderPlan.stage4ConnectorChannels.obstacleIntersections,
+      zeroHitAndTrialGuarantee: preRenderPlan.zeroHitAndTrialGuarantee,
+      passed: preRenderPlan.zeroHitAndTrialGuarantee
     }
   ];
 

@@ -17,80 +17,7 @@ function sha256Hex(input) {
   return crypto.createHash('sha256').update(String(input)).digest('hex');
 }
 
-const DEFAULT_COLLAB_THREADS = {
-  D05: [
-    {
-      threadId: 'thr_d05_spanner_ha',
-      blueprintCode: 'D05',
-      targetNodeId: 'node_primary_db',
-      anchorX: 1180,
-      anchorY: 420,
-      status: 'OPEN',
-      author: 'Priya Nair',
-      avatarColor: '#7C3AED',
-      messages: [
-        {
-          id: 'msg_1',
-          author: 'Priya Nair (@sre-lead)',
-          role: 'Staff SRE',
-          text: '@alex.rivera @finops-bot Confirmed Cloud Spanner multi-region quorum (us-east1 + europe-west1) holds RPO=0s with 4.2ms TrueTime commit.',
-          mentions: ['@alex.rivera', '@finops-bot'],
-          createdAt: '10:14 AM'
-        },
-        {
-          id: 'msg_2',
-          author: 'Marcus Vance (@sec-architect)',
-          role: 'Principal Security Architect',
-          text: '@sre-lead Verified CMEK HSM key rotation (90d) and VPC-SC perimeter enforcement on Zone 5.',
-          mentions: ['@sre-lead'],
-          createdAt: '10:18 AM'
-        }
-      ]
-    },
-    {
-      threadId: 'thr_d05_vertex_guardrail',
-      blueprintCode: 'D05',
-      targetNodeId: 'node_vertex_agent',
-      anchorX: 890,
-      anchorY: 310,
-      status: 'OPEN',
-      author: 'Alex Rivera',
-      avatarColor: '#2563EB',
-      messages: [
-        {
-          id: 'msg_3',
-          author: 'Alex Rivera (@alex.rivera)',
-          role: 'Principal Cloud Architect',
-          text: '@sec-architect Ensure Cloud DLP PII redaction proxy runs inline before every Vertex AI Gemini 3.8 Co-Pilot context window injection.',
-          mentions: ['@sec-architect'],
-          createdAt: '10:22 AM'
-        }
-      ]
-    }
-  ],
-  D06: [
-    {
-      threadId: 'thr_d06_ncc_hub',
-      blueprintCode: 'D06',
-      targetNodeId: 'n3',
-      anchorX: 540,
-      anchorY: 250,
-      status: 'OPEN',
-      author: 'Marcus Vance',
-      avatarColor: '#059669',
-      messages: [
-        {
-          id: 'msg_4',
-          author: 'Marcus Vance (@sec-architect)',
-          role: 'Principal Security Architect',
-          text: '@net-eng Network Connectivity Center hub transit routes verified with Next-Gen Firewall L7 inspection.',
-          mentions: ['@net-eng'],
-          createdAt: '10:30 AM'
-        }
-      ]
-    }
-  ]
-};
+const DEFAULT_COLLAB_THREADS = {};
 
 function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
   const execText = `${title} (${code}) is engineered for zero-trust multi-region high availability (99.999% SLA), deterministic Phase-0 layout geometry, and strict FinOps unit-cost governance. Use the "/" slash command menu below to insert custom narrative sections, callouts, code blocks, or embedded cross-lifecycle diagrams.`;
@@ -105,7 +32,7 @@ function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
       text: execText,
       embedCode: '',
       diagramCode: '',
-      updatedBy: 'Alex Rivera (@alex.rivera)',
+      updatedBy: 'Workspace Author',
       updatedAt: new Date().toISOString()
     },
     {
@@ -116,7 +43,7 @@ function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
       text: calloutText,
       embedCode: '',
       diagramCode: '',
-      updatedBy: 'Marcus Vance (@sec-architect)',
+      updatedBy: 'Workspace Author',
       updatedAt: new Date().toISOString()
     },
     {
@@ -127,7 +54,7 @@ function buildDefaultRfcBlocks(code, title = 'Enterprise Cloud Architecture') {
       text: tradeoffText,
       embedCode: '',
       diagramCode: '',
-      updatedBy: 'Priya Nair (@sre-lead)',
+      updatedBy: 'Workspace Author',
       updatedAt: new Date().toISOString()
     }
   ];
@@ -202,7 +129,7 @@ export function initSqliteWorkspaceStore(port = 8080) {
     CREATE TABLE IF NOT EXISTS workspace_starred_blueprints (
       blueprint_code TEXT PRIMARY KEY,
       starred INTEGER NOT NULL DEFAULT 1,
-      starred_by TEXT NOT NULL DEFAULT 'Alex Rivera (@alex.rivera)',
+      starred_by TEXT NOT NULL DEFAULT 'workspace_user',
       updated_at TEXT NOT NULL
     );
   `);
@@ -237,36 +164,10 @@ export function initSqliteWorkspaceStore(port = 8080) {
   if (!starCountRow || Number(starCountRow.cnt) === 0) {
     const insStar = dbInstance.prepare(`
       INSERT OR IGNORE INTO workspace_starred_blueprints (blueprint_code, starred, starred_by, updated_at)
-      VALUES (?, 1, 'Alex Rivera (@alex.rivera)', ?)
+      VALUES (?, 1, 'workspace_user', ?)
     `);
     for (const stCode of ['D05', 'D06', 'D10', 'D12', 'D15']) {
       insStar.run(stCode, new Date().toISOString());
-    }
-  }
-
-  // Seed default anchored @mention threads if table is empty
-  const threadCountRow = dbInstance.prepare(`SELECT COUNT(*) AS cnt FROM collab_threads`).get();
-  if (!threadCountRow || Number(threadCountRow.cnt) === 0) {
-    const insertThread = dbInstance.prepare(`
-      INSERT OR IGNORE INTO collab_threads (
-        thread_id, blueprint_code, target_node_id, anchor_x, anchor_y, status, author, avatar_color, messages_json, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    for (const threads of Object.values(DEFAULT_COLLAB_THREADS)) {
-      for (const t of threads) {
-        insertThread.run(
-          t.threadId,
-          t.blueprintCode,
-          t.targetNodeId || null,
-          t.anchorX,
-          t.anchorY,
-          t.status,
-          t.author,
-          t.avatarColor,
-          JSON.stringify(t.messages),
-          new Date().toISOString()
-        );
-      }
     }
   }
 
@@ -279,6 +180,14 @@ export function saveBlueprintHistoryToSqlite(blueprintStateStore, port = 8080) {
 
   db.exec('BEGIN IMMEDIATE');
   try {
+    const activeCodes = Array.from(blueprintStateStore.keys());
+    if (activeCodes.length > 0) {
+      const placeholders = activeCodes.map(() => '?').join(',');
+      db.prepare(`DELETE FROM blueprint_versions WHERE blueprint_code NOT IN (${placeholders})`).run(...activeCodes);
+    } else {
+      db.exec(`DELETE FROM blueprint_versions`);
+    }
+
     const delStmt = db.prepare(`DELETE FROM blueprint_versions WHERE blueprint_code = ?`);
     const insStmt = db.prepare(`
       INSERT INTO blueprint_versions (
@@ -295,7 +204,7 @@ export function saveBlueprintHistoryToSqlite(blueprintStateStore, port = 8080) {
         insStmt.run(
           code,
           idx,
-          String(graph.version || `v1.0.${idx + 1}`),
+          String(graph.version || (idx === 0 ? 'Baseline' : `Rev-${idx + 1}`)),
           String(graph.prompt || 'Baseline Seed'),
           Array.isArray(graph.nodes) ? graph.nodes.length : 0,
           Array.isArray(graph.edges) ? graph.edges.length : 0,
@@ -345,7 +254,7 @@ export function loadBlueprintHistoryFromSqlite(blueprintStateStore, port = 8080)
       blueprintStateStore.set(code, hist);
     }
   }
-  return blueprintStateStore.size === 18;
+  return blueprintStateStore.size >= 18;
 }
 
 export function getWhiteboardOverlay(code, port = 8080) {
@@ -462,7 +371,7 @@ export function saveRfcCustomBlocks(code, blocks, port = 8080) {
       text: bodyText,
       embedCode: emb,
       diagramCode: emb,
-      updatedBy: String(b.updatedBy || 'Alex Rivera (@alex.rivera)'),
+      updatedBy: String(b.updatedBy || 'Workspace Author'),
       updatedAt: new Date().toISOString()
     };
   });
@@ -512,9 +421,9 @@ export function createCollabThread(payload = {}, port = 8080) {
   const db = initSqliteWorkspaceStore(port);
   const cleanCode = String(payload.code || payload.blueprintCode || 'D05').toUpperCase();
   const threadId = payload.threadId || `thr_${cleanCode.toLowerCase()}_${Date.now()}`;
-  const author = String(payload.author || 'Alex Rivera (@alex.rivera)').trim();
-  const role = String(payload.role || 'Principal Architect').trim();
-  const text = String(payload.text || '@sre-lead Verify HA failover & mTLS 1.3 policy on this tier.').trim();
+  const author = String(payload.author || 'Workspace Author (@architect)').trim();
+  const role = String(payload.role || 'System Architect').trim();
+  const text = String(payload.text || '@reviewer Verify HA failover & mTLS 1.3 policy on this tier.').trim();
   const mentions = extractMentions(text);
   const nowTime = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const messages = [
@@ -561,8 +470,8 @@ export function replyToCollabThread(threadId, payload = {}, port = 8080) {
   if (text) {
     messages.push({
       id: `msg_${Date.now()}`,
-      author: String(payload.author || 'Priya Nair (@sre-lead)'),
-      role: String(payload.role || 'Staff SRE'),
+      author: String(payload.author || 'Workspace Reviewer (@reviewer)'),
+      role: String(payload.role || 'Reviewer'),
       text,
       mentions: extractMentions(text),
       createdAt: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
@@ -602,7 +511,7 @@ export function toggleStarredBlueprint(code = 'D05', starredOverride = null, por
         : 1;
   db.prepare(`
     INSERT INTO workspace_starred_blueprints (blueprint_code, starred, starred_by, updated_at)
-    VALUES (?, ?, 'Alex Rivera (@alex.rivera)', ?)
+    VALUES (?, ?, 'workspace_user', ?)
     ON CONFLICT(blueprint_code) DO UPDATE SET
       starred = excluded.starred,
       updated_at = excluded.updated_at

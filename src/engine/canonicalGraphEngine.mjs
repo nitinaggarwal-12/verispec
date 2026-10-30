@@ -1,6 +1,6 @@
 // Canonical Architecture Graph (CAG) & Stateful Multi-Entity AST Delta Patch Engine
 // Implements the VeriSpec / Google Cloud Architecture Center Stateful Graph Mutation Loop:
-//   1. Versioned Blueprint History (v1.0.1 -> v1.0.2 -> v1.0.3 -> v1.0.N)
+//   1. Bounded Undo/Redo Revision History (Baseline / Turn-1..Turn-3 / Rev-2..Rev-N)
 //   2. Scoped Node & Zone Targeting (resolves both CAG node IDs and SVG canvas node IDs/titles)
 //   3. Compound Multi-Entity Prompt Decomposition ("add Looker, and bigquery" -> 2 distinct cataloged nodes)
 //   4. 45+ Cloud, Data, AI & Security Technology Catalog with L100 / L200 / L300 Engineering Specs
@@ -13,10 +13,12 @@ export function cloneGraph(graph) {
 }
 
 export function bumpPatchVersion(versionStr) {
-  const match = String(versionStr || 'v1.0.1').match(/^v(\d+)\.(\d+)\.(\d+)$/);
-  if (!match) return 'v1.0.2';
-  const [, major, minor, patch] = match;
-  return `v${major}.${minor}.${Number(patch) + 1}`;
+  const raw = String(versionStr || 'Baseline').trim();
+  const turnMatch = raw.match(/^Turn[- ](\d+)$/i);
+  if (turnMatch) return `Turn-${Number(turnMatch[1]) + 1}`;
+  const revMatch = raw.match(/^Rev[- ](\d+)$/i);
+  if (revMatch) return `Rev-${Number(revMatch[1]) + 1}`;
+  return 'Rev-2';
 }
 
 /**
@@ -366,7 +368,7 @@ export const KNOWN_TECH_CATALOG = [
   {
     match: /\bvertex\s*ai\b|\bgemini\b|\bllm\b/i,
     key: 'vertex_gemini',
-    title: 'Vertex AI Gemini 3.8 Agent',
+    title: 'Vertex AI Gemini 3.1 Agent',
     subtitle: 'Frontier Multimodal Reasoning & Grounded Synthesis',
     pill: '1M Context · Grounded',
     l300Spec: 'Global Endpoint · ThinkingConfig HIGH · Provisioned PT',
@@ -610,7 +612,7 @@ export const KNOWN_TECH_CATALOG = [
 ];
 
 /**
- * Canonical Baseline Blueprint (D05 v1.0.1) with unified node IDs matching renderD05MultiTierCloud
+ * Canonical Baseline Blueprint (D05 Turn-1) with unified node IDs matching renderD05MultiTierCloud
  */
 export function createBaselineEcommerceBlueprint() {
   return {
@@ -620,7 +622,7 @@ export function createBaselineEcommerceBlueprint() {
     phaseNumber: 2,
     phaseTitle: 'Phase 2 · System & Cloud Architecture Topologies',
     phaseBadge: 'D05 · CLOUD-NATIVE MESH',
-    version: 'v1.0.1',
+    version: 'Turn-1',
     title: 'Cloud-Native Multi-Tier AI Commerce & Microservices Mesh',
     subtitle: 'Zero-Trust Edge WAF, GKE Autopilot Services, Spanner/Redis Data Tier & Vertex AI',
     prompt:
@@ -644,7 +646,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'client_web',
         slotOrder: 0,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -657,7 +659,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'client_web',
         slotOrder: 1,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -670,7 +672,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'apigee',
         slotOrder: 1,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -683,7 +685,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'graphql_bff',
         slotOrder: 0,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -696,20 +698,20 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'gke_autopilot',
         slotOrder: 1,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
         id: 'node_vertex_agent',
         zoneId: 'z4',
-        title: 'Gemini 3.8 Co-Pilot',
+        title: 'Gemini 3.1 Co-Pilot',
         subtitle: 'Grounded Shopping & Spec Assistant',
         pill: '1M Context · Streamed',
         l300Spec: 'locations/global · thinkingLevel: HIGH · A2A JSON-RPC',
         shape: 'hexagon_agent',
         iconKey: 'vertex_ai',
         slotOrder: 1,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -722,7 +724,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'hexagon_agent',
         iconKey: 'vector_search',
         slotOrder: 2,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -735,7 +737,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'cylinder_db',
         iconKey: 'postgresql',
         slotOrder: 1,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       },
       {
@@ -748,7 +750,7 @@ export function createBaselineEcommerceBlueprint() {
         shape: 'service_card',
         iconKey: 'kafka_pubsub',
         slotOrder: 2,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Turn-1',
         changeStatus: 'baseline'
       }
     ],
@@ -879,7 +881,7 @@ function resolveScopedOrTargetNode(graph, scopedNodeId, scopedNodeTitle = '') {
       shape: 'service_card',
       iconKey: resolveIconKeyFromText(cleanLabel),
       slotOrder: graph.nodes.filter((n) => n.zoneId === fallbackZone).length,
-      addedInVersion: graph.version || 'v1.0.1',
+      addedInVersion: graph.version || 'Baseline',
       changeStatus: 'baseline'
     };
     graph.nodes.push(syntheticAnchor);
@@ -966,8 +968,9 @@ function buildNodeSpecFromEntityText(entityText, graph, nextVer, idxSuffix = 1) 
           ? 'data'
           : 'compute';
 
+  const safeVerId = String(nextVer || 'rev').replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase();
   return {
-    key: `custom_${nextVer.replace(/\./g, '_')}_${idxSuffix}`,
+    key: `custom_${safeVerId}_${idxSuffix}`,
     title: formattedTitle || 'Custom Service Node',
     subtitle: `Prompt-Synthesized Component (${nextVer})`,
     pill: 'Live AST Node',
@@ -988,6 +991,7 @@ export function applyPromptMutation(currentGraph, promptText, scopedNodeId = nul
   const lower = prompt.toLowerCase();
 
   next.version = bumpPatchVersion(currentGraph.version);
+  const safeVerId = String(next.version || 'rev').replace(/[^a-zA-Z0-9]+/g, '_').toLowerCase();
   next.prompt = prompt;
   next.timestamp = new Date().toLocaleTimeString('en-US', { hour12: true });
 
@@ -1024,7 +1028,7 @@ export function applyPromptMutation(currentGraph, promptText, scopedNodeId = nul
         (e.sourceNodeId === targetId && e.targetNodeId === sourceId)
     );
     if (existing) return existing.id;
-    const edgeId = `e_${next.version.replace(/\./g, '_')}_${next.edges.length + 1}`;
+    const edgeId = `e_${safeVerId}_${next.edges.length + 1}`;
     next.edges.push({
       id: edgeId,
       sourceNodeId: sourceId,
@@ -1088,7 +1092,7 @@ export function applyPromptMutation(currentGraph, promptText, scopedNodeId = nul
       targetNode.addedInVersion = next.version;
       replacedNodes.push({ id: targetNode.id, from: oldTitle, to: targetNode.title });
 
-      const newNodeId = `node_split_${next.version.replace(/\./g, '_')}`;
+      const newNodeId = `node_split_${safeVerId}`;
       const newNode = {
         id: newNodeId,
         zoneId: targetNode.zoneId,
@@ -1249,7 +1253,7 @@ export function applyPromptMutation(currentGraph, promptText, scopedNodeId = nul
           scopedNode ? scopedNode.zoneId : null
         );
 
-        const newId = `node_${spec.key}_${next.version.replace(/\./g, '_')}_${idx + 1}`;
+        const newId = `node_${spec.key}_${safeVerId}_${idx + 1}`;
         const newNode = {
           id: newId,
           zoneId: targetZoneId,
@@ -1333,14 +1337,14 @@ export function applyPromptMutation(currentGraph, promptText, scopedNodeId = nul
 }
 
 /**
- * Generates the pre-populated 3-turn evolution history for D05 (v1.0.1 -> v1.0.2 -> v1.0.3)
+ * Generates the pre-populated 3-turn evolution history for D05 (Turn-1 -> Turn-2 -> Turn-3)
  */
 export function buildPrecomputedEvolutionTimeline() {
   const v1 = createBaselineEcommerceBlueprint();
 
-  // v1.0.2: Add Memorystore Redis L2 + Upgrade PostgreSQL 16 -> Cloud Spanner Global HA
+  // Turn-2: Add Memorystore Redis L2 + Upgrade PostgreSQL 16 -> Cloud Spanner Global HA
   const v2 = cloneGraph(v1);
-  v2.version = 'v1.0.2';
+  v2.version = 'Turn-2';
   v2.prompt =
     'Add Memorystore Redis L2 cache for sub-millisecond catalog & session lookups, and upgrade PostgreSQL 16 to Cloud Spanner Global HA.';
   v2.timestamp = '10:15:22 AM';
@@ -1354,7 +1358,7 @@ export function buildPrecomputedEvolutionTimeline() {
     shape: 'cylinder_db',
     iconKey: 'redis_memorystore',
     slotOrder: 0,
-    addedInVersion: 'v1.0.2',
+    addedInVersion: 'Turn-2',
     changeStatus: 'added'
   });
   const dbV2 = v2.nodes.find((n) => n.id === 'node_primary_db');
@@ -1365,7 +1369,7 @@ export function buildPrecomputedEvolutionTimeline() {
     dbV2.l300Spec = 'gRPC :443 · 5-Region Paxos Quorum · TrueTime';
     dbV2.iconKey = 'cloud_spanner';
     dbV2.changeStatus = 'modified';
-    dbV2.addedInVersion = 'v1.0.2';
+    dbV2.addedInVersion = 'Turn-2';
   }
   v2.edges.push({
     id: 'e_d05_v2_1',
@@ -1387,11 +1391,11 @@ export function buildPrecomputedEvolutionTimeline() {
     ]
   };
 
-  // v1.0.3: Add Cloud Armor WAF + IAP in Zone 2 & DLP Policy Gate in Zone 4
+  // Turn-3: Add Cloud Armor WAF + IAP in Zone 2 & DLP Policy Gate in Zone 4
   const v3 = cloneGraph(v2);
-  v3.version = 'v1.0.3';
+  v3.version = 'Turn-3';
   v3.prompt =
-    'Add Cloud Armor WAF + Zero-Trust IAP in front of Apigee X, and insert a DLP & Fraud Policy Gate before the Gemini 3.8 Co-Pilot.';
+    'Add Cloud Armor WAF + Zero-Trust IAP in front of Apigee X, and insert a DLP & Fraud Policy Gate before the Gemini 3.1 Co-Pilot.';
   v3.timestamp = '10:16:48 AM';
   v3.nodes.forEach((n) => {
     n.changeStatus = 'baseline';
@@ -1407,7 +1411,7 @@ export function buildPrecomputedEvolutionTimeline() {
       shape: 'decision_diamond',
       iconKey: 'cloud_armor',
       slotOrder: 0,
-      addedInVersion: 'v1.0.3',
+      addedInVersion: 'Turn-3',
       changeStatus: 'added'
     },
     {
@@ -1420,7 +1424,7 @@ export function buildPrecomputedEvolutionTimeline() {
       shape: 'decision_diamond',
       iconKey: 'dlp_guardrail',
       slotOrder: 0,
-      addedInVersion: 'v1.0.3',
+      addedInVersion: 'Turn-3',
       changeStatus: 'added'
     }
   );

@@ -5,7 +5,7 @@
 //   D02: Multi-Screen Interactive UX Wireframe Mockups + Decision Diamonds
 //   D03: DDD Event Storming Sticky Cards + 3 Dashed Bounded Context Enclaves
 //   D04: C4 Model (Person Actors + Dashed System Boundary + External Systems)
-//   D05: 5-Tier Cloud-Native AI Microservices + Live v1.0.1..v1.0.3 Diff Badges
+//   D05: 5-Tier Cloud-Native AI Microservices + Live Turn-1..Turn-3 Diff Badges
 //   D06: Canonical #78 Hub-and-Spoke Multi-VPC Topology (Hub + Left/Right Spokes)
 //   D07: UML API Sequence Diagram (6 Dashed Lifelines + Activation Bars + alt/par)
 //   D08: Distributed Saga & Finite State Machine (Capsules + Diamonds + Rollback)
@@ -87,23 +87,23 @@ function wrapSubtitleLines(text, maxWidthPx, baseFontSize = 9.5, minFontSize = 7
 
 export const ARCHETYPE_METADATA = {
   D01: { archetype: 'VALUE_STREAM_SWIMLANE', badge: '5-CHEVRON SWIMLANE VSM', color: '#1D4ED8', bg: '#EFF6FF' },
-  D02: { archetype: 'UX_WIREFRAME_FLOW', badge: 'UI WIREFRAME & DECISION TREE', color: '#7C3AED', bg: '#F5F3FF' },
-  D03: { archetype: 'EVENT_STORMING_DDD', badge: 'DDD EVENT STORMING & CONTEXTS', color: '#D97706', bg: '#FFFBEB' },
-  D04: { archetype: 'C4_SYSTEM_CONTAINER', badge: 'C4 BOUNDARY & CONTAINERS', color: '#0284C7', bg: '#F0F9FF' },
-  D05: { archetype: 'MULTI_TIER_CLOUD_DIFF', badge: '5-TIER CLOUD + AST DIFF', color: '#059669', bg: '#ECFDF5' },
-  D06: { archetype: 'HUB_AND_SPOKE_78', badge: 'HUB & SPOKE VPC (#78)', color: '#2563EB', bg: '#EFF6FF' },
-  D07: { archetype: 'UML_SEQUENCE_LIFELINE', badge: 'UML SEQUENCE LIFELINES', color: '#4F46E5', bg: '#EEF2FF' },
-  D08: { archetype: 'SAGA_STATE_MACHINE', badge: 'FSM & SAGA ROLLBACK LOOP', color: '#E11D48', bg: '#FFF1F2' },
-  D09: { archetype: 'GRAPHQL_FEDERATION', badge: 'SUPERGRAPH & PROTOBUF AST', color: '#9333EA', bg: '#FAF5FF' },
+  D02: { archetype: 'UX_WIREFRAME_FLOW', badge: 'UI WIREFRAME & DECISION TREE', color: '#6D28D9', bg: '#F5F3FF' },
+  D03: { archetype: 'EVENT_STORMING_DDD', badge: 'DDD EVENT STORMING & CONTEXTS', color: '#B45309', bg: '#FFFBEB' },
+  D04: { archetype: 'C4_SYSTEM_CONTAINER', badge: 'C4 BOUNDARY & CONTAINERS', color: '#0369A1', bg: '#F0F9FF' },
+  D05: { archetype: 'MULTI_TIER_CLOUD_DIFF', badge: '5-TIER CLOUD + AST DIFF', color: '#047857', bg: '#ECFDF5' },
+  D06: { archetype: 'HUB_AND_SPOKE_78', badge: 'HUB & SPOKE VPC (#78)', color: '#1D4ED8', bg: '#EFF6FF' },
+  D07: { archetype: 'UML_SEQUENCE_LIFELINE', badge: 'UML SEQUENCE LIFELINES', color: '#4338CA', bg: '#EEF2FF' },
+  D08: { archetype: 'SAGA_STATE_MACHINE', badge: 'FSM & SAGA ROLLBACK LOOP', color: '#BE123C', bg: '#FFF1F2' },
+  D09: { archetype: 'GRAPHQL_FEDERATION', badge: 'SUPERGRAPH & PROTOBUF AST', color: '#7E22CE', bg: '#FAF5FF' },
   D10: { archetype: 'DATABASE_ERD_CROWSFOOT', badge: "PHYSICAL ERD (CROW'S-FOOT)", color: '#0F766E', bg: '#F0FDFA' },
   D11: { archetype: 'MEDALLION_LAKEHOUSE', badge: 'BRONZE · SILVER · GOLD CDC', color: '#B45309', bg: '#FFFBEB' },
   D12: { archetype: 'CQRS_SHARDING_CACHE', badge: 'CQRS SPLIT & 3-SHARD CACHE', color: '#0369A1', bg: '#F0F9FF' },
   D13: { archetype: 'HYBRID_GRAPHRAG', badge: '3-ENGINE HYBRID GRAPHRAG', color: '#6D28D9', bg: '#F5F3FF' },
   D14: { archetype: 'MULTI_AGENT_A2A_MCP', badge: 'A2A SUPERVISOR & MCP SWARM', color: '#1D4ED8', bg: '#EFF6FF' },
-  D15: { archetype: 'CIRCULAR_MLOPS_FLYWHEEL', badge: 'RADIAL 6-STAGE FLYWHEEL', color: '#059669', bg: '#ECFDF5' },
+  D15: { archetype: 'CIRCULAR_MLOPS_FLYWHEEL', badge: 'RADIAL 6-STAGE FLYWHEEL', color: '#047857', bg: '#ECFDF5' },
   D16: { archetype: 'ZERO_TRUST_3RING_VAULT', badge: '3-RING ZERO-TRUST ENCLAVE', color: '#BE123C', bg: '#FFF1F2' },
   D17: { archetype: 'GITOPS_SLSA_CANARY', badge: 'SLSA L3 & CANARY FUNNEL', color: '#334155', bg: '#F1F5F9' },
-  D18: { archetype: 'ACTIVE_ACTIVE_DR_CELLS', badge: 'DUAL-REGION ACTIVE-ACTIVE', color: '#0284C7', bg: '#F0F9FF' }
+  D18: { archetype: 'ACTIVE_ACTIVE_DR_CELLS', badge: 'DUAL-REGION ACTIVE-ACTIVE', color: '#0369A1', bg: '#F0F9FF' }
 };
 
 let svgInstanceSeq = 0;
@@ -112,10 +112,18 @@ let activeRenderGraph = null;
 
 function drawStepCallout(cx, cy, stepNum, color = '#2563EB') {
   if (activeDetailLevel === 'L100') return '';
+  const safeFill =
+    color === '#10B981' || color === '#059669'
+      ? '#047857'
+      : color === '#D97706' || color === '#F59E0B'
+        ? '#B45309'
+        : color === '#0EA5E9' || color === '#0284C7'
+          ? '#0369A1'
+          : color;
   return `
     <g class="flow-step-callout">
-      <circle cx="${cx}" cy="${cy}" r="10.5" fill="#FFFFFF" stroke="${color}" stroke-width="2"/>
-      <circle cx="${cx}" cy="${cy}" r="8" fill="${color}"/>
+      <circle cx="${cx}" cy="${cy}" r="10.5" fill="#FFFFFF" stroke="${safeFill}" stroke-width="2"/>
+      <circle cx="${cx}" cy="${cy}" r="8" fill="${safeFill}"/>
       <text x="${cx}" y="${cy + 3.2}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" font-weight="800" fill="#FFFFFF">${esc(stepNum)}</text>
     </g>
   `;
@@ -226,7 +234,7 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
   const meta = ARCHETYPE_METADATA[code] || ARCHETYPE_METADATA.D05;
   const W = 1440;
   const H = 820;
-  const verSlug = String(graph.version || 'v1_0_1').replace(/[^a-zA-Z0-9]/g, '_');
+  const verSlug = String(graph.version || 'Baseline').replace(/[^a-zA-Z0-9]/g, '_');
   const diffFlag = options.showDiff === false ? 'base' : 'diff';
   const uid = `vs_${code}_${detailLevel}_${verSlug}_${diffFlag}`;
 
@@ -235,8 +243,8 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
     .replace(/\s*filter="url\(#vs-[^"]+\)"/g, '')
     .replace(/url\(#(arr-(?:slate|blue|green|rose|violet|amber))\)/g, `url(#${uid}_$1)`);
 
-  // For D01..D04 and D06..D18 (when not in DYNAMIC_MULTI_TIER mode): Synchronize in-place REMOVE and REPLACE/MODIFY mutations on baseline SVG nodes!
-  const isDynamicMultiTier = code === 'D05' || graph.renderMode === 'DYNAMIC_MULTI_TIER';
+  // For D01..D04 and D06..D18 (when not promoted to multi-tier): Synchronize in-place REMOVE and REPLACE/MODIFY mutations on baseline SVG nodes!
+  const isDynamicMultiTier = Boolean(code === 'D05' || graph.renderMode === 'DYNAMIC_MULTI_TIER' || options.promotedFromBespoke);
   const baselineArchNodes = extractRenderedSvgArchNodes(scopedInner);
   const baselineIdSet = new Set(baselineArchNodes.map((b) => b.id));
   const graphNodeMap = new Map((graph.nodes || []).map((n) => [n.id, n]));
@@ -300,23 +308,14 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
     scopedInner = rebuiltInner;
   }
 
-  // Newly added nodes on D01..D04 and D06..D18 that are not part of the baseline archetype stage
-  const extraAddedNodes =
-    !isDynamicMultiTier
-      ? (graph.nodes || []).filter((n) => !baselineIdSet.has(n.id) && (n.changeStatus === 'added' || (n.addedInVersion && n.addedInVersion !== 'v1.0.1')))
-      : [];
-  const extraModifiedNodes =
-    !isDynamicMultiTier
-      ? (graph.nodes || []).filter((n) => baselineIdSet.has(n.id) && n.changeStatus === 'modified')
-      : [];
-
-  const d05CustomMutations = isDynamicMultiTier
-    ? (graph.nodes || []).filter((n) => n.addedInVersion && !['v1.0.1', 'v1.0.2', 'v1.0.3'].includes(n.addedInVersion))
-    : [];
-
-  const allBannerMutations = isDynamicMultiTier ? d05CustomMutations : [...extraAddedNodes, ...extraModifiedNodes];
+  const allBannerMutations = (graph.nodes || []).filter(
+    (n) =>
+      n.changeStatus === 'added' ||
+      n.changeStatus === 'modified' ||
+      (n.addedInVersion && !['Baseline', 'Draft', 'Turn-1', 'Turn-2', 'Turn-3'].includes(n.addedInVersion))
+  );
   let mutationBanner = '';
-  if (allBannerMutations.length > 0) {
+  if (allBannerMutations.length > 0 && options.showDiff !== false) {
     const uniqueNames = [
       ...new Set(
         allBannerMutations.map((n) => {
@@ -329,68 +328,11 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
       uniqueNames.length <= 3
         ? uniqueNames.join(' · ')
         : `${uniqueNames.slice(0, 3).join(' · ')} (+${uniqueNames.length - 3})`;
-    const bFit = fitText(`AST DELTA (${graph.version}): ${compactNames}`, 332, 9.0, 7.4, 0.64);
+    const bFit = fitText(`AST DELTA: ${compactNames}`, 332, 9.0, 7.4, 0.64);
     mutationBanner = `
       <g transform="translate(758, 24)">
         <rect x="0" y="0" width="368" height="24" rx="12" fill="#ECFDF5" stroke="#10B981" stroke-width="1.3"/>
         <text x="184" y="15.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="${bFit.fontSize}" font-weight="700" fill="#065F46">${esc(bFit.text)}</text>
-      </g>
-    `;
-  }
-
-  // Uncapped Multi-Row Extension Tier for D01..D04 and D06..D18 (renders 100% of added nodes, zero .slice(-4) truncation!)
-  let stageTransformAttr = '';
-  let liveMutationDockSvg = '';
-  if (extraAddedNodes.length > 0 && code !== 'D05') {
-    stageTransformAttr = 'transform="translate(0, 15) scale(1, 0.79)"';
-    const count = extraAddedNodes.length;
-    const rows = count <= 4 ? [extraAddedNodes] : [extraAddedNodes.slice(0, Math.ceil(count / 2)), extraAddedNodes.slice(Math.ceil(count / 2))];
-    const rowCount = rows.length;
-    const cardH = rowCount === 1 ? 96 : 52;
-
-    let cardsMarkup = '';
-    rows.forEach((rowItems, rIdx) => {
-      const rLen = rowItems.length;
-      const cardW = rLen === 1 ? 380 : rLen === 2 ? 360 : rLen === 3 ? 330 : Math.min(308, Math.floor((1340 - (rLen - 1) * 18) / rLen));
-      const gapX = rLen <= 3 ? 24 : 18;
-      const totalW = rLen * cardW + (rLen - 1) * gapX;
-      const startX = Math.max(36, Math.round((W - totalW) / 2));
-      const cy = rowCount === 1 ? 662 : 656 + rIdx * (cardH + 6);
-
-      rowItems.forEach((mn, idx) => {
-        const cx = startX + idx * (cardW + gapX);
-        const scopeHint = mn.scopedTargetTitle ? `Wired → ${mn.scopedTargetTitle}` : mn.pill || 'Live AST Node';
-        cardsMarkup += drawNodeBox({
-          id: mn.id,
-          x: cx,
-          y: cy,
-          w: cardW,
-          h: cardH,
-          title: mn.title,
-          subtitle: rowCount === 1 ? mn.subtitle || 'Prompt-Synthesized Architecture Node' : '',
-          badge: mn.scopedTargetTitle ? `SCOPED: ${mn.scopedTargetTitle.slice(0, 14)}` : `AST DELTA ${mn.addedInVersion || graph.version}`,
-          metric: rowCount === 1 ? scopeHint : '',
-          l300Spec: mn.l300Spec || '',
-          accentColor: mn.changeStatus === 'modified' ? '#7C3AED' : '#059669',
-          changeStatus: mn.changeStatus || 'added',
-          versionTag: mn.addedInVersion || graph.version,
-          iconKey: mn.iconKey,
-          scopedNodeId: options.scopedNodeId
-        });
-        if (idx > 0) {
-          const prevRight = cx - gapX;
-          const midY = Math.round(cy + cardH / 2);
-          cardsMarkup += `<line class="arch-edge" x1="${prevRight}" y1="${midY}" x2="${cx - 4}" y2="${midY}" stroke="#10B981" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#${uid}_arr-green)"/>`;
-        }
-      });
-    });
-
-    liveMutationDockSvg = `
-      <g class="live-mutation-extension-tier">
-        <rect x="20" y="630" width="1400" height="138" rx="12" fill="#ECFDF5" fill-opacity="0.65" stroke="#10B981" stroke-width="1.8" stroke-dasharray="6 4"/>
-        <rect x="36" y="636" width="440" height="18" rx="5" fill="#10B981"/>
-        <text x="256" y="648.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9.0" font-weight="800" fill="#FFFFFF">LIVE PROMPT-MUTATED ARCHITECTURE EXTENSION TIER (${esc(graph.version)})</text>
-        ${cardsMarkup}
       </g>
     `;
   }
@@ -404,8 +346,9 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
   const lodBg = detailLevel === 'L300' ? '#EEF2FF' : detailLevel === 'L100' ? '#FFFBEB' : '#F1F5F9';
   const lodColor = detailLevel === 'L300' ? '#4338CA' : detailLevel === 'L100' ? '#B45309' : '#334155';
 
-  const headerTitleMaxW = allBannerMutations.length > 0 ? 685 : 1060;
-  const titleFit = fitText(`${code} — ${graph.title}`, headerTitleMaxW, 16.5, 11.5, 0.58);
+  const headerTitleMaxW = allBannerMutations.length > 0 && options.showDiff !== false ? 685 : 1060;
+  const rawSvgTitle = graph.isCustomDiagram ? String(graph.title || 'Custom Architecture') : `${code} — ${graph.title}`;
+  const titleFit = fitText(rawSvgTitle, headerTitleMaxW, 16.5, 11.5, 0.58);
   const subFit = fitText(graph.subtitle || '', headerTitleMaxW, 11, 9.2, 0.54);
 
   let annotationsSvg = '';
@@ -498,7 +441,7 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
     whiteboardOverlaySvg += `<g class="vs-elbow-waypoints-layer">${wpMarkup}</g>`;
   }
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" data-diagram-code="${esc(code)}" data-archetype="${esc(isDynamicMultiTier && code !== 'D05' ? 'MULTI_TIER_CLOUD_DIFF' : meta.archetype)}" data-render-mode="${esc(graph.renderMode || 'BESPOKE_ARCHETYPE')}" data-version="${esc(graph.version)}" data-detail-level="${esc(detailLevel)}" style="background:#F8FAFC; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; user-select:none;">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="100%" height="100%" data-diagram-code="${esc(code)}" data-archetype="${esc(isDynamicMultiTier && code !== 'D05' ? 'MULTI_TIER_CLOUD_DIFF' : meta.archetype)}" data-render-mode="${esc(options.promotedFromBespoke ? 'DYNAMIC_MULTI_TIER' : graph.renderMode || 'BESPOKE_ARCHETYPE')}" data-version="${esc(graph.version || 'Baseline')}" data-detail-level="${esc(detailLevel)}" style="background:#F8FAFC; font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif; user-select:none;">
   <defs>
     <pattern id="${uid}_grid" width="24" height="24" patternUnits="userSpaceOnUse">
       <circle cx="2" cy="2" r="1" fill="#CBD5E1" opacity="0.55"/>
@@ -535,12 +478,16 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
     <text x="36" y="34" font-size="${titleFit.fontSize}" font-weight="800" fill="#0F172A" letter-spacing="-0.02em">${esc(titleFit.text)}</text>
     <text x="36" y="54" font-size="${subFit.fontSize}" font-weight="500" fill="#64748B">${esc(subFit.text)}</text>
     ${mutationBanner}
-    <!-- Right Archetype, Version, Fidelity Level & Geometry Pill Cluster -->
+    <!-- Right Archetype, Topology Count, Fidelity Level & Geometry Pill Cluster -->
     <g transform="translate(1140, 14)">
       <rect x="0" y="0" width="280" height="22" rx="6" fill="${meta.bg}" stroke="${meta.color}" stroke-width="1"/>
-      <text x="140" y="14.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="${meta.color}">ARCHETYPE: ${esc(isDynamicMultiTier && code !== 'D05' ? '5-TIER CLOUD + AST DIFF' : meta.badge)}</text>
+      <text x="140" y="14.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="${meta.color}">${esc(
+        graph.isCustomDiagram
+          ? `CUSTOM ${Math.max(1, new Set((graph.nodes || []).map((n) => n.zoneId || 'z3')).size)}-TIER TOPOLOGY + AST`
+          : `ARCHETYPE: ${isDynamicMultiTier && code !== 'D05' ? 'MULTI-TIER + CONNECTED AST' : meta.badge}`
+      )}</text>
       <rect x="0" y="26" width="84" height="20" rx="5" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
-      <text x="42" y="39.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="9" font-weight="700" fill="#334155">REV ${esc(graph.version)}</text>
+      <text x="42" y="39.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.8" font-weight="700" fill="#334155">${esc(`${(graph.nodes || []).length}N · ${(graph.edges || []).length}E`)}</text>
       <rect x="90" y="26" width="94" height="20" rx="5" fill="${lodBg}" stroke="${lodColor}50" stroke-width="1"/>
       <text x="137" y="39.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.8" font-weight="800" fill="${lodColor}">${esc(lodLabel)}</text>
       <rect x="190" y="26" width="90" height="20" rx="5" fill="#ECFDF5" stroke="#6EE7B7" stroke-width="1"/>
@@ -548,11 +495,10 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
     </g>
   </g>
 
-  <!-- Main Bespoke Archetype Stage (y=82..768) -->
-  <g class="diagram-archetype-stage" ${stageTransformAttr}>
+  <!-- Main Bespoke Archetype Stage (y=82..768, 1:1 Unscaled Geometry) -->
+  <g class="diagram-archetype-stage">
     ${scopedInner}
   </g>
-  ${liveMutationDockSvg}
   ${annotationsSvg}
   ${whiteboardOverlaySvg}
 
@@ -560,9 +506,19 @@ function wrapSvgCanvas(graph, innerContent, options = {}) {
   <g class="diagram-footer-bar" transform="translate(0, 776)">
     <rect x="0" y="0" width="${W}" height="44" fill="#FFFFFF"/>
     <line x1="0" y1="0" x2="${W}" y2="0" stroke="#E2E8F0" stroke-width="1"/>
-    <text x="24" y="26" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#475569">${esc(fitText(`${graph.phaseBadge || 'LIFECYCLE'} · ${graph.phaseTitle || ''}`, 520, 10, 8.5, 0.6).text)}</text>
+    <text x="24" y="26" font-family="JetBrains Mono, monospace" font-size="10" font-weight="600" fill="#475569">${esc(
+      fitText(
+        graph.isCustomDiagram
+          ? `STANDALONE DIAGRAM (${code}) · ${(graph.nodes || []).length} Nodes · ${(graph.edges || []).length} Edges`
+          : `${graph.phaseBadge || 'LIFECYCLE'} · ${graph.phaseTitle || ''}`,
+        520,
+        10,
+        8.5,
+        0.6
+      ).text
+    )}</text>
     <text x="835" y="26" text-anchor="middle" font-size="10" font-weight="600" fill="#64748B">Click any node to scope prompt mutations · ${esc(lodLabel)}</text>
-    <text x="1416" y="26" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#059669">CHROME DOM VERIFIED · 1440×820 16:9</text>
+    <text x="1416" y="26" text-anchor="end" font-family="JetBrains Mono, monospace" font-size="10" font-weight="700" fill="#047857">CHROME DOM VERIFIED · 1440×820 16:9</text>
   </g>
 </svg>`;
 }
@@ -601,7 +557,6 @@ function drawNodeBox({
     if (liveNode.l300Spec) l300Spec = liveNode.l300Spec;
     if (liveNode.iconKey) iconKey = liveNode.iconKey;
     changeStatus = liveNode.changeStatus || 'modified';
-    versionTag = liveNode.addedInVersion || activeRenderGraph.version || versionTag;
   }
   const sizeOv =
     (activeRenderGraph && activeRenderGraph.nodeSizeOverrides && activeRenderGraph.nodeSizeOverrides[id]) ||
@@ -657,19 +612,30 @@ function drawNodeBox({
 
   let diffPill = '';
   if (isAdded || isMod) {
-    const dText = isAdded ? `+ADDED ${versionTag}` : `~UPDATED ${versionTag}`;
-    const dFill = isAdded ? '#10B981' : '#7C3AED';
-    const dW = Math.min(w * 0.46, dText.length * 5.6 + 12);
+    const dText = isAdded ? '+ADDED' : '~UPDATED';
+    const dFill = isAdded ? '#047857' : '#6D28D9';
+    const dW = Math.min(w * 0.44, dText.length * 6.0 + 14);
     diffPill = `
       <rect x="${w - dW - 8}" y="7" width="${dW}" height="15" rx="7.5" fill="${dFill}"/>
       <text x="${w - dW / 2 - 8}" y="17.5" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.2" font-weight="700" fill="#FFFFFF">${esc(dText)}</text>
     `;
   }
 
+  const badgeTextColor =
+    accentColor === '#10B981' || accentColor === '#059669'
+      ? '#047857'
+      : accentColor === '#D97706' || accentColor === '#F59E0B'
+        ? '#B45309'
+        : accentColor === '#0EA5E9' || accentColor === '#0284C7'
+          ? '#0369A1'
+          : accentColor === '#DB2777' || accentColor === '#EC4899'
+            ? '#BE185D'
+            : accentColor;
+
   const shadowRect = isScoped
     ? `<rect x="-4" y="-4" width="${w + 8}" height="${h + 8}" rx="${rx + 3}" fill="#2563EB" fill-opacity="0.18"/>`
     : isAdded
-      ? `<rect x="-3" y="-3" width="${w + 6}" height="${h + 6}" rx="${rx + 2}" fill="#10B981" fill-opacity="0.16"/>`
+      ? `<rect x="-3" y="-3" width="${w + 6}" height="${h + 6}" rx="${rx + 2}" fill="#059669" fill-opacity="0.14"/>`
       : isMod
         ? `<rect x="-3" y="-3" width="${w + 6}" height="${h + 6}" rx="${rx + 2}" fill="#7C3AED" fill-opacity="0.16"/>`
         : `<rect x="2" y="3" width="${w}" height="${h}" rx="${rx}" fill="#0F172A" fill-opacity="0.05"/>`;
@@ -749,8 +715,8 @@ function drawNodeBox({
       <rect class="node-bounding-rect" x="0" y="0" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${finalStroke}" stroke-width="${strokeW}"/>
       ${hasHeader ? `<rect x="1" y="1" width="${w - 2}" height="27" rx="${Math.max(4, rx - 1)}" fill="${headerFill}"/>` : `<rect x="0" y="10" width="4" height="${h - 20}" rx="2" fill="${accentColor}"/>`}
       ${bFit && !hasHeader ? `
-        <rect x="${padX}" y="7" width="${Math.min(w * 0.52, bFit.text.length * 5.6 + 12)}" height="15" rx="4" fill="${accentColor}15"/>
-        <text x="${padX + 6}" y="17.5" font-family="JetBrains Mono, monospace" font-size="${bFit.fontSize}" font-weight="700" fill="${accentColor}">${esc(bFit.text)}</text>
+        <rect x="${padX}" y="7" width="${Math.min(w * 0.52, bFit.text.length * 5.6 + 12)}" height="15" rx="4" fill="${badgeTextColor}14"/>
+        <text x="${padX + 6}" y="17.5" font-family="JetBrains Mono, monospace" font-size="${bFit.fontSize}" font-weight="700" fill="${badgeTextColor}">${esc(bFit.text)}</text>
       ` : ''}
       ${diffPill}
       ${iconBadgeSvg}
@@ -823,7 +789,7 @@ function renderD01ValueStream(graph, options) {
   const row2Cards = [
     { id: 'n6', title: 'Edge CDN & Geo-Router', sub: 'Cloudflare + Cloud Armor WAF', metric: 'TTFB: 14ms Global' },
     { id: 'n7', title: 'Zero-Trust IAP Identity', sub: 'Device posture + OIDC token', metric: 'Token Mint: 6ms' },
-    { id: 'n8', title: 'Gemini 3.8 RAG Co-Pilot', sub: 'Hybrid Vector + Spanner Graph', metric: 'Grounded: 99.2%' },
+    { id: 'n8', title: 'Gemini 3.1 RAG Co-Pilot', sub: 'Hybrid Vector + Spanner Graph', metric: 'Grounded: 99.2%' },
     { id: 'n9', title: 'Spanner Saga Coordinator', sub: 'TrueTime distributed commit', metric: 'RPO = 0s · 99.999%' },
     { id: 'n10', title: 'Pub/Sub Lifecycle Engine', sub: 'Real-time usage triggers', metric: 'Lag < 250ms' }
   ];
@@ -1065,7 +1031,7 @@ function renderD02UxWireframeFlow(graph, options) {
     title: 'ADR Sign-Off & GitOps PR',
     route: 'https://app.verispec.io/deploy-pr',
     elements: [
-      { label: '[Diff] +2 Added · ~1 Upgraded (v1.0.3)', bg: '#ECFDF5', border: '#6EE7B7', color: '#065F46' },
+      { label: '[Diff] +2 Added · ~1 Upgraded (Turn-3)', bg: '#ECFDF5', border: '#6EE7B7', color: '#065F46' },
       { label: '[Gate] 5/5 Geometry & Security PASS', bg: '#EFF6FF', border: '#93C5FD', color: '#1D4ED8' },
       { label: '[Sign] 21 CFR Part 11 HMAC Token', bg: '#F8FAFC' }
     ],
@@ -1336,7 +1302,7 @@ function renderD04C4Topology(graph, options) {
   // Right Column: C4 External Systems (x=1144..1412)
   const externals = [
     { id: 'e1', y: 140, title: 'Stripe Payment Network', tech: '[External System · PCI-DSS]', sub: 'Processes credit card & ACH settlements' },
-    { id: 'e2', y: 360, title: 'Vertex AI Gemini 4 Argon', tech: '[External System · Foundation LLM]', sub: 'Provides frontier reasoning & embeddings' },
+    { id: 'e2', y: 360, title: 'Vertex AI Gemini 3.1 Pro', tech: '[External System · Foundation LLM]', sub: 'Provides frontier reasoning & embeddings' },
     { id: 'e3', y: 580, title: 'SAP S/4HANA Global ERP', tech: '[External System · Finance Ledger]', sub: 'Receives settled invoices & tax records' }
   ];
 
@@ -1384,12 +1350,17 @@ function renderD04C4Topology(graph, options) {
 }
 
 // ============================================================================
-// D05: 5-TIER CLOUD-NATIVE MICROSERVICES & AI + LIVE AST DIFF (v1.0.1..v1.0.3)
+// D05: 5-TIER CLOUD-NATIVE MICROSERVICES & AI + LIVE AST DIFF (Turn-1..Turn-3)
 // ============================================================================
 function renderD05MultiTierCloud(graph, options = {}) {
-  const ver = graph.version || 'v1.0.3';
+  const ver = graph.version || 'Turn-3';
   const showDiff = options.showDiff !== false;
   const nodes = graph.nodes || [];
+  const useDynamicGraphZonesAndEdges = Boolean(
+    graph.isCustomDiagram ||
+      options.promotedFromBespoke ||
+      String(graph.code || '').toUpperCase() !== 'D05'
+  );
 
   const CANONICAL_IDS = new Set([
     'node_web_storefront',
@@ -1407,30 +1378,22 @@ function renderD05MultiTierCloud(graph, options = {}) {
   ]);
 
   const customAddedNodes = nodes.filter((n) => !CANONICAL_IDS.has(n.id));
-  const findNode = (id) => nodes.find((n) => n.id === id);
 
-  const zones = [
-    { id: 'z1', name: 'ZONE 1 · CLIENT', sub: 'Web & Mobile', x: 24, w: 248, cardX: 38, cardW: 220, bg: '#EFF6FF', border: '#93C5FD', color: '#1D4ED8', accent: '#2563EB' },
-    { id: 'z2', name: 'ZONE 2 · EDGE WAF', sub: 'Zero-Trust Ingress', x: 292, w: 262, cardX: 306, cardW: 234, bg: '#FFFBEB', border: '#FCD34D', color: '#B45309', accent: '#D97706' },
-    { id: 'z3', name: 'ZONE 3 · GKE MESH', sub: 'Core Microservices', x: 574, w: 268, cardX: 588, cardW: 240, bg: '#F5F3FF', border: '#C4B5FD', color: '#6D28D9', accent: '#7C3AED' },
-    { id: 'z4', name: 'ZONE 4 · AI & DLP', sub: 'Vertex & Guardrails', x: 862, w: 268, cardX: 876, cardW: 240, bg: '#FDF2F8', border: '#F9A8D4', color: '#BE185D', accent: '#DB2777' },
-    { id: 'z5', name: 'ZONE 5 · DATA HA', sub: 'Stateful Storage & BI', x: 1150, w: 266, cardX: 1164, cardW: 238, bg: '#ECFDF5', border: '#6EE7B7', color: '#047857', accent: '#059669' }
-  ];
-
-  let svg = '';
-  zones.forEach((z) => {
-    svg += `
-      <rect x="${z.x}" y="94" width="${z.w}" height="656" rx="14" fill="${z.bg}" fill-opacity="0.45" stroke="${z.border}" stroke-width="1.6" stroke-dasharray="6 4"/>
-      <rect x="${z.x + 12}" y="106" width="${z.w - 24}" height="40" rx="8" fill="#FFFFFF" stroke="${z.border}" stroke-width="1.2"/>
-      <text x="${z.x + z.w / 2}" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="800" fill="${z.color}">${esc(z.name)}</text>
-      <text x="${z.x + z.w / 2}" y="139" text-anchor="middle" font-size="9.5" font-weight="600" fill="#64748B">${esc(z.sub)}</text>
-    `;
+  // Dynamically bucket all current nodes in graph.nodes across up to 5 zones and sort by slotOrder
+  const zoneOrder = ['z1', 'z2', 'z3', 'z4', 'z5'];
+  const buckets = { z1: [], z2: [], z3: [], z4: [], z5: [] };
+  const zoneIdAliasMap = new Map();
+  const origZoneBySlot = new Map();
+  (graph.zones || []).forEach((gz, idx) => {
+    const slot = buckets[gz.id] ? gz.id : zoneOrder[Math.min(idx, zoneOrder.length - 1)];
+    zoneIdAliasMap.set(gz.id, slot);
+    if (!origZoneBySlot.has(slot)) {
+      origZoneBySlot.set(slot, gz);
+    }
   });
 
-  // Dynamically bucket all current nodes in graph.nodes across the 5 zones and sort by slotOrder
-  const buckets = { z1: [], z2: [], z3: [], z4: [], z5: [] };
   for (const n of nodes) {
-    const zid = buckets[n.zoneId] ? n.zoneId : 'z5';
+    const zid = buckets[n.zoneId] ? n.zoneId : zoneIdAliasMap.get(n.zoneId) || 'z5';
     buckets[zid].push(n);
   }
   for (const zid of Object.keys(buckets)) {
@@ -1438,11 +1401,9 @@ function renderD05MultiTierCloud(graph, options = {}) {
   }
 
   // Balance overflow if any single zone has > 4 nodes (e.g. adding Looker + BigQuery + Redshift into z5)
-  const zoneOrder = ['z1', 'z2', 'z3', 'z4', 'z5'];
   for (let i = zoneOrder.length - 1; i >= 0; i--) {
     const zid = zoneOrder[i];
     while (buckets[zid].length > 4) {
-      // Find nearest neighbor zone with < 4 nodes
       const neighbor =
         [i - 1, i + 1, i - 2, i + 2, i - 3]
           .filter((idx) => idx >= 0 && idx < zoneOrder.length)
@@ -1453,6 +1414,67 @@ function renderD05MultiTierCloud(graph, options = {}) {
       buckets[neighbor].push(overflowNode);
     }
   }
+
+  const CUSTOM_ZONE_META = {
+    z1: { shortRole: 'CLIENT TIER', sub: 'Web & Mobile Ingress', bg: '#EFF6FF', border: '#93C5FD', color: '#1D4ED8', accent: '#2563EB' },
+    z2: { shortRole: 'EDGE & GATEWAY', sub: 'WAF & API Routing', bg: '#FFFBEB', border: '#FCD34D', color: '#B45309', accent: '#D97706' },
+    z3: { shortRole: 'APP & API TIER', sub: 'Core Services & Mesh', bg: '#F5F3FF', border: '#C4B5FD', color: '#6D28D9', accent: '#7C3AED' },
+    z4: { shortRole: 'AI & WORKERS', sub: 'Models & Async Jobs', bg: '#FDF2F8', border: '#F9A8D4', color: '#BE185D', accent: '#DB2777' },
+    z5: { shortRole: 'STATEFUL DATA', sub: 'Databases & Analytics', bg: '#ECFDF5', border: '#6EE7B7', color: '#047857', accent: '#047857' }
+  };
+
+  let zones;
+  if (useDynamicGraphZonesAndEdges) {
+    const occupiedIds = zoneOrder.filter((zid) => buckets[zid].length > 0);
+    const activeIds = occupiedIds.length > 0 ? occupiedIds : ['z1', 'z3', 'z5'];
+    const k = activeIds.length;
+    const totalSpanW = 1392; // x = 24..1416
+    const interZoneGap = k <= 1 ? 0 : k === 2 ? 92 : k === 3 ? 54 : k === 4 ? 32 : 20;
+    const tierW = k === 1 ? 640 : Math.floor((totalSpanW - (k - 1) * interZoneGap) / k);
+    const cardW = k === 1 ? 340 : k === 2 ? 320 : k === 3 ? 296 : k === 4 ? 264 : 226;
+    const startX0 = k === 1 ? Math.round(24 + (totalSpanW - tierW) / 2) : 24;
+    zones = activeIds.map((zid, tIdx) => {
+      const meta = CUSTOM_ZONE_META[zid] || CUSTOM_ZONE_META.z3;
+      const origZone = origZoneBySlot.get(zid);
+      const zx = startX0 + tIdx * (tierW + interZoneGap);
+      const cardX = zx + Math.round((tierW - cardW) / 2);
+      const customHeaderName =
+        origZone && origZone.title && !graph.isCustomDiagram
+          ? origZone.title
+          : `TIER ${tIdx + 1} · ${meta.shortRole}`;
+      return {
+        id: zid,
+        name: customHeaderName,
+        sub: (origZone && origZone.subtitle) || meta.sub,
+        x: zx,
+        w: tierW,
+        cardX,
+        cardW,
+        bg: meta.bg,
+        border: meta.border,
+        color: meta.color,
+        accent: meta.accent
+      };
+    });
+  } else {
+    zones = [
+      { id: 'z1', name: 'ZONE 1 · CLIENT', sub: 'Web & Mobile', x: 24, w: 248, cardX: 38, cardW: 220, bg: '#EFF6FF', border: '#93C5FD', color: '#1D4ED8', accent: '#2563EB' },
+      { id: 'z2', name: 'ZONE 2 · EDGE WAF', sub: 'Zero-Trust Ingress', x: 292, w: 262, cardX: 306, cardW: 234, bg: '#FFFBEB', border: '#FCD34D', color: '#B45309', accent: '#D97706' },
+      { id: 'z3', name: 'ZONE 3 · GKE MESH', sub: 'Core Microservices', x: 574, w: 268, cardX: 588, cardW: 240, bg: '#F5F3FF', border: '#C4B5FD', color: '#6D28D9', accent: '#7C3AED' },
+      { id: 'z4', name: 'ZONE 4 · AI & DLP', sub: 'Vertex & Guardrails', x: 862, w: 268, cardX: 876, cardW: 240, bg: '#FDF2F8', border: '#F9A8D4', color: '#BE185D', accent: '#DB2777' },
+      { id: 'z5', name: 'ZONE 5 · DATA HA', sub: 'Stateful Storage & BI', x: 1150, w: 266, cardX: 1164, cardW: 238, bg: '#ECFDF5', border: '#6EE7B7', color: '#047857', accent: '#059669' }
+    ];
+  }
+
+  let svg = '';
+  zones.forEach((z) => {
+    svg += `
+      <rect x="${z.x}" y="94" width="${z.w}" height="656" rx="14" fill="${z.bg}" fill-opacity="0.45" stroke="${z.border}" stroke-width="1.6" stroke-dasharray="6 4"/>
+      <rect x="${z.x + 12}" y="106" width="${z.w - 24}" height="40" rx="8" fill="#FFFFFF" stroke="${z.border}" stroke-width="1.2"/>
+      <text x="${z.x + z.w / 2}" y="124" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="800" fill="${z.color}">${esc(z.name)}</text>
+      <text x="${z.x + z.w / 2}" y="139" text-anchor="middle" font-size="9.5" font-weight="600" fill="#64748B">${esc(z.sub)}</text>
+    `;
+  });
 
   const nodeBoxMap = new Map();
 
@@ -1507,7 +1529,7 @@ function renderD05MultiTierCloud(graph, options = {}) {
                             : 'RELATIONAL DB'
                           : n.id === 'node_kafka_bus'
                             ? 'EVENT BACKBONE'
-                            : z.name.split('·')[1]?.trim() || 'CLOUD SERVICE';
+                            : z.name.split('·')[1]?.trim() || z.name.slice(0, 18) || 'CLOUD SERVICE';
 
       svg += drawNodeBox({
         id: n.id,
@@ -1543,13 +1565,103 @@ function renderD05MultiTierCloud(graph, options = {}) {
     });
   });
 
-  // Base Orthogonal H-V-H Channel Connectors using exact rendered node positions
-  const bWeb = nodeBoxMap.get('node_web_storefront') || buckets.z1[0] && nodeBoxMap.get(buckets.z1[0].id);
-  const bMob = nodeBoxMap.get('node_mobile_passkey') || buckets.z1[1] && nodeBoxMap.get(buckets.z1[1].id);
+  // Dynamic / Promoted / Custom Diagrams: render exact directed graph.edges via obstacle-free Manhattan channels
+  if (useDynamicGraphZonesAndEdges) {
+    const edgeColors = ['#2563EB', '#047857', '#7C3AED', '#D97706', '#0EA5E9'];
+    const arrIds = ['arr-blue', 'arr-green', 'arr-violet', 'arr-amber', 'arr-blue'];
+    const pairEdgeCounts = new Map();
+    const pairEdgeSeen = new Map();
+    (graph.edges || []).forEach((edge) => {
+      const sb = nodeBoxMap.get(edge.sourceNodeId || edge.from || edge.source);
+      const tb = nodeBoxMap.get(edge.targetNodeId || edge.to || edge.target);
+      if (!sb || !tb || sb.id === tb.id) return;
+      const key = `${sb.zoneIdx}->${tb.zoneIdx}`;
+      pairEdgeCounts.set(key, (pairEdgeCounts.get(key) || 0) + 1);
+    });
+
+    (graph.edges || []).forEach((edge, idx) => {
+      const srcBox = nodeBoxMap.get(edge.sourceNodeId || edge.from || edge.source);
+      const targetBox = nodeBoxMap.get(edge.targetNodeId || edge.to || edge.target);
+      if (!srcBox || !targetBox || srcBox.id === targetBox.id) return;
+      const edgeId = edge.id || `e_${idx + 1}`;
+      const edgeMetaAttrs = `data-edge-id="${esc(edgeId)}" data-source-id="${esc(srcBox.id)}" data-target-id="${esc(targetBox.id)}"`;
+      const stroke = edgeColors[idx % edgeColors.length];
+      const arr = arrIds[idx % arrIds.length];
+      const calloutNum = String(idx + 1);
+      const pairKey = `${srcBox.zoneIdx}->${targetBox.zoneIdx}`;
+      const seenIdx = pairEdgeSeen.get(pairKey) || 0;
+      pairEdgeSeen.set(pairKey, seenIdx + 1);
+      const totalInPair = pairEdgeCounts.get(pairKey) || 1;
+
+      if (targetBox.zoneIdx === srcBox.zoneIdx && targetBox.rowIdx !== srcBox.rowIdx) {
+        if (Math.abs(targetBox.rowIdx - srcBox.rowIdx) === 1) {
+          const y1 = targetBox.rowIdx > srcBox.rowIdx ? srcBox.bottom : srcBox.y;
+          const y2 = targetBox.rowIdx > srcBox.rowIdx ? targetBox.y - 4 : targetBox.bottom + 4;
+          svg += `<line class="arch-edge" ${edgeMetaAttrs} x1="${srcBox.cx}" y1="${y1}" x2="${targetBox.cx}" y2="${y2}" stroke="${stroke}" stroke-width="2.2" marker-end="url(#${arr})"/>`;
+          svg += drawStepCallout(srcBox.cx + 30, Math.round((y1 + y2) / 2), calloutNum, stroke);
+        } else {
+          const gutterX = srcBox.right + 10 + (seenIdx % 2) * 5;
+          svg += `<path class="arch-edge" ${edgeMetaAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${gutterX} ${srcBox.cy} L ${gutterX} ${targetBox.cy} L ${targetBox.right + 4} ${targetBox.cy}" fill="none" stroke="${stroke}" stroke-width="2.2" marker-end="url(#${arr})"/>`;
+          svg += drawStepCallout(gutterX, Math.round((srcBox.cy + targetBox.cy) / 2), calloutNum, stroke);
+        }
+      } else if (targetBox.zoneIdx === srcBox.zoneIdx + 1) {
+        const gapW = targetBox.x - srcBox.right;
+        const baseMidX = Math.round((srcBox.right + targetBox.x) / 2);
+        const chanX = baseMidX + (totalInPair > 1 ? Math.round((seenIdx - (totalInPair - 1) / 2) * 6) : 0);
+        const midY = Math.round((srcBox.cy + targetBox.cy) / 2);
+        const calloutY = totalInPair > 1 ? midY + (seenIdx - (totalInPair - 1) / 2) * 28 : midY;
+        svg += `<path class="arch-edge" ${edgeMetaAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${chanX} ${srcBox.cy} L ${chanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="${stroke}" stroke-width="2.2" marker-end="url(#${arr})"/>`;
+        svg += drawStepCallout(chanX, Math.round(calloutY), calloutNum, stroke);
+        if (edge.label && gapW >= 120 && totalInPair === 1 && options.detailLevel !== 'L100') {
+          const cleanLbl = String(edge.label).slice(0, 18);
+          const pillW = Math.min(gapW - 22, Math.max(68, Math.round(cleanLbl.length * 6.2 + 16)));
+          const pillY = Math.round(calloutY) - 28;
+          svg += `
+            <rect x="${Math.round(chanX - pillW / 2)}" y="${pillY - 9}" width="${pillW}" height="18" rx="9" fill="#FFFFFF" stroke="${stroke}" stroke-width="1.2"/>
+            <text x="${chanX}" y="${pillY + 3.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.8" font-weight="700" fill="${stroke}">${esc(cleanLbl)}</text>
+          `;
+        }
+      } else if (targetBox.zoneIdx > srcBox.zoneIdx + 1) {
+        const srcRightCard = srcBox.right;
+        const nextZoneCardLeft = zones[srcBox.zoneIdx + 1] ? zones[srcBox.zoneIdx + 1].cardX : srcRightCard + 28;
+        const srcChanX = Math.round((srcRightCard + nextZoneCardLeft) / 2) - (seenIdx % 3) * 4;
+        const prevZoneCardRight = zones[targetBox.zoneIdx - 1]
+          ? zones[targetBox.zoneIdx - 1].cardX + zones[targetBox.zoneIdx - 1].cardW
+          : targetBox.x - 28;
+        const dstChanX = Math.round((prevZoneCardRight + targetBox.x) / 2) + (seenIdx % 3) * 4;
+        const busY = Math.min(744, 656 + (idx % 7) * 12);
+        svg += `<path class="arch-edge" ${edgeMetaAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${srcChanX} ${srcBox.cy} L ${srcChanX} ${busY} L ${dstChanX} ${busY} L ${dstChanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="${stroke}" stroke-width="2.2" marker-end="url(#${arr})"/>`;
+        svg += drawStepCallout(dstChanX, targetBox.cy + (seenIdx % 2 === 1 ? -24 : 0), calloutNum, stroke);
+      } else {
+        // Backward inter-zone edge (targetBox.zoneIdx < srcBox.zoneIdx)
+        const leftZoneCardRight = zones[srcBox.zoneIdx - 1]
+          ? zones[srcBox.zoneIdx - 1].cardX + zones[srcBox.zoneIdx - 1].cardW
+          : srcBox.x - 28;
+        const leftChanX = Math.round((leftZoneCardRight + srcBox.x) / 2) + (seenIdx % 3) * 4;
+        if (targetBox.zoneIdx === srcBox.zoneIdx - 1) {
+          svg += `<path class="arch-edge" ${edgeMetaAttrs} d="M ${srcBox.x} ${srcBox.cy} L ${leftChanX} ${srcBox.cy} L ${leftChanX} ${targetBox.cy} L ${targetBox.right + 4} ${targetBox.cy}" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#${arr})"/>`;
+          svg += drawStepCallout(leftChanX, Math.round((srcBox.cy + targetBox.cy) / 2), calloutNum, stroke);
+        } else {
+          const nextToTargetCardLeft = zones[targetBox.zoneIdx + 1]
+            ? zones[targetBox.zoneIdx + 1].cardX
+            : targetBox.right + 28;
+          const rightOfTargetChanX = Math.round((targetBox.right + nextToTargetCardLeft) / 2) - (seenIdx % 3) * 4;
+          const busY = Math.min(744, 656 + (idx % 7) * 12);
+          svg += `<path class="arch-edge" ${edgeMetaAttrs} d="M ${srcBox.x} ${srcBox.cy} L ${leftChanX} ${srcBox.cy} L ${leftChanX} ${busY} L ${rightOfTargetChanX} ${busY} L ${rightOfTargetChanX} ${targetBox.cy} L ${targetBox.right + 4} ${targetBox.cy}" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#${arr})"/>`;
+          svg += drawStepCallout(rightOfTargetChanX, targetBox.cy + (seenIdx % 2 === 1 ? -24 : 0), calloutNum, stroke);
+        }
+      }
+    });
+    return wrapSvgCanvas(graph, svg, options);
+  }
+
+  // Base Orthogonal H-V-H Channel Connectors using exact rendered node positions (D05)
+  const bWeb = nodeBoxMap.get('node_web_storefront') || (buckets.z1[0] && nodeBoxMap.get(buckets.z1[0].id));
+  const bMob = nodeBoxMap.get('node_mobile_passkey') || (buckets.z1[1] && nodeBoxMap.get(buckets.z1[1].id));
   const bArmor = nodeBoxMap.get('node_cloud_armor');
-  const bApigee = nodeBoxMap.get('node_apigee_gateway') || buckets.z2[buckets.z2.length - 1] && nodeBoxMap.get(buckets.z2[buckets.z2.length - 1].id);
-  const bCat = nodeBoxMap.get('node_catalog_bff') || buckets.z3[0] && nodeBoxMap.get(buckets.z3[0].id);
-  const bChk = nodeBoxMap.get('node_checkout_service') || buckets.z3[1] && nodeBoxMap.get(buckets.z3[1].id);
+  const bApigee = nodeBoxMap.get('node_apigee_gateway') || (buckets.z2[buckets.z2.length - 1] && nodeBoxMap.get(buckets.z2[buckets.z2.length - 1].id));
+  const bCat = nodeBoxMap.get('node_catalog_bff') || (buckets.z3[0] && nodeBoxMap.get(buckets.z3[0].id));
+  const bChk = nodeBoxMap.get('node_checkout_service') || (buckets.z3[1] && nodeBoxMap.get(buckets.z3[1].id));
   const bDlp = nodeBoxMap.get('node_dlp_guardrail');
   const bVertex = nodeBoxMap.get('node_vertex_agent');
   const bVector = nodeBoxMap.get('node_vector_index');
@@ -1559,54 +1671,53 @@ function renderD05MultiTierCloud(graph, options = {}) {
 
   const z2EntryTop = bArmor || bApigee;
   if (bWeb && z2EntryTop) {
-    svg += `<path class="arch-edge" d="M ${bWeb.right} ${bWeb.cy} L 282 ${bWeb.cy} L 282 ${z2EntryTop.cy} L ${z2EntryTop.x - 4} ${z2EntryTop.cy}" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arr-blue)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bWeb.id)}" data-target-id="${esc(z2EntryTop.id)}" d="M ${bWeb.right} ${bWeb.cy} L 282 ${bWeb.cy} L 282 ${z2EntryTop.cy} L ${z2EntryTop.x - 4} ${z2EntryTop.cy}" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arr-blue)"/>`;
     svg += drawStepCallout(282, bWeb.cy, '1', '#2563EB');
   }
   if (bMob && bApigee) {
-    svg += `<path class="arch-edge" d="M ${bMob.right} ${bMob.cy} L 282 ${bMob.cy} L 282 ${bApigee.cy} L ${bApigee.x - 4} ${bApigee.cy}" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arr-blue)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bMob.id)}" data-target-id="${esc(bApigee.id)}" d="M ${bMob.right} ${bMob.cy} L 282 ${bMob.cy} L 282 ${bApigee.cy} L ${bApigee.x - 4} ${bApigee.cy}" fill="none" stroke="#2563EB" stroke-width="2" marker-end="url(#arr-blue)"/>`;
     svg += drawStepCallout(282, bMob.cy, '2', '#2563EB');
   }
   if (bArmor && bApigee && bArmor.zoneIdx === bApigee.zoneIdx && bArmor.bottom < bApigee.y) {
-    svg += `<line class="arch-edge" x1="${bArmor.cx}" y1="${bArmor.bottom}" x2="${bApigee.cx}" y2="${bApigee.y - 4}" stroke="#10B981" stroke-width="2.2" marker-end="url(#arr-green)"/>`;
+    svg += `<line class="arch-edge" data-source-id="${esc(bArmor.id)}" data-target-id="${esc(bApigee.id)}" x1="${bArmor.cx}" y1="${bArmor.bottom}" x2="${bApigee.cx}" y2="${bApigee.y - 4}" stroke="#10B981" stroke-width="2.2" marker-end="url(#arr-green)"/>`;
   }
   if (bApigee && bCat) {
-    svg += `<path class="arch-edge" d="M ${bApigee.right} ${bApigee.cy - 14} L 562 ${bApigee.cy - 14} L 562 ${bCat.cy} L ${bCat.x - 4} ${bCat.cy}" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bApigee.id)}" data-target-id="${esc(bCat.id)}" d="M ${bApigee.right} ${bApigee.cy - 14} L 562 ${bApigee.cy - 14} L 562 ${bCat.cy} L ${bCat.x - 4} ${bCat.cy}" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>`;
     svg += drawStepCallout(562, Math.round((bApigee.cy + bCat.cy) / 2), '3', '#D97706');
   }
   if (bApigee && bChk) {
-    svg += `<path class="arch-edge" d="M ${bApigee.right} ${bApigee.cy + 14} L 562 ${bApigee.cy + 14} L 562 ${bChk.cy} L ${bChk.x - 4} ${bChk.cy}" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bApigee.id)}" data-target-id="${esc(bChk.id)}" d="M ${bApigee.right} ${bApigee.cy + 14} L 562 ${bApigee.cy + 14} L 562 ${bChk.cy} L ${bChk.x - 4} ${bChk.cy}" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>`;
   }
   const z4Top = bDlp || bVertex;
   if (bCat && z4Top) {
-    svg += `<path class="arch-edge" d="M ${bCat.right} ${bCat.cy} L 852 ${bCat.cy} L 852 ${z4Top.cy} L ${z4Top.x - 4} ${z4Top.cy}" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-violet)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bCat.id)}" data-target-id="${esc(z4Top.id)}" d="M ${bCat.right} ${bCat.cy} L 852 ${bCat.cy} L 852 ${z4Top.cy} L ${z4Top.x - 4} ${z4Top.cy}" fill="none" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-violet)"/>`;
     svg += drawStepCallout(852, bCat.cy, '4', '#7C3AED');
   }
   if (bDlp && bVertex && bDlp.zoneIdx === bVertex.zoneIdx && bDlp.bottom < bVertex.y) {
-    svg += `<line class="arch-edge" x1="${bDlp.cx}" y1="${bDlp.bottom}" x2="${bVertex.cx}" y2="${bVertex.y - 4}" stroke="#10B981" stroke-width="2" marker-end="url(#arr-green)"/>`;
+    svg += `<line class="arch-edge" data-source-id="${esc(bDlp.id)}" data-target-id="${esc(bVertex.id)}" x1="${bDlp.cx}" y1="${bDlp.bottom}" x2="${bVertex.cx}" y2="${bVertex.y - 4}" stroke="#10B981" stroke-width="2" marker-end="url(#arr-green)"/>`;
   }
   if (bVertex && bVector && bVertex.zoneIdx === bVector.zoneIdx && bVertex.bottom < bVector.y) {
-    svg += `<line class="arch-edge" x1="${bVertex.cx}" y1="${bVertex.bottom}" x2="${bVector.cx}" y2="${bVector.y - 4}" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-violet)"/>`;
+    svg += `<line class="arch-edge" data-source-id="${esc(bVertex.id)}" data-target-id="${esc(bVector.id)}" x1="${bVertex.cx}" y1="${bVertex.bottom}" x2="${bVector.cx}" y2="${bVector.y - 4}" stroke="#7C3AED" stroke-width="2" marker-end="url(#arr-violet)"/>`;
   }
   if (bRedis && z4Top && bRedis.zoneIdx === 4) {
-    svg += `<path class="arch-edge" d="M ${z4Top.right} ${z4Top.cy} L 1140 ${z4Top.cy} L 1140 ${bRedis.cy} L ${bRedis.x - 4} ${bRedis.cy}" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(z4Top.id)}" data-target-id="${esc(bRedis.id)}" d="M ${z4Top.right} ${z4Top.cy} L 1140 ${z4Top.cy} L 1140 ${bRedis.cy} L ${bRedis.x - 4} ${bRedis.cy}" fill="none" stroke="#10B981" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
     svg += drawStepCallout(1140, bRedis.cy, '5', '#10B981');
   }
   if (bChk && bDb && bDb.zoneIdx === 4) {
-    svg += `<path class="arch-edge" d="M ${bChk.right} ${bChk.cy - 12} L 846 ${bChk.cy - 12} L 846 654 L 1140 654 L 1140 ${bDb.cy} L ${bDb.x - 4} ${bDb.cy}" fill="none" stroke="#059669" stroke-width="2.2" marker-end="url(#arr-green)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bChk.id)}" data-target-id="${esc(bDb.id)}" d="M ${bChk.right} ${bChk.cy - 12} L 846 ${bChk.cy - 12} L 846 654 L 1140 654 L 1140 ${bDb.cy} L ${bDb.x - 4} ${bDb.cy}" fill="none" stroke="#059669" stroke-width="2.2" marker-end="url(#arr-green)"/>`;
     svg += drawStepCallout(1140, bDb.cy, '6', '#059669');
   }
   if (bChk && bKafka && bKafka.zoneIdx === 4) {
-    svg += `<path class="arch-edge" d="M ${bChk.right} ${bChk.cy + 12} L 838 ${bChk.cy + 12} L 838 672 L 1148 672 L 1148 ${bKafka.cy} L ${bKafka.x - 4} ${bKafka.cy}" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>`;
+    svg += `<path class="arch-edge" data-source-id="${esc(bChk.id)}" data-target-id="${esc(bKafka.id)}" d="M ${bChk.right} ${bChk.cy + 12} L 838 ${bChk.cy + 12} L 838 672 L 1148 672 L 1148 ${bKafka.cy} L ${bKafka.x - 4} ${bKafka.cy}" fill="none" stroke="#059669" stroke-width="2" marker-end="url(#arr-green)"/>`;
     svg += drawStepCallout(1148, bKafka.cy, '7', '#059669');
   }
 
   // Render Orthogonal Connectors + Callouts for Every Custom Prompt-Added Node (Looker, BigQuery, Redshift, etc.)
-  const channelXs = [282, 562, 852, 1140, 1410];
+  const channelXs = [282, 562, 852, 1140, 1412];
   customAddedNodes.forEach((cn, idx) => {
     const targetBox = nodeBoxMap.get(cn.id);
     if (!targetBox) return;
 
-    // Find source box from scopedTargetId or graph.edges
     const edgeMatch = (graph.edges || []).find((e) => e.targetNodeId === cn.id || e.sourceNodeId === cn.id);
     const srcId =
       cn.scopedTargetId ||
@@ -1615,23 +1726,35 @@ function renderD05MultiTierCloud(graph, options = {}) {
     const srcBox = nodeBoxMap.get(srcId) || bVector || bDb || bChk;
     if (!srcBox || srcBox.id === targetBox.id) return;
 
+    const edgeAttrs = `data-source-id="${esc(srcBox.id)}" data-target-id="${esc(targetBox.id)}"`;
     const calloutNum = String(8 + idx);
-    if (targetBox.zoneIdx === srcBox.zoneIdx && targetBox.rowIdx === srcBox.rowIdx + 1) {
-      // Adjacent vertical cards in the same zone: direct vertical connector!
-      svg += `<line class="arch-edge" x1="${srcBox.cx}" y1="${srcBox.bottom}" x2="${targetBox.cx}" y2="${targetBox.y - 4}" stroke="#10B981" stroke-width="2.3" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
-      svg += drawStepCallout(srcBox.cx + 28, Math.round((srcBox.bottom + targetBox.y) / 2), calloutNum, '#10B981');
+    if (targetBox.zoneIdx === srcBox.zoneIdx) {
+      if (Math.abs(targetBox.rowIdx - srcBox.rowIdx) === 1) {
+        const y1 = targetBox.rowIdx > srcBox.rowIdx ? srcBox.bottom : srcBox.y;
+        const y2 = targetBox.rowIdx > srcBox.rowIdx ? targetBox.y - 4 : targetBox.bottom + 4;
+        svg += `<line class="arch-edge" ${edgeAttrs} x1="${srcBox.cx}" y1="${y1}" x2="${targetBox.cx}" y2="${y2}" stroke="#10B981" stroke-width="2.3" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+        svg += drawStepCallout(srcBox.cx + 28, Math.round((y1 + y2) / 2), calloutNum, '#10B981');
+      } else {
+        const gutterX = srcBox.right + 8 + (idx % 2) * 5;
+        svg += `<path class="arch-edge" ${edgeAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${gutterX} ${srcBox.cy} L ${gutterX} ${targetBox.cy} L ${targetBox.right + 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.3" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+        svg += drawStepCallout(gutterX, Math.round((srcBox.cy + targetBox.cy) / 2), calloutNum, '#10B981');
+      }
     } else if (targetBox.zoneIdx === srcBox.zoneIdx + 1) {
-      // Adjacent zone: route directly via inter-zone channel
       const chanX = channelXs[srcBox.zoneIdx] - (idx % 2) * 6;
-      svg += `<path class="arch-edge" d="M ${srcBox.right} ${srcBox.cy} L ${chanX} ${srcBox.cy} L ${chanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.3" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+      svg += `<path class="arch-edge" ${edgeAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${chanX} ${srcBox.cy} L ${chanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.3" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
       svg += drawStepCallout(chanX, targetBox.cy, calloutNum, '#10B981');
-    } else {
-      // Route via inter-zone channel + bottom horizontal bus (y = 690 + idx * 12) so 0 cards are crossed
-      const srcChanX = channelXs[Math.min(srcBox.zoneIdx, 3)] - 4;
-      const dstChanX = targetBox.zoneIdx > 0 ? channelXs[targetBox.zoneIdx - 1] + 4 : 28;
-      const busY = Math.min(740, 690 + idx * 12);
-      svg += `<path class="arch-edge" d="M ${srcBox.right} ${srcBox.cy} L ${srcChanX} ${srcBox.cy} L ${srcChanX} ${busY} L ${dstChanX} ${busY} L ${dstChanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+    } else if (targetBox.zoneIdx > srcBox.zoneIdx + 1) {
+      const srcChanX = channelXs[srcBox.zoneIdx] - 4;
+      const dstChanX = channelXs[targetBox.zoneIdx - 1] + 4;
+      const busY = Math.min(744, 686 + (idx % 5) * 12);
+      svg += `<path class="arch-edge" ${edgeAttrs} d="M ${srcBox.right} ${srcBox.cy} L ${srcChanX} ${srcBox.cy} L ${srcChanX} ${busY} L ${dstChanX} ${busY} L ${dstChanX} ${targetBox.cy} L ${targetBox.x - 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
       svg += drawStepCallout(dstChanX, targetBox.cy, calloutNum, '#10B981');
+    } else {
+      const leftChanX = channelXs[srcBox.zoneIdx - 1] + 4;
+      const rightOfTargetChanX = channelXs[targetBox.zoneIdx] - 4;
+      const busY = Math.min(744, 686 + (idx % 5) * 12);
+      svg += `<path class="arch-edge" ${edgeAttrs} d="M ${srcBox.x} ${srcBox.cy} L ${leftChanX} ${srcBox.cy} L ${leftChanX} ${busY} L ${rightOfTargetChanX} ${busY} L ${rightOfTargetChanX} ${targetBox.cy} L ${targetBox.right + 4} ${targetBox.cy}" fill="none" stroke="#10B981" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>`;
+      svg += drawStepCallout(rightOfTargetChanX, targetBox.cy, calloutNum, '#10B981');
     }
   });
 
@@ -1715,7 +1838,7 @@ function renderD06HubAndSpoke(graph, options) {
     <rect x="878" y="464" width="508" height="32" rx="8" fill="#FAD2CF" stroke="#D93025" stroke-width="1.2"/>
     <text x="1132" y="484" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10.5" font-weight="800" fill="#A50E0E">ZONE 4 · RIGHT SPOKE VPC · DATA &amp; AI ENCLAVE (#FAD2CF)</text>
   `;
-  svg += drawNodeBox({ id: 'n12', x: 880, y: 508, w: 242, h: 106, title: 'Vertex AI Private Endpoint', subtitle: 'Gemini 4 Argon + Vector Search 2.0', badge: 'SPOKE 2 AI ENCLAVE', metric: 'No Public IP · VPC-SC', accentColor: '#D93025', scopedNodeId: options.scopedNodeId });
+  svg += drawNodeBox({ id: 'n12', x: 880, y: 508, w: 242, h: 106, title: 'Vertex AI Private Endpoint', subtitle: 'Gemini 3.1 Pro + Vector Search 2.0', badge: 'SPOKE 2 AI ENCLAVE', metric: 'No Public IP · VPC-SC', accentColor: '#D93025', scopedNodeId: options.scopedNodeId });
   svg += drawNodeBox({ id: 'n13', x: 1140, y: 508, w: 244, h: 106, title: 'Cloud Spanner Banking Ledger', subtitle: 'CMEK Multi-Region TrueTime ACID SoT', badge: 'SPOKE 2 LEDGER DB', metric: '99.999% HA · RPO=0', accentColor: '#D93025', scopedNodeId: options.scopedNodeId });
   svg += drawNodeBox({ id: 'n14', x: 880, y: 624, w: 504, h: 98, title: 'BigQuery Enterprise Lakehouse + Cloud DLP', subtitle: 'Column-Level Policy Tags, Dynamic PII Masking & Zero-Copy Analytics', badge: 'SPOKE 2 ANALYTICS', metric: 'Zero-Exfiltration Lock', accentColor: '#D93025', scopedNodeId: options.scopedNodeId });
 
@@ -2065,7 +2188,7 @@ function renderD09GraphqlFederation(graph, options) {
         '}'
       ],
       backendId: 'b4',
-      backendTitle: 'Vertex ADK + Gemini 3.8',
+      backendTitle: 'Vertex ADK + Gemini 3.1',
       backendMetric: 'GraphRAG Grounded'
     }
   ];
@@ -2162,7 +2285,7 @@ function renderD10DatabaseErd(graph, options) {
         { key: 'FK', name: 'org_id', type: 'UUID → organizations' },
         { key: 'FK', name: 'created_by_user', type: 'UUID → users_identity' },
         { key: 'IX', name: 'lifecycle_code', type: 'CHAR(3) [D01..D18]' },
-        { key: '  ', name: 'latest_semver', type: 'VARCHAR(16)' }
+        { key: '  ', name: 'latest_revision', type: 'VARCHAR(24)' }
       ]
     },
     {
@@ -2174,7 +2297,7 @@ function renderD10DatabaseErd(graph, options) {
       cols: [
         { key: 'PK', name: 'version_id', type: 'UUID NOT NULL' },
         { key: 'FK', name: 'diagram_id', type: 'UUID → arch_diagrams' },
-        { key: 'UQ', name: 'semver_tag', type: 'VARCHAR(16) [v1.0.x]' },
+        { key: 'UQ', name: 'revision_tag', type: 'VARCHAR(24) [Rev-N]' },
         { key: '  ', name: 'user_prompt_text', type: 'TEXT NOT NULL' },
         { key: '  ', name: 'canonical_cag_json', type: 'JSONB NOT NULL' }
       ]
@@ -2453,9 +2576,9 @@ function renderD13HybridGraphRag(graph, options) {
   svg += drawNodeBox({ id: 'rag4', x: 358, y: 348, w: 312, h: 162, title: '2. Spanner Property Graph (GQL)', subtitle: '2-hop multi-entity dependency & lineage traversal', badge: 'KNOWLEDGE GRAPH', metric: 'ISO GQL · 6ms Hop', iconKey: 'cloud_spanner', accentColor: '#2563EB', scopedNodeId: options.scopedNodeId });
   svg += drawNodeBox({ id: 'rag5', x: 358, y: 544, w: 312, h: 162, title: '3. Sparse BM25 & ACL Filter', subtitle: 'Exact SKU/ticket ID match + tenant RBAC pre-filter', badge: 'LEXICAL + RBAC', metric: 'Zero Cross-Tenant Bleed', iconKey: 'iap', accentColor: '#0284C7', scopedNodeId: options.scopedNodeId });
 
-  // Center-Right: Reciprocal Rank Fusion + Gemini 4 Argon Synthesis
+  // Center-Right: Reciprocal Rank Fusion + Gemini 3.1 Pro Synthesis
   svg += drawNodeBox({ id: 'rag6', x: 744, y: 170, w: 316, h: 190, title: 'RRF & Cross-Encoder Reranker', subtitle: 'Merges Dense + Graph + BM25 into top-12 high-precision context chunks', badge: 'HYBRID RERANKER', metric: 'NDCG@10 = 0.964', iconKey: 'vector_search', accentColor: '#D97706', scopedNodeId: options.scopedNodeId });
-  svg += drawNodeBox({ id: 'rag7', x: 744, y: 430, w: 316, h: 190, title: 'Gemini 4 Argon Synthesizer', subtitle: 'thinkingLevel: HIGH · Inline [doc:line] citation binding', badge: 'FRONTIER SYNTHESIS', metric: 'locations/global Endpoint', iconKey: 'vertex_ai', accentColor: '#7C3AED', scopedNodeId: options.scopedNodeId });
+  svg += drawNodeBox({ id: 'rag7', x: 744, y: 430, w: 316, h: 190, title: 'Gemini 3.1 Pro Synthesizer', subtitle: 'thinkingLevel: HIGH · Inline [doc:line] citation binding', badge: 'FRONTIER SYNTHESIS', metric: 'locations/global Endpoint', iconKey: 'vertex_ai', accentColor: '#7C3AED', scopedNodeId: options.scopedNodeId });
 
   // Far Right: Deterministic NLI Hallucination Gate & Verified Output
   svg += drawNodeBox({ id: 'rag8', x: 1112, y: 170, w: 298, h: 190, title: 'NLI Entailment & Citation Gate', subtitle: 'Verifies synthesized claims against RRF context spans; blocks hallucinations', badge: 'ZERO-HALLUCINATION GATE', metric: 'Groundedness >= 0.95', iconKey: 'dlp_guardrail', headerFill: '#059669', accentColor: '#059669', scopedNodeId: options.scopedNodeId });
@@ -2470,7 +2593,7 @@ function renderD13HybridGraphRag(graph, options) {
     <path class="arch-edge" d="M 670 429 L 716 429 L 716 265 L 740 265" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>
     <path class="arch-edge" d="M 670 625 L 724 625 L 724 285 L 740 285" fill="none" stroke="#D97706" stroke-width="2" marker-end="url(#arr-amber)"/>
 
-    <!-- RRF Context Spans feed BOTH Gemini 4 Argon (rag7) AND NLI Entailment Gate (rag8) -->
+    <!-- RRF Context Spans feed BOTH Gemini 3.1 Pro (rag7) AND NLI Entailment Gate (rag8) -->
     <line class="arch-edge" x1="902" y1="360" x2="902" y2="426" stroke="#7C3AED" stroke-width="2.2" marker-end="url(#arr-violet)"/>
     <line class="arch-edge" x1="1060" y1="245" x2="1108" y2="245" stroke="#D97706" stroke-width="2.2" stroke-dasharray="5 3" marker-end="url(#arr-amber)"/>
     <path class="arch-edge" d="M 1060 525 L 1086 525 L 1086 305 L 1108 305" fill="none" stroke="#059669" stroke-width="2.2" marker-end="url(#arr-green)"/>
@@ -2496,7 +2619,7 @@ function renderD14MultiAgentMcp(graph, options) {
 
   // Top Tier: User Goal -> Supervisor Agent -> Episodic Blackboard
   svg += drawNodeBox({ id: 'ag_goal', x: 36, y: 102, w: 320, h: 120, title: 'Enterprise Goal & Spec Request', subtitle: 'Natural-language objective + policy constraints', badge: 'USER / API INTENT', metric: 'Scoped CASG JWT', accentColor: '#334155', scopedNodeId: options.scopedNodeId });
-  svg += drawNodeBox({ id: 'ag_sup', x: 430, y: 102, w: 560, h: 120, title: 'Supervisor Orchestrator Agent (Gemini 4 Argon)', subtitle: 'Decomposes DAG plan, delegates tasks via A2A Protocol & reconciles outputs', badge: 'A2A SUPERVISOR HUB', metric: 'thinkingLevel: HIGH · Max 6 Turns', headerFill: '#1D4ED8', accentColor: '#1D4ED8', scopedNodeId: options.scopedNodeId });
+  svg += drawNodeBox({ id: 'ag_sup', x: 430, y: 102, w: 560, h: 120, title: 'Supervisor Orchestrator Agent (Gemini 3.1 Pro)', subtitle: 'Decomposes DAG plan, delegates tasks via A2A Protocol & reconciles outputs', badge: 'A2A SUPERVISOR HUB', metric: 'thinkingLevel: HIGH · Max 6 Turns', headerFill: '#1D4ED8', accentColor: '#1D4ED8', scopedNodeId: options.scopedNodeId });
   svg += drawNodeBox({ id: 'ag_mem', x: 1064, y: 102, w: 340, h: 120, title: 'Shared Episodic Memory & Blackboard', subtitle: 'Spanner + Redis transactional agent state store', badge: 'STATE BLACKBOARD', metric: 'Checkpointed Per Step', accentColor: '#059669', scopedNodeId: options.scopedNodeId });
 
   // A2A Protocol Horizontal Bus Bar (y=246..278)
@@ -2507,10 +2630,10 @@ function renderD14MultiAgentMcp(graph, options) {
 
   // Middle Tier: 4 Specialist Sub-Agents (y=308..466)
   const subAgents = [
-    { id: 'sa1', x: 36, title: 'Architect Planner Agent', sub: 'Synthesizes C4/CAG topologies & ADRs', badge: 'SUB-AGENT 01', metric: 'Model: Gemini 4 Argon', color: '#2563EB' },
-    { id: 'sa2', x: 386, title: 'Data & SQLX Engineer Agent', sub: 'Authors BigQuery/Spanner schemas & dbt', badge: 'SUB-AGENT 02', metric: 'Model: Gemini 3.8 Flash', color: '#0284C7' },
+    { id: 'sa1', x: 36, title: 'Architect Planner Agent', sub: 'Synthesizes C4/CAG topologies & ADRs', badge: 'SUB-AGENT 01', metric: 'Model: Gemini 3.1 Pro', color: '#2563EB' },
+    { id: 'sa2', x: 386, title: 'Data & SQLX Engineer Agent', sub: 'Authors BigQuery/Spanner schemas & dbt', badge: 'SUB-AGENT 02', metric: 'Model: Gemini 3 Flash', color: '#0284C7' },
     { id: 'sa3', x: 736, title: 'Adversarial Critic Agent', sub: 'Audits DOM geometry, OWASP & IAM leaks', badge: 'SUB-AGENT 03', metric: 'Zero Sunk-Cost Bias', color: '#E11D48' },
-    { id: 'sa4', x: 1086, title: 'SRE & GitOps Release Agent', sub: 'Compiles Terraform, SBOM & Canary PRs', badge: 'SUB-AGENT 04', metric: 'Model: Gemini 3.8 Flash', color: '#059669' }
+    { id: 'sa4', x: 1086, title: 'SRE & GitOps Release Agent', sub: 'Compiles Terraform, SBOM & Canary PRs', badge: 'SUB-AGENT 04', metric: 'Model: Gemini 3 Flash', color: '#059669' }
   ];
 
   subAgents.forEach((sa) => {
@@ -2885,48 +3008,87 @@ export function renderBespokeLifecycleSvg(graph, options = {}) {
   activeDetailLevel = String(options.detailLevel || 'L200').toUpperCase();
   activeRenderGraph = graph;
   const renderMode = String(options.renderMode || graph.renderMode || 'BESPOKE_ARCHETYPE').toUpperCase();
-  if (renderMode === 'DYNAMIC_MULTI_TIER') {
+  if (renderMode === 'DYNAMIC_MULTI_TIER' || graph.isCustomDiagram) {
     return renderD05MultiTierCloud(graph, options);
   }
   const code = String(graph.code || 'D05').toUpperCase();
+  if (code === 'D05' || code.startsWith('DOC-')) {
+    return renderD05MultiTierCloud(graph, options);
+  }
+
+  let bespokeSvg;
   switch (code) {
     case 'D01':
-      return renderD01ValueStream(graph, options);
+      bespokeSvg = renderD01ValueStream(graph, options);
+      break;
     case 'D02':
-      return renderD02UxWireframeFlow(graph, options);
+      bespokeSvg = renderD02UxWireframeFlow(graph, options);
+      break;
     case 'D03':
-      return renderD03EventStorming(graph, options);
+      bespokeSvg = renderD03EventStorming(graph, options);
+      break;
     case 'D04':
-      return renderD04C4Topology(graph, options);
-    case 'D05':
-      return renderD05MultiTierCloud(graph, options);
+      bespokeSvg = renderD04C4Topology(graph, options);
+      break;
     case 'D06':
-      return renderD06HubAndSpoke(graph, options);
+      bespokeSvg = renderD06HubAndSpoke(graph, options);
+      break;
     case 'D07':
-      return renderD07SequenceLifeline(graph, options);
+      bespokeSvg = renderD07SequenceLifeline(graph, options);
+      break;
     case 'D08':
-      return renderD08SagaStateMachine(graph, options);
+      bespokeSvg = renderD08SagaStateMachine(graph, options);
+      break;
     case 'D09':
-      return renderD09GraphqlFederation(graph, options);
+      bespokeSvg = renderD09GraphqlFederation(graph, options);
+      break;
     case 'D10':
-      return renderD10DatabaseErd(graph, options);
+      bespokeSvg = renderD10DatabaseErd(graph, options);
+      break;
     case 'D11':
-      return renderD11MedallionLakehouse(graph, options);
+      bespokeSvg = renderD11MedallionLakehouse(graph, options);
+      break;
     case 'D12':
-      return renderD12CqrsSharding(graph, options);
+      bespokeSvg = renderD12CqrsSharding(graph, options);
+      break;
     case 'D13':
-      return renderD13HybridGraphRag(graph, options);
+      bespokeSvg = renderD13HybridGraphRag(graph, options);
+      break;
     case 'D14':
-      return renderD14MultiAgentMcp(graph, options);
+      bespokeSvg = renderD14MultiAgentMcp(graph, options);
+      break;
     case 'D15':
-      return renderD15CircularFlywheel(graph, options);
+      bespokeSvg = renderD15CircularFlywheel(graph, options);
+      break;
     case 'D16':
-      return renderD18ZeroTrustEnclave(graph, options);
+      bespokeSvg = renderD18ZeroTrustEnclave(graph, options);
+      break;
     case 'D17':
-      return renderD16GitopsCicd(graph, options);
+      bespokeSvg = renderD16GitopsCicd(graph, options);
+      break;
     case 'D18':
-      return renderD17ActiveActiveCells(graph, options);
+      bespokeSvg = renderD17ActiveActiveCells(graph, options);
+      break;
     default:
       return renderD05MultiTierCloud(graph, options);
   }
+
+  const rendered = extractRenderedSvgArchNodes(bespokeSvg);
+  const renderedIds = new Set(rendered.map((r) => r.id));
+  const hasAddedTopologyNodes = (graph.nodes || []).some(
+    (n) =>
+      !renderedIds.has(n.id) &&
+      (n.changeStatus === 'added' || (n.addedInVersion && n.addedInVersion !== 'Baseline'))
+  );
+  const hasRemovedTopologyNodes =
+    graph.version &&
+    graph.version !== 'Baseline' &&
+    Array.isArray(graph.diffManifest?.removedNodeTitles) &&
+    graph.diffManifest.removedNodeTitles.length > 0;
+
+  if (hasAddedTopologyNodes || hasRemovedTopologyNodes) {
+    return renderD05MultiTierCloud(graph, { ...options, promotedFromBespoke: true });
+  }
+
+  return bespokeSvg;
 }

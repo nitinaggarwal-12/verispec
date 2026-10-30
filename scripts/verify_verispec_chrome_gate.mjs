@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT_DIR = path.join(__dirname, '..');
-const ARTIFACT_DIR = '/Users/nitinagga/.gemini/jetski/brain/00c3db27-cadd-41ea-b7d8-b74d5b49b2b4';
+const ARTIFACT_DIR = process.env.VERISPEC_ARTIFACT_DIR || path.join(ROOT_DIR, '.local_state', 'chrome_gate_artifacts');
+fs.mkdirSync(ARTIFACT_DIR, { recursive: true });
 const CHROME_BIN = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 function sleep(ms) {
@@ -309,7 +310,7 @@ async function main() {
     await sleep(500);
 
     const auditAfterLookerBq = await evaluateInPage(auditSvgSelector('#atelierSvgContainer svg'));
-    console.log('D05 After "add Looker, and bigquery" (v1.0.4):', JSON.stringify(auditAfterLookerBq));
+    console.log('D05 After "add Looker, and bigquery" (Turn-4):', JSON.stringify(auditAfterLookerBq));
 
     const hasLooker = auditAfterLookerBq.renderedNodeTitles.some((t) => t.toLowerCase().includes('looker'));
     const hasBigQuery = auditAfterLookerBq.renderedNodeTitles.some((t) => t.toLowerCase().includes('bigquery'));
@@ -319,7 +320,7 @@ async function main() {
     if (auditAfterLookerBq.nodeToNodeOverlaps > 0 || auditAfterLookerBq.textToTextOverlaps > 0 || auditAfterLookerBq.textOutsideParent > 0) {
       throw new Error(`Geometry collision after "add Looker, and bigquery": ${JSON.stringify(auditAfterLookerBq)}`);
     }
-    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_d05_v1_0_4_looker_bigquery.png'));
+    await captureScreenshot(path.join(ARTIFACT_DIR, 'after_d05_turn_4_looker_bigquery.png'));
 
     // 2C. Scope to Vector Search 2.0 again and submit prompt 2: "add aws redshift"
     await evaluateInPage(`(async () => {
@@ -330,7 +331,7 @@ async function main() {
     await sleep(500);
 
     const auditAfterRedshift = await evaluateInPage(auditSvgSelector('#atelierSvgContainer svg'));
-    console.log('D05 After "add aws redshift" (v1.0.5):', JSON.stringify(auditAfterRedshift));
+    console.log('D05 After "add aws redshift" (Turn-5):', JSON.stringify(auditAfterRedshift));
 
     const hasRedshift = auditAfterRedshift.renderedNodeTitles.some((t) => t.toLowerCase().includes('aws redshift'));
     const hasBuggyWsRedshift = auditAfterRedshift.renderedNodeTitles.some((t) => t.includes('Ws redshift'));
@@ -399,8 +400,18 @@ async function main() {
     })()`);
     await sleep(500);
     const auditD06Mutated = await evaluateInPage(auditSvgSelector('#atelierSvgContainer svg'));
-    console.log('D06 Mutated Extension Tier Audit:', JSON.stringify({
+    const d06StructuralCheck = await evaluateInPage(`(() => {
+      const svg = document.querySelector('#atelierSvgContainer svg');
+      const raw = svg ? svg.outerHTML : '';
+      return {
+        hasVerticalSquash: /scale\\(1,\\s*0\\.\\d+\\)/.test(raw),
+        connectedEdgeCount: svg ? svg.querySelectorAll('.arch-edge').length : 0
+      };
+    })()`);
+    console.log('D06 Mutated Connected Manhattan Audit:', JSON.stringify({
       nodeCount: auditD06Mutated.nodeCount,
+      connectedEdgeCount: d06StructuralCheck.connectedEdgeCount,
+      hasVerticalSquash: d06StructuralCheck.hasVerticalSquash,
       renderedNodeTitles: auditD06Mutated.renderedNodeTitles,
       nodeToNodeOverlaps: auditD06Mutated.nodeToNodeOverlaps,
       textToTextOverlaps: auditD06Mutated.textToTextOverlaps,
@@ -409,11 +420,13 @@ async function main() {
     if (
       !auditD06Mutated.renderedNodeTitles.some((t) => t.toLowerCase().includes('looker')) ||
       !auditD06Mutated.renderedNodeTitles.some((t) => t.toLowerCase().includes('bigquery')) ||
+      d06StructuralCheck.hasVerticalSquash ||
+      d06StructuralCheck.connectedEdgeCount < 2 ||
       auditD06Mutated.nodeToNodeOverlaps > 0 ||
       auditD06Mutated.textToTextOverlaps > 0 ||
       auditD06Mutated.textOutsideParent > 0
     ) {
-      throw new Error(`D06 mutated extension tier failed: ${JSON.stringify(auditD06Mutated)}`);
+      throw new Error(`D06 mutated connected layout failed: ${JSON.stringify({ auditD06Mutated, d06StructuralCheck })}`);
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_d06_mutated_extension_tier.png'));
 
@@ -680,8 +693,14 @@ async function main() {
     console.log('--- Step 7: Verifying SQLite WAL, Whiteboard Tools, Hybrid WYSIWYG RFC, @mention Threads & GitHub PR Bot ---');
     await navigateAndWait('http://localhost:8080/?code=D05&edition=atelier&detail=L200', 450);
 
-    // 7A. Interactive Whiteboard Operations, Undo/Redo & Live Canvas Cursors on D05
+    // 7A. Interactive Whiteboard Operations, Undo/Redo & Live Session Collaborator Cursors on D05
     const whiteboardAudit = await evaluateInPage(`(async () => {
+      const initialGhostCursorCount = document.querySelectorAll('#vsLiveCollabCursorsOverlay .vs-collab-cursor-marker').length;
+      await fetch('/api/collab/cursor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: 'usr_sre', name: 'SRE Reviewer', handle: '@sre-lead', color: '#047857', code: 'D05', x: 520, y: 260 })
+      });
       await window.clearWhiteboardOverlays();
       await window.resizeScopedNodeDelta(24, 14);
       await window.addSampleElbowWaypoint();
@@ -708,6 +727,7 @@ async function main() {
         hasStickyNote: Boolean(svg && svg.querySelector('.vs-sticky-note')),
         hasElbowHandle: Boolean(svg && svg.querySelector('.vs-elbow-handle')),
         hasResizeHandles: Boolean(svg && svg.querySelector('.vs-resize-handle')),
+        initialGhostCursorCount,
         liveCanvasCursorCount: liveCursors.length,
         hasUndoRedoBtns,
         hasVisionUploadBtn,
@@ -721,7 +741,8 @@ async function main() {
       !whiteboardAudit.hasStickyNote ||
       !whiteboardAudit.hasElbowHandle ||
       !whiteboardAudit.hasResizeHandles ||
-      whiteboardAudit.liveCanvasCursorCount < 3 ||
+      whiteboardAudit.initialGhostCursorCount !== 0 ||
+      whiteboardAudit.liveCanvasCursorCount !== 1 ||
       !whiteboardAudit.hasUndoRedoBtns ||
       !whiteboardAudit.hasVisionUploadBtn ||
       !whiteboardAudit.undoRedoRoundtripPassed
@@ -814,17 +835,30 @@ async function main() {
       const bentoCards = document.querySelectorAll('#landingBentoGrid > div').length;
       const hasHeroSvg = Boolean(document.querySelector('#landingHeroLiveSvgPreview svg'));
       const hasSandboxInput = Boolean(document.getElementById('landingHeroPromptInput')?.value);
+      const noFakeTestimonialsGrid = document.getElementById('landingTestimonialsGrid') === null;
+      const bodyTxt = sec ? sec.innerText : '';
+      const noFakePersonas = !bodyTxt.includes('Alex Rivera') && !bodyTxt.includes('Priya Nair') && !bodyTxt.includes('Marcus Vance');
       const scrollOverflow = document.documentElement.scrollWidth - window.innerWidth;
       return {
         visible,
         bentoCards,
         hasHeroSvg,
         hasSandboxInput,
+        noFakeTestimonialsGrid,
+        noFakePersonas,
         scrollOverflow
       };
     })()`);
     console.log('Product Landing Page Audit:', JSON.stringify(landingAudit));
-    if (!landingAudit.visible || landingAudit.bentoCards !== 6 || !landingAudit.hasHeroSvg || !landingAudit.hasSandboxInput || landingAudit.scrollOverflow > 2) {
+    if (
+      !landingAudit.visible ||
+      landingAudit.bentoCards !== 6 ||
+      !landingAudit.hasHeroSvg ||
+      !landingAudit.hasSandboxInput ||
+      !landingAudit.noFakeTestimonialsGrid ||
+      !landingAudit.noFakePersonas ||
+      landingAudit.scrollOverflow > 2
+    ) {
       throw new Error(`Product Landing Page Gate Failed: ${JSON.stringify(landingAudit)}`);
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_landing_page_v35.png'));
@@ -915,7 +949,7 @@ async function main() {
         window.stepArchitectureFlowWalkthrough();
       }
       // Test inline node edit bar open & close
-      window.openInlineCanvasNodeEdit({ id: 'orchestrator', title: 'Supervisor Agent', subtitle: 'Gemini 3.8 Pro', pill: 'ADK v2' });
+      window.openInlineCanvasNodeEdit({ id: 'orchestrator', title: 'Supervisor Agent', subtitle: 'Gemini 3.1 Pro', pill: 'ADK v2' });
       const inlineBarVisible = document.getElementById('inlineCanvasNodeEditBar')?.style.display === 'flex';
       window.closeInlineCanvasNodeEdit();
       return {
@@ -929,11 +963,167 @@ async function main() {
       throw new Error(`v3.6 Parity Gate Failed: ${JSON.stringify(v36ParityAudit)}`);
     }
 
-    // 7I. Reset SQLite workspace to canonical D05 · v1.0.3 baseline & verify v3.7 UX Remediation Gate
+    // 7H-bis. v3.8 + v3.9 (P0.1) In-Studio Onboarding, 1366px Header Containment, Unified C4/LOD Switcher,
+    //         Split Export Dropdown, 1-Row Context Ribbon, Non-Occluding Floating Canvas Dock & Auto-Collapse Gate
+    await setViewport(1366, 900, 2);
+    await sleep(180);
+    const v38Header1366Audit = await evaluateInPage(`(() => {
+      const header = document.querySelector('.top-header');
+      const newBtn = document.getElementById('btnHeaderNewDiagram');
+      const tourBtn = document.getElementById('btnHeaderOnboardingTour');
+      const lodBox = document.getElementById('lodSwitcher');
+      const exportBtn = document.getElementById('headerExportDrawioBtn');
+      const exportChevron = document.getElementById('btnHeaderExportMenuToggle');
+      const expR = exportChevron.getBoundingClientRect();
+      const newR = newBtn.getBoundingClientRect();
+      const tourR = tourBtn.getBoundingClientRect();
+      const lodText = (lodBox?.textContent || '').replace(/\\s+/g, ' ').trim();
+      return {
+        viewportW: window.innerWidth,
+        headerScrollW: header.scrollWidth,
+        headerClientW: header.clientWidth,
+        newBtnVisible: newR.width > 76 && newR.left >= 0,
+        tourBtnVisible: tourR.width > 56 && tourR.right <= window.innerWidth - 6,
+        exportSplitVisibleAt1366: expR.right <= window.innerWidth - 6 && exportBtn.getBoundingClientRect().width > 50,
+        unifiedC4LodLabels: lodText.includes('1·Context L100') && lodText.includes('2·Container L200') && lodText.includes('3·Component L300'),
+        duplicateToolbarNewRemoved: document.getElementById('btnGreenfieldSynth') === null,
+        duplicateC4BarRemoved: document.getElementById('c4StepL100') === null
+      };
+    })()`);
+    console.log('v3.9 (P0.1) 1366px Header & Zero-Duplication Audit:', JSON.stringify(v38Header1366Audit));
+    if (
+      !v38Header1366Audit.newBtnVisible ||
+      !v38Header1366Audit.tourBtnVisible ||
+      !v38Header1366Audit.exportSplitVisibleAt1366 ||
+      !v38Header1366Audit.unifiedC4LodLabels ||
+      !v38Header1366Audit.duplicateToolbarNewRemoved ||
+      !v38Header1366Audit.duplicateC4BarRemoved ||
+      v38Header1366Audit.headerScrollW > v38Header1366Audit.headerClientW + 2
+    ) {
+      throw new Error(`v3.9 (P0.1) 1366px Header Budget / Duplication Gate Failed: ${JSON.stringify(v38Header1366Audit)}`);
+    }
+
+    await setViewport(1600, 980, 2);
+    await sleep(150);
+    const v38OnboardingAndCreatorAudit = await evaluateInPage(`(async () => {
+      window.openOnboardingQuickStart(false);
+      await new Promise(r => setTimeout(r, 120));
+
+      // 0. Verify 1-Row Context Ribbon height <= 44px, Split Export 5-format menu, & Non-Occluding Floating Canvas Dock
+      const contextRibbon = document.getElementById('canvasMapDrilldownBar');
+      const contextRibbonHeightPx = Math.round(contextRibbon.getBoundingClientRect().height);
+      const svgEl0 = document.querySelector('#atelierSvgContainer svg');
+      const dockEl = document.getElementById('vsFloatingCanvasDock');
+      const svgR0 = svgEl0.getBoundingClientRect();
+      const dockR0 = dockEl.getBoundingClientRect();
+      const dockZeroSvgOverlap = dockR0.width > 300 && dockR0.top >= svgR0.bottom - 1;
+
+      window.toggleHeaderExportMenu();
+      const exportMenu = document.getElementById('headerExportDropdownMenu');
+      const exportMenuItemsCount = exportMenu.querySelectorAll('.vs-export-menu-item').length;
+      const exportMenuOpened = exportMenu.classList.contains('open') && exportMenuItemsCount === 5;
+      window.closeHeaderExportMenu();
+
+      // 1. Expand BOTH Left Rail & Lineage Panel simultaneously and verify zero horizontal clipping across Context Ribbon & Dock
+      const leftRail = document.getElementById('leftLifecycleRail');
+      const adrPanel = document.getElementById('atelierAdrPanel');
+      if (leftRail.classList.contains('collapsed')) window.toggleLeftRail();
+      if (adrPanel.classList.contains('collapsed')) window.toggleAdrPanel();
+      await new Promise(r => setTimeout(r, 250));
+      const canvasCardRect = document.querySelector('#viewEditionAtelier .canvas-stage-card').getBoundingClientRect();
+      const rfcBtnRect = document.getElementById('btnContextOpenRfc').getBoundingClientRect();
+      const cmdBtnRect = document.getElementById('btnOpenCommandPalette').getBoundingClientRect();
+      const toolbarUnclippedWithBothSidebars =
+        rfcBtnRect.width > 36 &&
+        rfcBtnRect.right <= canvasCardRect.right + 1 &&
+        cmdBtnRect.right <= canvasCardRect.right + 1;
+
+      // Collapse sidebars back to default
+      if (!leftRail.classList.contains('collapsed')) window.toggleLeftRail();
+      if (!adrPanel.classList.contains('collapsed')) window.toggleAdrPanel();
+
+      // 2. Launch 4-Step Interactive Tour and step through 1..4
+      window.startInteractiveOnboardingTour();
+      const pop = document.getElementById('vsGuidedTourPopover');
+      const tourStep1Active = pop.classList.contains('active') && document.getElementById('vsTourStepBadge').textContent.includes('STEP 1 OF 4');
+      const popRect1 = pop.getBoundingClientRect();
+      const pop1InsideViewport = popRect1.left >= 8 && popRect1.right <= window.innerWidth - 8 && popRect1.bottom <= window.innerHeight - 8;
+      window.stepInteractiveOnboardingTour(1);
+      window.stepInteractiveOnboardingTour(1);
+      window.stepInteractiveOnboardingTour(1);
+      const tourStep4Reached = document.getElementById('vsTourStepBadge').textContent.includes('STEP 4 OF 4');
+      window.closeInteractiveOnboardingTour();
+
+      // 3. Open Docked 4-Mode New Diagram Creator Drawer (Rule 25F Reflow, 0 canvas occlusion)
+      window.openNewDiagramDrawer('blank');
+      await new Promise(r => setTimeout(r, 260));
+      const creatorDrawer = document.getElementById('newDiagramCreatorDrawer');
+      const creatorRect = creatorDrawer.getBoundingClientRect();
+      const stageRect = document.querySelector('.main-stage').getBoundingClientRect();
+      const dockedCreatorZeroOcclusion = stageRect.right <= creatorRect.left + 2;
+
+      // 4. Create a Clean 3-Tier Blank Canvas Diagram (without opening stencils) & verify onboarding banner auto-collapsed!
+      const blankData = await window.submitCreateBlankDiagram(false);
+      await new Promise(r => setTimeout(r, 220));
+      const blankStats = (document.getElementById('activeBpMetaStats')?.textContent || '').trim();
+      const onboardingAutoCollapsed =
+        document.getElementById('vsOnboardingQuickStartBanner').classList.contains('hidden') &&
+        window.localStorage.getItem('verispec_hide_onboarding_v38') === '1';
+
+      // 5. Create a New Diagram from Prompt via Bottom Composer [＋ New Diagram] intent mode
+      window.setComposerIntentMode('new');
+      const inp = document.getElementById('atelierPromptInput');
+      inp.value = 'Cloud Armor WAF, Apigee API Gateway, GKE Autopilot, Vertex AI Gemini, and Cloud Spanner HA';
+      await window.submitPromptFromInput('atelierPromptInput');
+      await new Promise(r => setTimeout(r, 250));
+      const promptStats = (document.getElementById('activeBpMetaStats')?.textContent || '').trim();
+      const postCreateSvgHeightPx = Math.round(document.querySelector('#atelierSvgContainer svg').getBoundingClientRect().height);
+
+      return {
+        contextRibbonHeightPx,
+        dockZeroSvgOverlap,
+        exportMenuOpened,
+        toolbarUnclippedWithBothSidebars,
+        tourStep1Active,
+        pop1InsideViewport,
+        tourStep4Reached,
+        dockedCreatorZeroOcclusion,
+        blankCreatedCode: blankData && blankData.code,
+        blankCreatedOk: Boolean(blankData && blankData.ok && blankData.code === 'DOC-01' && blankStats === '3 Nodes · 2 Edges'),
+        onboardingAutoCollapsed,
+        postCreateSvgHeightPx,
+        blankStats,
+        promptStats
+      };
+    })()`);
+    const v38CustomSvgAudit = await evaluateInPage(auditSvgSelector('#atelierSvgContainer svg'));
+    console.log('v3.9 (P0.1) Consolidation, Onboarding & Creator Audit:', JSON.stringify({ ...v38OnboardingAndCreatorAudit, svgOverlaps: v38CustomSvgAudit.nodeToNodeOverlaps }));
+    if (
+      v38OnboardingAndCreatorAudit.contextRibbonHeightPx > 46 ||
+      !v38OnboardingAndCreatorAudit.dockZeroSvgOverlap ||
+      !v38OnboardingAndCreatorAudit.exportMenuOpened ||
+      !v38OnboardingAndCreatorAudit.toolbarUnclippedWithBothSidebars ||
+      !v38OnboardingAndCreatorAudit.tourStep1Active ||
+      !v38OnboardingAndCreatorAudit.pop1InsideViewport ||
+      !v38OnboardingAndCreatorAudit.tourStep4Reached ||
+      !v38OnboardingAndCreatorAudit.dockedCreatorZeroOcclusion ||
+      !v38OnboardingAndCreatorAudit.blankCreatedOk ||
+      !v38OnboardingAndCreatorAudit.onboardingAutoCollapsed ||
+      v38CustomSvgAudit.nodeCount < 5 ||
+      v38CustomSvgAudit.nodeToNodeOverlaps > 0 ||
+      v38CustomSvgAudit.textToTextOverlaps > 0
+    ) {
+      throw new Error(`v3.9 (P0.1) Consolidation & Creator Gate Failed: ${JSON.stringify({ v38OnboardingAndCreatorAudit, v38CustomSvgAudit })}`);
+    }
+
+    // 7I. Reset SQLite workspace to canonical D05 · Turn-3 baseline & verify v4.0 UX Remediation Gate
     const v37UxAudit = await evaluateInPage(`(async () => {
       window.closeMcpApiModal();
       window.closeCollabThreadsModal();
       window.closeInlineCanvasNodeEdit();
+      window.closeInteractiveOnboardingTour();
+      window.closeNewDiagramDrawer();
+      window.openOnboardingQuickStart(false);
       await window.clearWhiteboardOverlays();
       window.closeStitchPromptDrawer();
       if (typeof window.clearScopedNode === 'function') {
@@ -970,9 +1160,9 @@ async function main() {
         firstPillText
       };
     })()`);
-    console.log('v3.7 UX Remediation & Pristine Baseline Audit:', JSON.stringify(v37UxAudit));
+    console.log('v4.0 UX Remediation & Pristine Baseline Audit:', JSON.stringify(v37UxAudit));
     if (
-      v37UxAudit.codeBadge !== 'D05 · v1.0.3' ||
+      v37UxAudit.codeBadge !== 'D05 · Turn-3' ||
       v37UxAudit.metaStats !== '12 Nodes · 11 Edges' ||
       v37UxAudit.sqliteBadge !== '☁️ Saved · SQLite WAL' ||
       v37UxAudit.svgWidthPx < 1050 ||
@@ -980,7 +1170,7 @@ async function main() {
       !v37UxAudit.collabOverlayHiddenByDefault ||
       !v37UxAudit.firstPillText.includes('Stream')
     ) {
-      throw new Error(`v3.7 UX Remediation Gate Failed: ${JSON.stringify(v37UxAudit)}`);
+      throw new Error(`v4.0 UX Remediation Gate Failed: ${JSON.stringify(v37UxAudit)}`);
     }
     await captureScreenshot(path.join(ARTIFACT_DIR, 'after_verispec_ux_remediation_v37.png'));
 

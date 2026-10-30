@@ -1,16 +1,16 @@
 {
   "serviceName": "verispec",
-  "version": "v3.7",
+  "version": "v4.0",
   "beyondCorpUrl": "https://verispec-248990048888.cr.gclb.goog",
   "directCloudRunUrl": "https://verispec-mi7l4h536a-uw.a.run.app",
-  "buildProject": "nitina-ggarwal-sandbox-647724",
+  "buildProject": "ramp-portal-dev",
   "runProject": "ramp-portal-dev",
   "region": "us-west1",
-  "latestReadyRevisionName": "verispec-00008-dq2",
-  "latestCreatedRevisionName": "verispec-00008-dq2",
+  "latestReadyRevisionName": "verispec-00011-2kp",
+  "latestCreatedRevisionName": "verispec-00011-2kp",
   "readyStatus": "True",
   "trafficPercent": 100,
-  "image": "us-west1-docker.pkg.dev/ramp-portal-dev/cloud-run-source-deploy/verispec:v20261027-025159-v37",
+  "image": "us-west1-docker.pkg.dev/ramp-portal-dev/cloud-run-source-deploy/verispec:v20261030-044935-v40",
   "startupProbeLog": "Default STARTUP TCP probe succeeded after 1 attempt for container \"verispec-1\" on port 8080.",
-  "verifiedAt": "2026-10-27T02:52:25Z"
+  "verifiedAt": "2026-10-30T04:49:59Z"
 }

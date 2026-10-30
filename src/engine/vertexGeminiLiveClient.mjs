@@ -439,7 +439,7 @@ Return strict JSON:
       prompt: flashPrompt,
       thinkingLevel: 'LOW',
       responseMimeType: 'application/json',
-      requiredKeys: ['sreCritique'],
+      requiredKeys: ['sreCritique', 'sreScore'],
       maxOutputTokens: 2048
     })
   ]);
@@ -448,9 +448,11 @@ Return strict JSON:
   const proJson = proResult.json || {};
   const flashJson = flashResult.json || {};
 
-  const detScore = Number(deterministicReport.overallScore || 96);
-  const proScore = Math.max(75, Math.min(100, Number(proJson.liveGeminiScore || 95)));
-  const flashScore = Math.max(75, Math.min(100, Number(flashJson.sreScore || 94)));
+  const detScore = Math.max(0, Math.min(100, Number(deterministicReport.overallScore ?? 0)));
+  const rawPro = Number(proJson.liveGeminiScore);
+  const rawFlash = Number(flashJson.sreScore);
+  const proScore = Math.max(0, Math.min(100, Number.isFinite(rawPro) ? rawPro : detScore));
+  const flashScore = Math.max(0, Math.min(100, Number.isFinite(rawFlash) ? rawFlash : detScore));
   const scoreDisagreementDelta = Math.abs(proScore - flashScore);
   const weightedConsensusScore = Math.round(0.5 * detScore + 0.35 * proScore + 0.15 * flashScore);
 
@@ -594,15 +596,22 @@ export async function executeLiveGeminiMutationCoPilotAndJudge(mutatedGraph, use
     }
     return enrichedJudge;
   } catch (err) {
-    console.warn('[VeriSpec Gemini Live Jury] Fallback to deterministic judge:', err.message);
-    return deterministicReport;
+    const errMsg = String(err?.message || err);
+    console.warn('[VeriSpec Gemini Live Jury] Live Vertex call unavailable:', errMsg);
+    return {
+      ...deterministicReport,
+      isLiveLlmCall: false,
+      liveVertexApiExecuted: false,
+      liveGeminiError: errMsg
+    };
   }
 }
 
 /**
  * Multimodal Vision / Whiteboard Image-to-Diagram Decompiler (`POST /api/vision-decompile`).
  * Invokes `gemini-3-flash-preview` (fallback `gemini-2.5-flash`) on `locations/global` to extract
- * cloud services, vendor stencils, and directed flows from an uploaded image or architecture description.
+ * actual cloud services and directed flows observed in a real uploaded PNG/JPEG/WebP image.
+ * Rejects missing or synthetic 1x1 blank pixel images (`< 150` base64 chars) with zero hardcoded service fallbacks.
  */
 export async function executeVertexGeminiVisionDecompiler({
   base64Image = null,
@@ -610,43 +619,170 @@ export async function executeVertexGeminiVisionDecompiler({
   hintPrompt = '',
   blueprintCode = 'D05'
 } = {}) {
-  const sys = `You are the VeriSpec Vision Architecture Decompiler. Extract cloud services and data flows from the provided architecture image or whiteboard description and return ONLY valid JSON:
+  const cleanB64 = String(base64Image || '').replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, '').trim();
+  if (!cleanB64 || cleanB64.length < 150) {
+    return {
+      ok: false,
+      error:
+        'A genuine architecture image (PNG/JPEG/WebP, >= 150 base64 bytes) is required for Gemini Vision decompilation; blank 1x1 pixel placeholders are prohibited.'
+    };
+  }
+
+  const sys = `You are the VeriSpec Multimodal Vision Architecture Decompiler. Inspect the provided architecture diagram or whiteboard image carefully and extract ONLY the actual cloud services, tiers, components, and directed flows visibly present in the image. Do NOT invent unrelated vendors. Return ONLY valid JSON matching:
 {
-  "title": "Decompiled Architecture Title",
-  "extractedServices": ["Cloudflare WAF", "Apigee X API Gateway", "GKE Autopilot", "Vertex AI Gemini", "Cloud Spanner", "BigQuery"],
-  "mutationCommand": "Add Cloudflare WAF, Okta Auth0, MongoDB Atlas, and PagerDuty SRE",
-  "summary": "1-sentence summary of the decompiled topology"
+  "title": "<concise title of the architecture shown in the image>",
+  "extractedServices": ["<exact service/component 1>", "<exact service/component 2>", "<exact service/component 3>"],
+  "mutationCommand": "Add <comma-separated list of the extracted services>",
+  "summary": "<1-sentence factual summary of the topology visible in the image>"
 }`;
 
   const userText =
     hintPrompt ||
-    'Decompile this architecture diagram/whiteboard into cloud services, security gateways, compute tiers, AI agents, and stateful databases.';
+    'Inspect this architecture image and extract all visible cloud services, gateways, compute workloads, AI/ML components, and databases into structured JSON.';
 
-  const res = await callVertexGeminiGenerateContent({
-    model: 'gemini-3-flash-preview',
-    fallbackModel: 'gemini-2.5-flash',
-    role: 'VISION_IMAGE_DECOMPILER',
-    stageId: 'SERIAL_STAGE_0_VISION_DECOMPILER',
-    blueprintCode,
-    prompt: userText,
-    systemInstruction: sys,
-    inlineData: base64Image ? { mimeType, data: base64Image } : null,
-    thinkingLevel: 'LOW',
-    requiredKeys: ['mutationCommand', 'extractedServices'],
-    maxOutputTokens: 2048,
-    temperature: 0.1
-  });
+  try {
+    const res = await callVertexGeminiGenerateContent({
+      model: 'gemini-3-flash-preview',
+      fallbackModel: 'gemini-2.5-flash',
+      role: 'VISION_IMAGE_DECOMPILER',
+      stageId: 'SERIAL_STAGE_0_VISION_DECOMPILER',
+      blueprintCode,
+      prompt: userText,
+      systemInstruction: sys,
+      inlineData: { mimeType, data: cleanB64 },
+      thinkingLevel: 'LOW',
+      responseMimeType: 'application/json',
+      requiredKeys: ['extractedServices', 'mutationCommand'],
+      customValidator: (j) => {
+        if (!Array.isArray(j.extractedServices) || j.extractedServices.length === 0) {
+          return 'extractedServices must be a non-empty array of visible components';
+        }
+        return null;
+      },
+      maxOutputTokens: 2048,
+      temperature: 0.1
+    });
 
-  return {
-    parsed: res.parsedJson || {
-      title: 'Vision-Decompiled Cloud Topology',
-      extractedServices: ['Cloudflare WAF', 'Okta Auth0', 'MongoDB Atlas', 'PagerDuty SRE'],
-      mutationCommand: 'Add Cloudflare WAF, Okta Auth0, MongoDB Atlas, and PagerDuty',
-      summary: 'Decompiled edge WAF, identity, document store, and SRE incident pipeline.'
-    },
-    telemetry: res.telemetry,
-    attemptTrace: res.attemptTrace
-  };
+    const parsedJson = res.json;
+    if (!parsedJson || !Array.isArray(parsedJson.extractedServices) || parsedJson.extractedServices.length === 0) {
+      return {
+        ok: false,
+        error: 'Gemini Vision Decompiler returned no extractedServices from the provided image.'
+      };
+    }
+
+    return {
+      ok: true,
+      parsed: {
+        title: String(parsedJson.title || 'Vision-Decompiled Architecture').trim(),
+        extractedServices: parsedJson.extractedServices.map((s) => String(s).trim()).filter(Boolean),
+        mutationCommand:
+          String(parsedJson.mutationCommand || '').trim() ||
+          `Add ${parsedJson.extractedServices.map((s) => String(s).trim()).filter(Boolean).join(', ')}`,
+        summary: String(parsedJson.summary || '').trim()
+      },
+      modelUsed: res.telemetry?.modelVersion || 'gemini-3-flash-preview',
+      responseId: res.telemetry?.responseId || null,
+      telemetry: res.telemetry,
+      attemptTrace: res.attemptTrace
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: String(err.message || err)
+    };
+  }
 }
+
+/**
+ * Live Vertex AI Gemini Structured Architecture Topology Planner (`POST /api/diagram/create` mode='prompt').
+ * Uses `gemini-3-flash-preview` (fallback `gemini-2.5-flash`) on `locations/global` to design
+ * domain-accurate nodes across zones `z1..z5` and non-linear directed fan-out/data/telemetry edges.
+ */
+export async function planArchitectureWithLiveGemini({
+  title = 'Custom Cloud Architecture',
+  prompt = '',
+  blueprintCode = 'DOC-01'
+} = {}) {
+  const cleanPrompt = String(prompt || '').trim();
+  if (!cleanPrompt) {
+    return {
+      ok: false,
+      error: 'Prompt is required for live Gemini architecture planning.'
+    };
+  }
+
+  const sys = `You are a Principal Cloud Systems Architect planning a multi-tier architecture graph for VeriSpec Studio.
+Assign every node to one of these 5 topological zones (at most 3 nodes per zone, 4 to 10 nodes total):
+- "z1": Client / Ingress Producers (Web SPA, Mobile, Partner Webhook, IoT, CLI)
+- "z2": Edge Security & API Gateway (Cloud Armor WAF, Apigee X, Load Balancer, IAP, CloudFront)
+- "z3": Core Compute & Service Mesh (Cloud Run, GKE Autopilot, EKS, GraphQL BFF, Event Bus / Kafka / PubSub)
+- "z4": AI, Policy & Stream Workers (Vertex AI Gemini, Model Armor / DLP, KMS HSM, Temporal / Flink Workers)
+- "z5": Stateful Databases, Cache & Analytics (Cloud Spanner, AlloyDB, Memorystore Redis, BigQuery, Looker, S3)
+
+Design realistic directed edges (fan-out from gateway to services, services to AI/cache/DB, async event streams) — NOT a naive single straight line.
+Return ONLY valid JSON:
+{
+  "title": "Concise Architecture Title",
+  "subtitle": "1-line architectural summary",
+  "nodes": [
+    {
+      "id": "n_client",
+      "zoneId": "z1",
+      "title": "Web & Mobile Client",
+      "subtitle": "OIDC Passkey Ingress",
+      "pill": "HTTPS :443",
+      "l300Spec": "TLS 1.3 · WebAuthn · CDN"
+    }
+  ],
+  "edges": [
+    {
+      "sourceNodeId": "n_client",
+      "targetNodeId": "n_waf",
+      "label": "HTTPS :443"
+    }
+  ]
+}`;
+
+  try {
+    const res = await callVertexGeminiGenerateContent({
+      model: 'gemini-3-flash-preview',
+      fallbackModel: 'gemini-2.5-flash',
+      role: 'TOPOLOGY_ARCHITECT_PLANNER',
+      stageId: 'SERIAL_STAGE_1_LIVE_GEMINI_TOPOLOGY_PLANNER',
+      blueprintCode,
+      prompt: `Title: "${title}"\nUser Architecture Request: "${cleanPrompt}"`,
+      systemInstruction: sys,
+      thinkingLevel: 'LOW',
+      responseMimeType: 'application/json',
+      requiredKeys: ['nodes', 'edges'],
+      customValidator: (j) => {
+        if (!Array.isArray(j.nodes) || j.nodes.length < 2) {
+          return 'nodes must contain at least 2 components';
+        }
+        if (!Array.isArray(j.edges) || j.edges.length < 1) {
+          return 'edges must contain at least 1 directed flow';
+        }
+        return null;
+      },
+      maxOutputTokens: 3072,
+      temperature: 0.2
+    });
+
+    return {
+      ok: true,
+      plan: res.json,
+      modelUsed: res.telemetry?.modelVersion || 'gemini-3-flash-preview',
+      responseId: res.telemetry?.responseId || null,
+      telemetry: res.telemetry
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      error: String(err.message || err)
+    };
+  }
+}
+
 
 

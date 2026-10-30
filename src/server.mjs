@@ -48,7 +48,8 @@ import {
   getGeminiApiCallLedger,
   executeLiveCrossModelGeminiJury,
   executeLiveGeminiMutationCoPilotAndJudge,
-  executeVertexGeminiVisionDecompiler
+  executeVertexGeminiVisionDecompiler,
+  planArchitectureWithLiveGemini
 } from './engine/vertexGeminiLiveClient.mjs';
 import {
   CANONICAL_GITHUB_REPO_URL,
@@ -82,59 +83,37 @@ const STATE_FILE = path.join(STATE_DIR, `verispec_workspace_state_${PORT_NUM}.js
 // Initialize SQLite WAL Database on startup
 initSqliteWorkspaceStore(PORT_NUM);
 
-// Maintain a multi-turn evolution history map and redo stack for all 18 lifecycle diagrams
+// Maintain a bounded multi-turn evolution history map (Baseline + max 15 Undo steps) and redo stack
+const MAX_HISTORY_STATES = 16;
+const MAX_REDO_STATES = 15;
 const blueprintStateStore = new Map();
 const blueprintRedoStore = new Map();
 const sseClients = new Set();
+const CANONICAL_CODES_SET = new Set(LIFECYCLE_BLUEPRINTS_18.map((b) => b.code));
 
-// Live Multiplayer Presence Map (seeded with 3 active team collaborators + updated via POST /api/collab/cursor)
-const multiplayerPresenceMap = new Map([
-  [
-    'usr_alex',
-    {
-      userId: 'usr_alex',
-      name: 'Alex Rivera',
-      handle: '@alex.rivera',
-      role: 'Principal Cloud Architect',
-      color: '#2563EB',
-      blueprintCode: 'D05',
-      x: 320,
-      y: 195,
-      activeNodeId: 'node_catalog_bff',
-      lastSeen: new Date().toISOString()
-    }
-  ],
-  [
-    'usr_priya',
-    {
-      userId: 'usr_priya',
-      name: 'Priya Nair',
-      handle: '@sre-lead',
-      role: 'Staff SRE',
-      color: '#059669',
-      blueprintCode: 'D05',
-      x: 740,
-      y: 340,
-      activeNodeId: 'node_primary_db',
-      lastSeen: new Date().toISOString()
-    }
-  ],
-  [
-    'usr_marcus',
-    {
-      userId: 'usr_marcus',
-      name: 'Marcus Vance',
-      handle: '@sec-architect',
-      role: 'Principal Security Architect',
-      color: '#7C3AED',
-      blueprintCode: 'D05',
-      x: 1120,
-      y: 485,
-      activeNodeId: 'node_dlp_guardrail',
-      lastSeen: new Date().toISOString()
-    }
-  ]
-]);
+// Live Multiplayer Presence Map — starts empty (0 fabricated ghost personas) and populates via POST /api/collab/cursor
+const multiplayerPresenceMap = new Map();
+
+function pushBoundedHistory(history, nextGraph) {
+  history.push(nextGraph);
+  while (history.length > MAX_HISTORY_STATES) {
+    history.splice(1, 1);
+  }
+}
+
+function getCustomDocCodes() {
+  return Array.from(blueprintStateStore.keys())
+    .filter((k) => !CANONICAL_CODES_SET.has(k))
+    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+function mintNextCustomDocCode() {
+  let idx = 1;
+  while (blueprintStateStore.has(`DOC-${String(idx).padStart(2, '0')}`)) {
+    idx += 1;
+  }
+  return `DOC-${String(idx).padStart(2, '0')}`;
+}
 
 function broadcastWorkspaceEvent(payload = {}) {
   const msg = `data: ${JSON.stringify({ type: 'WORKSPACE_SYNC', timestamp: new Date().toISOString(), ...payload })}\n\n`;
@@ -186,7 +165,7 @@ function loadStoreFromDisk() {
             blueprintStateStore.set(k, v);
           }
         }
-        if (blueprintStateStore.size === 18) {
+        if (blueprintStateStore.size >= 18) {
           saveBlueprintHistoryToSqlite(blueprintStateStore, PORT_NUM);
           return true;
         }
@@ -226,12 +205,11 @@ function syncSeedGraphWithRenderedArchetype(bp) {
         shape: existing.shape || 'service_card',
         iconKey: rn.iconKey || existing.iconKey || resolveIconKeyFromText(title, subtitle),
         slotOrder: idx,
-        addedInVersion: 'v1.0.1',
+        addedInVersion: 'Baseline',
         changeStatus: 'baseline'
       };
     });
 
-    // Map bp.edges semantic IDs (e.g. 'n1' -> renderedNodes[0].id) so 100% real semantic edge labels and topology are preserved!
     const idRemap = new Map();
     oldNodes.forEach((on, idx) => {
       if (g.nodes[idx]) {
@@ -266,6 +244,7 @@ function initializeStore(forceReset = false) {
   if (forceReset) {
     resetWhiteboardOverlay(null, PORT_NUM);
     blueprintRedoStore.clear();
+    multiplayerPresenceMap.clear();
   }
   if (!forceReset && loadStoreFromDisk()) {
     return;
@@ -273,7 +252,6 @@ function initializeStore(forceReset = false) {
   blueprintStateStore.clear();
   for (const bp of LIFECYCLE_BLUEPRINTS_18) {
     if (bp.code === 'D05') {
-      // Use canonical 3-step evolution history (v1.0.1 -> v1.0.2 -> v1.0.3) with unified node IDs
       const timeline = buildPrecomputedEvolutionTimeline();
       blueprintStateStore.set('D05', timeline);
     } else {
@@ -302,14 +280,15 @@ function resolveJudgeReportWithLiveLedger(graph, svg, bijectionContract) {
     return {
       ...detReport,
       ...graph.cachedLiveJudgeReport,
-      overallScore: detReport.overallScore,
-      certified: detReport.certified,
-      pillars: detReport.pillars
+      overallScore: graph.cachedLiveJudgeReport.overallScore ?? detReport.overallScore,
+      compositeScore: graph.cachedLiveJudgeReport.compositeScore ?? detReport.compositeScore,
+      certified: graph.cachedLiveJudgeReport.certified ?? detReport.certified,
+      pillars: graph.cachedLiveJudgeReport.pillars || detReport.pillars
     };
   }
   const ledger = getGeminiApiCallLedger();
-  const proCall = ledger.calls.find((c) => c.blueprintCode === graph.code && c.role === 'PRIMARY_PRO_JUDGE') || ledger.calls.find((c) => c.role === 'PRIMARY_PRO_JUDGE') || ledger.latestCall;
-  const flashCall = ledger.calls.find((c) => c.blueprintCode === graph.code && c.role === 'CROSS_FAMILY_FLASH_CRITIC') || ledger.calls.find((c) => c.role === 'CROSS_FAMILY_FLASH_CRITIC') || ledger.latestCall;
+  const proCall = ledger.calls.find((c) => c.blueprintCode === graph.code && c.role === 'PRIMARY_PRO_JUDGE') || null;
+  const flashCall = ledger.calls.find((c) => c.blueprintCode === graph.code && c.role === 'CROSS_FAMILY_FLASH_CRITIC') || null;
   if (proCall) {
     return {
       ...detReport,
@@ -329,7 +308,11 @@ function resolveJudgeReportWithLiveLedger(graph, svg, bijectionContract) {
       }
     };
   }
-  return detReport;
+  return {
+    ...detReport,
+    isLiveLlmCall: false,
+    liveVertexAiTelemetry: null
+  };
 }
 
 function attachWhiteboardOverlayToGraph(graph, code) {
@@ -352,7 +335,12 @@ function buildBlueprintResponseItem(code, showDiff = true, detailLevel = 'L200',
 
   const latestLayout = compileDiagramLayout(latestGraph);
   const latestAudit = runGeometryAudit(latestLayout);
-  const archMeta = ARCHETYPE_METADATA[code] || ARCHETYPE_METADATA.D05;
+  const archMeta = ARCHETYPE_METADATA[code] || {
+    archetype: 'CUSTOM_MULTI_TIER',
+    badge: `${code} · CUSTOM ARCHITECTURE`,
+    color: '#2563EB',
+    bg: '#EFF6FF'
+  };
   const latestSvg = renderInteractiveSvg(latestGraph, { showDiff, detailLevel, scopedNodeId });
   const bijectionContract = verifyGraphToSvgBijectionContract(latestGraph, latestSvg);
   const preRenderPlan = compilePreRenderPlanCertificate(latestGraph, latestSvg, { detailLevel });
@@ -378,11 +366,12 @@ function buildBlueprintResponseItem(code, showDiff = true, detailLevel = 'L200',
   return {
     code,
     id: latestGraph.id,
+    isCustomDiagram: Boolean(latestGraph.isCustomDiagram),
     starred: starredSet.has(code),
-    phaseId: latestGraph.phaseId,
-    phaseNumber: latestGraph.phaseNumber,
-    phaseTitle: latestGraph.phaseTitle,
-    phaseBadge: latestGraph.phaseBadge,
+    phaseId: latestGraph.phaseId || 'phase_custom',
+    phaseNumber: latestGraph.phaseNumber || 0,
+    phaseTitle: latestGraph.phaseTitle || 'Custom Workspace Architectures',
+    phaseBadge: latestGraph.phaseBadge || `${code} · CUSTOM DIAGRAM`,
     archetype: archMeta.archetype,
     archetypeBadge: archMeta.badge,
     archetypeColor: archMeta.color,
@@ -454,13 +443,17 @@ function buildBlueprintResponseItem(code, showDiff = true, detailLevel = 'L200',
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  // 1. GET /api/atlas -> Returns all 6 phases and all 18 lifecycle diagrams with rendered SVGs, DSL, SQLite, Collab & Judge reports
+  // 1. GET /api/atlas -> Returns all 6 phases, all 18 lifecycle diagrams + any custom DOC-* diagrams
   if (req.method === 'GET' && url.pathname === '/api/atlas') {
     const showDiff = url.searchParams.get('diff') !== 'false';
     const detailLevel = (url.searchParams.get('detail') || 'L200').toUpperCase();
     const scopedNodeId = url.searchParams.get('scopedNodeId') || null;
-    const diagrams = LIFECYCLE_BLUEPRINTS_18.map((bp) =>
-      buildBlueprintResponseItem(bp.code, showDiff, detailLevel, scopedNodeId)
+    const allOrderedCodes = [
+      ...LIFECYCLE_BLUEPRINTS_18.map((bp) => bp.code),
+      ...getCustomDocCodes()
+    ];
+    const diagrams = allOrderedCodes.map((c) =>
+      buildBlueprintResponseItem(c, showDiff, detailLevel, scopedNodeId)
     );
     const rfcBlocksMap = {};
     for (const d of diagrams) {
@@ -619,7 +612,7 @@ const server = http.createServer((req, res) => {
           nextGraph.cachedLiveJudgeReport = liveJudge;
         }
 
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk();
 
         return sendJson(res, 200, {
@@ -664,7 +657,7 @@ const server = http.createServer((req, res) => {
           nextGraph.cachedLiveJudgeReport = liveJudge;
         }
 
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk();
 
         return sendJson(res, 200, {
@@ -765,7 +758,7 @@ const server = http.createServer((req, res) => {
           ]
         };
 
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk({ code, action: 'INLINE_INSPECTOR_EDIT' });
         return sendJson(res, 200, {
           ok: true,
@@ -825,7 +818,7 @@ const server = http.createServer((req, res) => {
           ]
         };
 
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk({ code, action: 'REMOVE_NODE' });
         return sendJson(res, 200, {
           ok: true,
@@ -903,7 +896,7 @@ const server = http.createServer((req, res) => {
           ]
         };
 
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk({ code, action: 'UPSERT_DIRECTED_EDGE' });
         return sendJson(res, 200, {
           ok: true,
@@ -995,30 +988,107 @@ const server = http.createServer((req, res) => {
     req.on('end', async () => {
       try {
         const parsed = JSON.parse(body || '{}');
-        const code = String(parsed.code || 'D05').toUpperCase();
+        const requestedCode = String(parsed.slotCode || parsed.code || '').trim().toUpperCase();
+        const isNewStandalone = !requestedCode || requestedCode === 'NEW' || !blueprintStateStore.has(requestedCode);
         const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
         const visionResult = await executeVertexGeminiVisionDecompiler({
           base64Image: parsed.base64Image || null,
           mimeType: parsed.mimeType || 'image/png',
           hintPrompt: parsed.hintPrompt || '',
-          blueprintCode: code
+          blueprintCode: isNewStandalone ? 'DOC-VISION' : requestedCode
         });
 
-        const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
-        const current = history[history.length - 1];
-        const cmd =
-          visionResult.parsed.mutationCommand ||
-          `Add ${(visionResult.parsed.extractedServices || ['Cloudflare WAF', 'Okta Auth0', 'MongoDB Atlas']).join(', ')}`;
-        const nextGraph = applyPromptMutation(current, cmd, null, '');
-        if (visionResult.parsed.title) {
+        if (!visionResult.ok) {
+          return sendJson(res, 400, {
+            ok: false,
+            error: visionResult.error || 'Vision decompilation failed',
+            visionDecompile: visionResult
+          });
+        }
+
+        const extracted = Array.isArray(visionResult.parsed?.extractedServices)
+          ? visionResult.parsed.extractedServices.map((s) => String(s).trim()).filter(Boolean)
+          : [];
+        const boundedExtracted = extracted.slice(0, 8);
+        const cmd = String(
+          boundedExtracted.length > 0
+            ? `Add ${boundedExtracted.join(', ')}`
+            : visionResult.parsed?.mutationCommand || ''
+        ).trim();
+        if (!cmd) {
+          return sendJson(res, 422, {
+            ok: false,
+            error: 'No architecture services detected in uploaded image',
+            visionDecompile: visionResult
+          });
+        }
+
+        const code = !requestedCode || requestedCode === 'NEW' ? mintNextCustomDocCode() : requestedCode;
+        if (!blueprintStateStore.has(code)) {
+          blueprintStateStore.set(code, []);
+        }
+        const history = blueprintStateStore.get(code);
+        const fiveZones = [
+          { id: 'z1', title: 'ZONE 1 · CLIENT' },
+          { id: 'z2', title: 'ZONE 2 · EDGE WAF' },
+          { id: 'z3', title: 'ZONE 3 · GKE MESH' },
+          { id: 'z4', title: 'ZONE 4 · AI & DLP' },
+          { id: 'z5', title: 'ZONE 5 · DATA HA' }
+        ];
+        const d05Seed = blueprintStateStore.get('D05')?.[0] || LIFECYCLE_BLUEPRINTS_18[4];
+        const seedGraph =
+          history.length > 0
+            ? history[history.length - 1]
+            : {
+                ...cloneGraph(d05Seed),
+                code,
+                phase: 'CUSTOM · VISION DECOMPILED ARCHITECTURE',
+                archetype: 'Multimodal Vision Topology',
+                version: 'Baseline',
+                title: String(visionResult.parsed?.title || 'Vision-Decompiled Architecture').trim(),
+                subtitle: String(visionResult.parsed?.summary || 'Decompiled via Live Vertex AI Gemini Vision').trim(),
+                renderMode: 'DYNAMIC_MULTI_TIER',
+                isCustomDiagram: true,
+                zones: fiveZones,
+                nodes: [
+                  {
+                    id: 'node_vision_client',
+                    zoneId: 'z1',
+                    title: 'Client & API Ingress',
+                    subtitle: 'Observed External Traffic Entrypoint',
+                    pill: 'HTTPS :443',
+                    l300Spec: 'TLS 1.3 · Global Edge Ingress',
+                    shape: 'service_card',
+                    iconKey: 'react_web',
+                    slotOrder: 0,
+                    addedInVersion: 'Baseline',
+                    changeStatus: 'baseline'
+                  }
+                ],
+                edges: [],
+                annotations: []
+              };
+
+        const nextGraph = applyPromptMutation(seedGraph, cmd, null, '');
+        nextGraph.code = code;
+        if (isNewStandalone) {
+          nextGraph.version = 'Baseline';
+          nextGraph.isCustomDiagram = true;
+          nextGraph.renderMode = 'DYNAMIC_MULTI_TIER';
+          nextGraph.zones = fiveZones;
+          nextGraph.title = String(visionResult.parsed?.title || 'Vision-Decompiled Architecture').trim();
+          resetWhiteboardOverlay(code, PORT_NUM);
+        }
+        if (visionResult.parsed?.title) {
           nextGraph.subtitle = `Vision Decompiled: ${visionResult.parsed.title}`;
         }
         nextGraph.prompt = `📷 Vision Decompile: ${cmd}`;
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk({ code, action: 'VISION_DECOMPILE' });
 
         return sendJson(res, 200, {
           ok: true,
+          code,
           visionDecompile: visionResult,
           blueprint: buildBlueprintResponseItem(code, true, detailLevel, null),
           geminiApiLedger: getGeminiApiCallLedger()
@@ -1030,8 +1100,8 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 6G. POST /api/greenfield -> Creates a Blank-Scratch / Greenfield Custom Architecture from any user prompt
-  if (req.method === 'POST' && url.pathname === '/api/greenfield') {
+  // 6G. POST /api/greenfield & POST /api/diagram/create -> Creates a Brand-New Standalone DOC-* Diagram (or updates explicit code)
+  if (req.method === 'POST' && (url.pathname === '/api/greenfield' || url.pathname === '/api/diagram/create')) {
     let body = '';
     req.on('data', (chunk) => {
       body += chunk;
@@ -1039,39 +1109,453 @@ const server = http.createServer((req, res) => {
     req.on('end', async () => {
       try {
         const parsed = JSON.parse(body || '{}');
-        const code = String(parsed.code || 'D05').toUpperCase();
-        const customTitle = String(parsed.title || 'Custom Greenfield Cloud Architecture').trim();
-        const prompt = String(
-          parsed.prompt || 'Add Cloudflare WAF, Okta Auth0, Google Kubernetes Engine, Vertex AI Gemini, Cloud Spanner, and BigQuery'
-        ).trim();
+        const requestedCode = String(parsed.slotCode || parsed.code || '').trim().toUpperCase();
+        const isNewStandalone = !requestedCode || requestedCode === 'NEW' || !blueprintStateStore.has(requestedCode);
+        const code =
+          !requestedCode || requestedCode === 'NEW'
+            ? mintNextCustomDocCode()
+            : requestedCode;
+        const mode = String(parsed.mode || 'prompt').toLowerCase(); // 'prompt' | 'blank' | 'code'
+        const templatePreset = String(parsed.templatePreset || 'three_tier').toLowerCase();
         const detailLevel = String(parsed.detailLevel || 'L200').toUpperCase();
+        const skipLiveGemini = Boolean(parsed.skipLiveGemini);
 
-        const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
-        const current = history[history.length - 1];
-        const starterGraph = cloneGraph(current);
-        starterGraph.title = customTitle;
-        starterGraph.subtitle = `Greenfield Custom Architecture · Synthesized from "${prompt.slice(0, 64)}"`;
-        starterGraph.renderMode = 'DYNAMIC_MULTI_TIER';
-        // Start from a clean 3-node core skeleton before applying the user's greenfield prompt
-        starterGraph.nodes = starterGraph.nodes.slice(0, 3).map((n) => ({
-          ...n,
-          changeStatus: 'baseline'
-        }));
-        const keepIds = new Set(starterGraph.nodes.map((n) => n.id));
-        starterGraph.edges = (starterGraph.edges || []).filter(
-          (e) => keepIds.has(e.sourceNodeId) && keepIds.has(e.targetNodeId)
-        );
+        if (!blueprintStateStore.has(code)) {
+          blueprintStateStore.set(code, []);
+        }
+        const history = blueprintStateStore.get(code);
+        const d05Seed = blueprintStateStore.get('D05')?.[0] || LIFECYCLE_BLUEPRINTS_18[4];
+        const current = history.length > 0 ? history[history.length - 1] : d05Seed;
+        const baseGraph = cloneGraph(current);
+        baseGraph.code = code;
+        if (code.startsWith('DOC-')) {
+          baseGraph.phase = 'CUSTOM · WORKSPACE ARCHITECTURE';
+          baseGraph.archetype = 'Dynamic 5-Tier Cloud Topology';
+        }
 
-        const nextGraph = applyPromptMutation(starterGraph, prompt, null, '');
-        nextGraph.title = customTitle;
-        nextGraph.renderMode = 'DYNAMIC_MULTI_TIER';
-        nextGraph.prompt = `✨ Greenfield Synthesis: ${prompt}`;
-        history.push(nextGraph);
-        saveStoreToDisk({ code, action: 'GREENFIELD_SYNTHESIS' });
+        // Ensure canonical 5-zone metadata for Dynamic Multi-Tier rendering
+        const fiveZones = [
+          { id: 'z1', title: 'ZONE 1 · CLIENT' },
+          { id: 'z2', title: 'ZONE 2 · EDGE WAF' },
+          { id: 'z3', title: 'ZONE 3 · GKE MESH' },
+          { id: 'z4', title: 'ZONE 4 · AI & DLP' },
+          { id: 'z5', title: 'ZONE 5 · DATA HA' }
+        ];
+        const zoneRank = { z1: 0, z2: 1, z3: 2, z4: 3, z5: 4 };
+
+        const wireCleanZoneOrderedEdges = (nodesList, defaultLabel = 'mTLS 1.3 / HTTPS') => {
+          const ordered = [...nodesList].sort((a, b) => {
+            const za = zoneRank[a.zoneId] ?? 4;
+            const zb = zoneRank[b.zoneId] ?? 4;
+            if (za !== zb) return za - zb;
+            return (a.slotOrder ?? 0) - (b.slotOrder ?? 0);
+          });
+          const edges = [];
+          for (let i = 0; i < ordered.length - 1; i++) {
+            edges.push({
+              id: `edge_custom_${i + 1}`,
+              sourceNodeId: ordered[i].id,
+              targetNodeId: ordered[i + 1].id,
+              from: ordered[i].id,
+              to: ordered[i + 1].id,
+              label: i === 0 ? 'HTTPS :443' : defaultLabel,
+              changeStatus: isNewStandalone ? 'baseline' : 'added'
+            });
+          }
+          return edges;
+        };
+
+        let nextGraph;
+
+        if (mode === 'blank') {
+          const customTitle = String(parsed.title || 'New Blank Cloud Architecture').trim();
+          let starterNodes;
+          if (templatePreset === 'minimal_2') {
+            starterNodes = [
+              {
+                id: 'node_blank_client',
+                zoneId: 'z1',
+                title: 'Client / API Ingress',
+                subtitle: 'Double-click node to rename',
+                pill: 'HTTPS :443',
+                l300Spec: 'TLS 1.3 · OAuth2 OIDC · Edge Rate Limit',
+                shape: 'service_card',
+                iconKey: 'gcp_load_balancing',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_service',
+                zoneId: 'z3',
+                title: 'Core Application Service',
+                subtitle: 'Add services via Stencils or Prompt',
+                pill: 'p99 < 25ms',
+                l300Spec: 'gRPC / REST · Horizontal Autoscaling · OTLP',
+                shape: 'service_card',
+                iconKey: 'cloud_run',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              }
+            ];
+          } else if (templatePreset === 'five_tier') {
+            starterNodes = [
+              {
+                id: 'node_blank_client',
+                zoneId: 'z1',
+                title: 'Web & Mobile Client',
+                subtitle: 'SPA & Native SDK Ingress',
+                pill: 'HTTPS :443',
+                l300Spec: 'TLS 1.3 · WebAuthn Passkey · CDN',
+                shape: 'service_card',
+                iconKey: 'react_web',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_gateway',
+                zoneId: 'z2',
+                title: 'Edge WAF & API Gateway',
+                subtitle: 'Zero-Trust Perimeter & Routing',
+                pill: 'L7 WAF + OIDC',
+                l300Spec: 'Cloud Armor + Apigee X · mTLS 1.3',
+                shape: 'service_card',
+                iconKey: 'apigee',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_compute',
+                zoneId: 'z3',
+                title: 'Core Microservice Tier',
+                subtitle: 'Stateless Workload Mesh',
+                pill: '99.99% HA',
+                l300Spec: 'GKE Autopilot / Cloud Run · SPIFFE ID',
+                shape: 'service_card',
+                iconKey: 'gke_autopilot',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_ai',
+                zoneId: 'z4',
+                title: 'AI & Policy Orchestrator',
+                subtitle: 'Model Routing & DLP Guardrail',
+                pill: 'Vertex Gemini',
+                l300Spec: 'locations/global · PII Redaction · Audit',
+                shape: 'service_card',
+                iconKey: 'vertex_ai',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_db',
+                zoneId: 'z5',
+                title: 'Primary Stateful Store',
+                subtitle: 'Multi-Region Relational / Lakehouse',
+                pill: 'RPO = 0 · CMEK',
+                l300Spec: 'Cloud Spanner / AlloyDB · KMS HSM',
+                shape: 'cylinder_db',
+                iconKey: 'cloud_spanner',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              }
+            ];
+          } else {
+            starterNodes = [
+              {
+                id: 'node_blank_client',
+                zoneId: 'z1',
+                title: 'Client Application',
+                subtitle: 'Double-click any card to rename',
+                pill: 'HTTPS :443',
+                l300Spec: 'TLS 1.3 · OIDC JWT · Edge Ingress',
+                shape: 'service_card',
+                iconKey: 'react_web',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_api',
+                zoneId: 'z3',
+                title: 'Core API Service',
+                subtitle: 'Stateless Compute & Business Logic',
+                pill: '99.99% SLO',
+                l300Spec: 'Cloud Run / GKE · mTLS 1.3 · OTLP',
+                shape: 'service_card',
+                iconKey: 'cloud_run',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_blank_data',
+                zoneId: 'z5',
+                title: 'Primary Database',
+                subtitle: 'Transactional HA Persistence',
+                pill: 'Multi-AZ · CMEK',
+                l300Spec: 'AlloyDB / Spanner · PITR · KMS',
+                shape: 'cylinder_db',
+                iconKey: 'postgresql',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              }
+            ];
+          }
+
+          nextGraph = {
+            ...baseGraph,
+            code,
+            version: isNewStandalone ? 'Baseline' : bumpPatchVersion(current.version || 'Baseline'),
+            title: customTitle,
+            subtitle: `Blank Canvas Starter (${starterNodes.length} Nodes) · Double-click any node to edit or add from 52 Stencils`,
+            renderMode: 'DYNAMIC_MULTI_TIER',
+            isCustomDiagram: true,
+            zones: fiveZones,
+            nodes: starterNodes,
+            edges: wireCleanZoneOrderedEdges(starterNodes, 'mTLS 1.3'),
+            annotations: [],
+            prompt: `⬜ Created New Blank Canvas (${templatePreset}): "${customTitle}"`,
+            timestamp: 'Just now',
+            diffManifest: {
+              summaryBadge: `Initialized ${starterNodes.length}-Node Blank Canvas`,
+              summary: `Initialized clean ${starterNodes.length}-node Blank Canvas topology`,
+              patchOps: starterNodes.map((n) => ({
+                op: 'INIT_NODE',
+                target: n.title,
+                detail: `Placed in ${n.zoneId.toUpperCase()}`
+              }))
+            }
+          };
+          resetWhiteboardOverlay(code, PORT_NUM);
+        } else if (mode === 'code') {
+          const customTitle = String(parsed.title || 'Code-Synthesized Cloud Architecture').trim();
+          const codeText = String(parsed.codeText || parsed.dslText || '').trim();
+          if (!codeText) {
+            return sendJson(res, 400, { ok: false, error: 'codeText or dslText is required in code mode' });
+          }
+          const seedGraph = {
+            ...baseGraph,
+            code,
+            version: isNewStandalone ? 'Baseline' : current.version || 'Baseline',
+            title: customTitle,
+            subtitle: 'Synthesized from Infrastructure / Schema Code',
+            renderMode: 'DYNAMIC_MULTI_TIER',
+            isCustomDiagram: true,
+            zones: fiveZones,
+            nodes: [
+              {
+                id: 'node_seed_ingress',
+                zoneId: 'z1',
+                title: 'Client / API Ingress',
+                subtitle: 'External Traffic Entrypoint',
+                pill: 'HTTPS :443',
+                l300Spec: 'TLS 1.3 · Anycast Edge',
+                shape: 'service_card',
+                iconKey: 'gcp_load_balancing',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              }
+            ],
+            edges: [],
+            annotations: []
+          };
+          const compiled = applyVeriSpecDslToGraph(seedGraph, codeText);
+          compiled.code = code;
+          if (isNewStandalone) compiled.version = 'Baseline';
+          compiled.title = customTitle;
+          compiled.subtitle = `Synthesized from Code / Schema (${compiled.nodes.length} Components)`;
+          compiled.renderMode = 'DYNAMIC_MULTI_TIER';
+          compiled.isCustomDiagram = true;
+          compiled.zones = fiveZones;
+          if (!compiled.edges || compiled.edges.length === 0) {
+            compiled.edges = wireCleanZoneOrderedEdges(compiled.nodes, 'mTLS / SQL');
+          }
+          compiled.prompt = `🧬 Created New Diagram from Code/Schema: "${customTitle}"`;
+          nextGraph = compiled;
+          resetWhiteboardOverlay(code, PORT_NUM);
+        } else {
+          // Default: mode === 'prompt' (Text Prompt Greenfield Synthesis)
+          const customTitle = String(parsed.title || 'Custom Greenfield Cloud Architecture').trim();
+          const rawPrompt = String(parsed.prompt || '').trim();
+          if (!rawPrompt) {
+            return sendJson(res, 400, { ok: false, error: 'Prompt is required to synthesize a diagram' });
+          }
+          const normalizedPrompt = /^(add|include|insert|deploy|provision|integrate|attach)\b/i.test(rawPrompt)
+            ? rawPrompt
+            : `Add ${rawPrompt}`;
+
+          const seedIds = new Set(['node_seed_client', 'node_seed_gateway']);
+          const starterGraph = {
+            ...baseGraph,
+            code,
+            version: isNewStandalone ? 'Baseline' : current.version || 'Baseline',
+            title: customTitle,
+            subtitle: `Greenfield Custom Architecture · Synthesized from "${rawPrompt.slice(0, 64)}"`,
+            renderMode: 'DYNAMIC_MULTI_TIER',
+            isCustomDiagram: true,
+            zones: fiveZones,
+            nodes: [
+              {
+                id: 'node_seed_client',
+                zoneId: 'z1',
+                title: 'Client Web & Mobile App',
+                subtitle: 'OIDC + Passkey Ingress',
+                pill: 'HTTPS :443',
+                l300Spec: 'TLS 1.3 · WebAuthn · Global CDN',
+                shape: 'service_card',
+                iconKey: 'react_web',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              },
+              {
+                id: 'node_seed_gateway',
+                zoneId: 'z2',
+                title: 'Edge API Gateway',
+                subtitle: 'Zero-Trust Routing & Rate Limit',
+                pill: 'mTLS 1.3',
+                l300Spec: 'Apigee X / Envoy · JWT AuthZ',
+                shape: 'service_card',
+                iconKey: 'apigee',
+                slotOrder: 0,
+                addedInVersion: 'Baseline',
+                changeStatus: 'baseline'
+              }
+            ],
+            edges: [],
+            annotations: []
+          };
+
+          let aiPlannedGraph = null;
+          if (!skipLiveGemini) {
+            const aiPlan = await planArchitectureWithLiveGemini({
+              title: customTitle,
+              prompt: rawPrompt,
+              blueprintCode: code
+            });
+            if (aiPlan?.ok && Array.isArray(aiPlan.plan?.nodes) && aiPlan.plan.nodes.length >= 2) {
+              const plannedNodes = aiPlan.plan.nodes.slice(0, 14).map((n, idx) => {
+                const zId = fiveZones.some((z) => z.id === n.zoneId) ? n.zoneId : 'z3';
+                return {
+                  id: String(n.id || `node_ai_${idx + 1}`).replace(/[^a-zA-Z0-9_-]/g, '_'),
+                  zoneId: zId,
+                  title: String(n.title || `Service ${idx + 1}`).trim(),
+                  subtitle: String(n.subtitle || 'Managed Cloud Service').trim(),
+                  pill: String(n.pill || '99.99% SLO').trim(),
+                  l300Spec: String(n.l300Spec || 'mTLS 1.3 · OTLP Trace').trim(),
+                  shape: zId === 'z5' ? 'cylinder_db' : 'service_card',
+                  iconKey: String(n.iconKey || (zId === 'z5' ? 'cloud_spanner' : zId === 'z4' ? 'vertex_ai' : 'cloud_run')).trim(),
+                  slotOrder: idx,
+                  addedInVersion: isNewStandalone ? 'Baseline' : bumpPatchVersion(current.version || 'Baseline'),
+                  changeStatus: isNewStandalone ? 'baseline' : 'added'
+                };
+              });
+              const nodeIds = new Set(plannedNodes.map((n) => n.id));
+              let plannedEdges = Array.isArray(aiPlan.plan.edges)
+                ? aiPlan.plan.edges
+                    .filter((e) => nodeIds.has(e.sourceNodeId) && nodeIds.has(e.targetNodeId) && e.sourceNodeId !== e.targetNodeId)
+                    .map((e, idx) => ({
+                      id: `edge_ai_${idx + 1}`,
+                      sourceNodeId: e.sourceNodeId,
+                      targetNodeId: e.targetNodeId,
+                      from: e.sourceNodeId,
+                      to: e.targetNodeId,
+                      label: String(e.label || 'mTLS 1.3').trim(),
+                      changeStatus: isNewStandalone ? 'baseline' : 'added'
+                    }))
+                : [];
+              if (plannedEdges.length === 0) {
+                plannedEdges = wireCleanZoneOrderedEdges(plannedNodes, 'gRPC / mTLS 1.3');
+              }
+              aiPlannedGraph = {
+                ...starterGraph,
+                code,
+                version: isNewStandalone ? 'Baseline' : bumpPatchVersion(current.version || 'Baseline'),
+                title: String(aiPlan.plan.title || customTitle).trim(),
+                subtitle: String(aiPlan.plan.subtitle || `Greenfield Architecture · Synthesized from "${rawPrompt.slice(0, 64)}"`).trim(),
+                nodes: plannedNodes,
+                edges: plannedEdges,
+                prompt: `✨ Greenfield Synthesis: ${rawPrompt}`,
+                timestamp: 'Just now',
+                diffManifest: {
+                  summaryBadge: `Synthesized ${plannedNodes.length} Nodes (${aiPlan.model})`,
+                  summary: `Synthesized ${plannedNodes.length}-node architecture via ${aiPlan.model}`,
+                  addedNodeIds: isNewStandalone ? [] : plannedNodes.map((n) => n.id),
+                  patchOps: plannedNodes.map((n) => ({
+                    op: 'PLAN_NODE',
+                    target: n.title,
+                    detail: `Placed in ${n.zoneId.toUpperCase()}`
+                  }))
+                }
+              };
+            }
+          }
+
+          if (aiPlannedGraph) {
+            nextGraph = aiPlannedGraph;
+          } else {
+            const mutated = applyPromptMutation(starterGraph, normalizedPrompt, null, '');
+            const userAdded = mutated.nodes.filter((n) => !seedIds.has(n.id));
+            let finalNodes = mutated.nodes;
+            if (userAdded.length >= 3) {
+              const hasZ1 = userAdded.some((n) => n.zoneId === 'z1');
+              finalNodes = hasZ1 ? userAdded : [starterGraph.nodes[0], ...userAdded];
+            }
+            finalNodes.forEach((n, idx) => {
+              if (!fiveZones.some((z) => z.id === n.zoneId)) n.zoneId = 'z3';
+              n.slotOrder = idx;
+              if (isNewStandalone) {
+                n.addedInVersion = 'Baseline';
+                n.changeStatus = 'baseline';
+              }
+            });
+            mutated.code = code;
+            if (isNewStandalone) mutated.version = 'Baseline';
+            mutated.nodes = finalNodes;
+            mutated.edges = wireCleanZoneOrderedEdges(finalNodes, 'gRPC / mTLS 1.3');
+            mutated.title = customTitle;
+            mutated.subtitle = `Greenfield Architecture · Synthesized from "${rawPrompt.slice(0, 64)}"`;
+            mutated.renderMode = 'DYNAMIC_MULTI_TIER';
+            mutated.isCustomDiagram = true;
+            mutated.zones = fiveZones;
+            mutated.prompt = `✨ Greenfield Synthesis: ${rawPrompt}`;
+            nextGraph = mutated;
+          }
+          resetWhiteboardOverlay(code, PORT_NUM);
+        }
+
+        if (!skipLiveGemini) {
+          const nextSvg = renderInteractiveSvg(nextGraph, { showDiff: true, detailLevel });
+          const nextBijection = verifyGraphToSvgBijectionContract(nextGraph, nextSvg);
+          const detJudge = evaluateArchitectureWithJudgeJury(nextGraph, nextSvg, nextBijection);
+          const liveJudge = await executeLiveGeminiMutationCoPilotAndJudge(
+            nextGraph,
+            nextGraph.prompt || customTitle || mode,
+            detJudge
+          );
+          nextGraph.cachedLiveJudgeReport = liveJudge;
+        }
+
+        pushBoundedHistory(history, nextGraph);
+        saveStoreToDisk({ code, action: `CREATE_DIAGRAM_${mode.toUpperCase()}` });
 
         return sendJson(res, 200, {
           ok: true,
-          blueprint: buildBlueprintResponseItem(code, true, detailLevel, null)
+          code,
+          isNewStandalone,
+          mode,
+          blueprint: buildBlueprintResponseItem(code, true, detailLevel, null),
+          geminiApiLedger: getGeminiApiCallLedger()
         });
       } catch (err) {
         return sendJson(res, 500, { ok: false, error: String(err.message || err) });
@@ -1090,7 +1574,7 @@ const server = http.createServer((req, res) => {
     res.write(
       `data: ${JSON.stringify({
         type: 'CONNECTED',
-        activeCollaborators: Math.max(sseClients.size + 1, multiplayerPresenceMap.size),
+        activeCollaborators: multiplayerPresenceMap.size,
         collaborators: Array.from(multiplayerPresenceMap.values())
       })}\n\n`
     );
@@ -1160,7 +1644,7 @@ const server = http.createServer((req, res) => {
             d,
             color: String(parsed.color || '#2563EB'),
             width: Number(parsed.width) || 3.2,
-            author: String(parsed.author || 'Alex Rivera')
+            author: String(parsed.author || 'Workspace Architect')
           });
           saveWhiteboardOverlay(code, wb, PORT_NUM);
           saveStoreToDisk({ code, action: 'ADD_STROKE' });
@@ -1181,7 +1665,7 @@ const server = http.createServer((req, res) => {
             text: String(parsed.text || 'Verify multi-region quorum & CMEK rotation').trim(),
             color: String(parsed.color || '#FEF08A'),
             borderColor: String(parsed.borderColor || '#EAB308'),
-            author: String(parsed.author || 'Alex Rivera (@alex.rivera)')
+            author: String(parsed.author || 'Workspace Architect (@architect)')
           });
           saveWhiteboardOverlay(code, wb, PORT_NUM);
           saveStoreToDisk({ code, action: 'ADD_STICKY' });
@@ -1315,11 +1799,11 @@ const server = http.createServer((req, res) => {
     req.on('end', () => {
       try {
         const parsed = JSON.parse(body || '{}');
-        const userId = String(parsed.userId || 'usr_alex');
+        const userId = String(parsed.userId || 'usr_architect');
         const existing = multiplayerPresenceMap.get(userId) || {
           userId,
-          name: parsed.name || 'Alex Rivera',
-          handle: parsed.handle || '@alex.rivera',
+          name: parsed.name || 'Workspace Architect',
+          handle: parsed.handle || '@architect',
           role: parsed.role || 'Principal Architect',
           color: parsed.color || '#2563EB'
         };
@@ -1431,7 +1915,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 6G. POST /api/undo & POST /api/redo -> Full Undo / Redo Stack across Blueprint Mutations & Whiteboard Overlays
+  // 6G. POST /api/undo & POST /api/redo -> Bounded 15-Step Undo / Redo Stack across Blueprint Mutations
   if (req.method === 'POST' && (url.pathname === '/api/undo' || url.pathname === '/api/redo')) {
     let body = '';
     req.on('data', (chunk) => {
@@ -1449,13 +1933,16 @@ const server = http.createServer((req, res) => {
           if (history.length > 1) {
             const popped = history.pop();
             redoStack.push(popped);
+            while (redoStack.length > MAX_REDO_STATES) {
+              redoStack.shift();
+            }
             blueprintRedoStore.set(code, redoStack);
             saveStoreToDisk({ code, action: 'UNDO', version: history[history.length - 1].version });
           }
         } else {
           if (redoStack.length > 0) {
             const restored = redoStack.pop();
-            history.push(restored);
+            pushBoundedHistory(history, restored);
             blueprintRedoStore.set(code, redoStack);
             saveStoreToDisk({ code, action: 'REDO', version: restored.version });
           }
@@ -1487,11 +1974,16 @@ const server = http.createServer((req, res) => {
         if (code && blueprintStateStore.has(code)) {
           resetWhiteboardOverlay(code, PORT_NUM);
           blueprintRedoStore.set(code, []);
+          const existingHist = blueprintStateStore.get(code);
           if (code === 'D05') {
             blueprintStateStore.set('D05', buildPrecomputedEvolutionTimeline());
           } else {
             const seed = LIFECYCLE_BLUEPRINTS_18.find((b) => b.code === code);
-            if (seed) blueprintStateStore.set(code, [syncSeedGraphWithRenderedArchetype(seed)]);
+            if (seed) {
+              blueprintStateStore.set(code, [syncSeedGraphWithRenderedArchetype(seed)]);
+            } else if (existingHist && existingHist.length > 0) {
+              blueprintStateStore.set(code, [existingHist[0]]);
+            }
           }
           saveStoreToDisk({ code, action: 'RESET' });
           return sendJson(res, 200, {
@@ -1565,7 +2057,7 @@ const server = http.createServer((req, res) => {
           summaryBadge: `Inline Edit · ${targetNode?.title || nodeId} (${nextGraph.version})`,
           modifiedNodeIds: [targetNode?.id || nodeId]
         };
-        history.push(nextGraph);
+        pushBoundedHistory(history, nextGraph);
         saveStoreToDisk({ code, action: 'INLINE_NODE_EDIT', nodeId });
         return sendJson(res, 200, {
           ok: true,
@@ -1591,7 +2083,7 @@ const server = http.createServer((req, res) => {
       tools: [
         {
           name: 'verispec_list_blueprints',
-          description: 'List all 18 SDLC architecture blueprints with version, node/edge counts, FinOps $/mo, and p99 latency.',
+          description: 'List all 18 SDLC architecture blueprints and custom DOC-* diagrams with revision, node/edge counts, FinOps $/mo, and p99 latency.',
           inputSchema: { type: 'object', properties: { folderId: { type: 'string' }, starredOnly: { type: 'boolean' } } }
         },
         {
@@ -1605,7 +2097,7 @@ const server = http.createServer((req, res) => {
         },
         {
           name: 'verispec_mutate_ast',
-          description: 'Apply a deterministic natural-language or DSL graph mutation to an existing blueprint and bump its micro-version.',
+          description: 'Apply a deterministic natural-language or DSL graph mutation to an existing blueprint and advance its revision.',
           inputSchema: {
             type: 'object',
             required: ['code', 'command'],
@@ -1645,21 +2137,25 @@ const server = http.createServer((req, res) => {
 
         if (toolName === 'verispec_list_blueprints') {
           const starredSet = new Set(getStarredBlueprints(PORT_NUM));
-          const items = LIFECYCLE_BLUEPRINTS_18.map((bp) => {
-            const history = blueprintStateStore.get(bp.code) || [bp];
-            const latest = history[history.length - 1];
-            const finops = estimateArchitectureFinOpsAndLatency(latest);
-            return {
-              code: bp.code,
-              title: latest.title,
-              version: latest.version,
-              starred: starredSet.has(bp.code),
-              nodeCount: latest.nodes.length,
-              edgeCount: latest.edges.length,
-              finopsMonthlyUsd: finops.totalMonthlyUsd,
-              p99LatencyMs: finops.estimatedEndToEndP99Ms
-            };
-          }).filter((it) => (args.starredOnly ? it.starred : true));
+          const allCodes = [...LIFECYCLE_BLUEPRINTS_18.map((bp) => bp.code), ...getCustomDocCodes()];
+          const items = allCodes
+            .map((c) => {
+              const history = blueprintStateStore.get(c);
+              if (!history || history.length === 0) return null;
+              const latest = history[history.length - 1];
+              const finops = estimateArchitectureFinOpsAndLatency(latest);
+              return {
+                code: c,
+                title: latest.title,
+                version: latest.version,
+                starred: starredSet.has(c),
+                nodeCount: latest.nodes.length,
+                edgeCount: latest.edges.length,
+                finopsMonthlyUsd: finops.totalMonthlyUsd,
+                p99LatencyMs: finops.estimatedEndToEndP99Ms
+              };
+            })
+            .filter((it) => it && (args.starredOnly ? it.starred : true));
           return sendJson(res, 200, {
             jsonrpc: '2.0',
             id: parsed.id || 1,
@@ -1670,11 +2166,14 @@ const server = http.createServer((req, res) => {
         }
 
         if (toolName === 'verispec_mutate_ast' || toolName === 'verispec_generate_diagram') {
-          const cmd = String(args.command || args.prompt || 'Add Cloud Armor WAF and Cloud DLP Guardrail').trim();
+          const cmd = String(args.command || args.prompt || '').trim();
+          if (!cmd) {
+            return sendJson(res, 400, { ok: false, error: 'command or prompt is required' });
+          }
           const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
           const current = history[history.length - 1];
           const nextGraph = applyPromptMutation(current, cmd, null, '');
-          history.push(nextGraph);
+          pushBoundedHistory(history, nextGraph);
           saveStoreToDisk({ code, action: 'MCP_TOOL_MUTATION', tool: toolName });
           const item = buildBlueprintResponseItem(code, true, detailLevel, null);
           return sendJson(res, 200, {
@@ -1758,7 +2257,7 @@ const server = http.createServer((req, res) => {
           const history = blueprintStateStore.get(code) || blueprintStateStore.get('D05');
           const current = history[history.length - 1];
           const nextGraph = applyPromptMutation(current, prompt, null, '');
-          history.push(nextGraph);
+          pushBoundedHistory(history, nextGraph);
           saveStoreToDisk({ code, action: 'REST_API_GENERATE' });
         }
         const item = buildBlueprintResponseItem(code, true, detailLevel, null);
@@ -1787,7 +2286,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // 8. GET /api/export-drawio?code=D05&ver=v1.0.x -> Downloads standards-compliant .drawio XML
+  // 8. GET /api/export-drawio?code=D05&ver=Rev-N -> Downloads standards-compliant .drawio XML
   if (req.method === 'GET' && url.pathname === '/api/export-drawio') {
     const code = (url.searchParams.get('code') || 'D05').toUpperCase();
     const requestedVer = url.searchParams.get('ver') || null;

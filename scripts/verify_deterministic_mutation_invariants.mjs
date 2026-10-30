@@ -24,6 +24,7 @@ import {
 } from '../src/engine/verispecDslAndJudgeEngine.mjs';
 import {
   planUiViewportBudget,
+  planOrthogonalConnectorChannels,
   compilePreRenderPlanCertificate
 } from '../src/engine/preRenderGeometryPlanner.mjs';
 import {
@@ -54,7 +55,7 @@ function syncBaseline(bp) {
     shape: 'service_card',
     iconKey: resolveIconKeyFromText(rn.title || rn.id),
     slotOrder: idx,
-    addedInVersion: 'v1.0.1',
+    addedInVersion: 'Baseline',
     changeStatus: 'baseline'
   }));
   return g;
@@ -246,8 +247,8 @@ assert.equal(mermaidCode.includes('flowchart LR'), true, 'Mermaid output missing
 const judgeReport = evaluateArchitectureWithJudgeJury(dslMutated, dslSvg, dslContract);
 assert.notEqual(judgeReport.generatorModel, judgeReport.frontierJudgeModel, 'Generator and Frontier Judge must be distinct models');
 assert.notEqual(judgeReport.generatorModel, judgeReport.crossFamilyJudgeModel, 'Generator and Cross-Family Judge must be distinct models');
-assert.equal(getDistinctJudgeModel('gemini-3.8-flash'), 'gemini-3.1-pro-preview');
-assert.equal(getDistinctJudgeModel('gemini-3.1-pro-preview'), 'gemini-3.8-flash');
+assert.equal(getDistinctJudgeModel('gemini-3-flash-preview'), 'gemini-3.1-pro-preview');
+assert.equal(getDistinctJudgeModel('gemini-3.1-pro-preview'), 'gemini-3-flash-preview');
 
 const finops = estimateArchitectureFinOpsAndLatency(dslMutated);
 assert.equal(finops.totalMonthlyUsd > 0, true, 'FinOps monthly run-rate must be > $0');
@@ -411,7 +412,58 @@ console.log(
   `  [PASS] Native node:sqlite (${sqliteStat.journalMode.toUpperCase()} mode) + Starred Blueprints + 18/18 Node Drag Base-Coords + Draw.io Sticky/Pin Export + WYSIWYG RFC Dual-Fields + @mention Threads (${threadCountAfter}) + GitHub PR Bot (+$${prBotReport.deltaMonthlyUsd}/mo)`
 );
 
+const customBlankGraph = {
+  code: 'DOC-01',
+  title: 'New Blank Cloud Architecture',
+  archetype: 'MULTI_TIER_CLOUD_DIFF',
+  renderMode: 'DYNAMIC_MULTI_TIER',
+  isCustomDiagram: true,
+  zones: baseD05.zones,
+  nodes: [
+    { id: 'node_starter_client', zoneId: 'z1', title: 'Web / Mobile App', subtitle: 'Client Tier', iconKey: 'react_web', pill: 'HTTPS' },
+    { id: 'node_starter_api', zoneId: 'z3', title: 'Core API Service', subtitle: 'Cloud Run', iconKey: 'cloud_run', pill: 'gRPC' },
+    { id: 'node_starter_db', zoneId: 'z5', title: 'Primary Database', subtitle: 'Cloud Spanner', iconKey: 'cloud_spanner', pill: 'ACID' }
+  ],
+  edges: [
+    { id: 'edge_1', from: 'node_starter_client', to: 'node_starter_api', label: '1. HTTPS' },
+    { id: 'edge_2', from: 'node_starter_api', to: 'node_starter_db', label: '2. SQL' }
+  ]
+};
+const customBlankSvg = renderInteractiveSvg(customBlankGraph, { showDiff: true, detailLevel: 'L200' });
+const customNodeMatches = [...customBlankSvg.matchAll(/<g class="arch-node"[^>]*>/g)];
+const customEdgeMatches = [...customBlankSvg.matchAll(/class="arch-edge"/g)];
+assert.equal(customNodeMatches.length, 3, 'isCustomDiagram=true 3-tier blank starter must render exact 3 nodes');
+assert.equal(customEdgeMatches.length, 2, 'isCustomDiagram=true 3-tier blank starter must render exact 2 edges');
+console.log('  [PASS] v3.8 Clean Blank/Prompt Custom Diagram Renderer (3 Nodes · 2 Edges · 0 Canonical Leakage)');
+
+// Verify Stage-4 segment-vs-obstacle AABB intersection catches synthetic crossing edges
+const syntheticCrossingSvg = customBlankSvg.replace(
+  '</svg>',
+  '<path class="arch-edge" d="M 40 410 L 1400 410" stroke="#EF4444" /></svg>'
+);
+const stage4Catch = planOrthogonalConnectorChannels(customBlankGraph, syntheticCrossingSvg);
+assert.equal(stage4Catch.obstacleIntersections > 0, true, 'Stage 4 must detect synthetic horizontal edge slicing through middle node');
+assert.equal(stage4Catch.passed, false, 'Stage 4 must fail when an arch-edge intersects a non-endpoint node box');
+
+// Verify mutated bespoke D06 promotes to connected Manhattan routing with zero vertical scale(1, sy) squash
+const bpD06 = syncBaseline(LIFECYCLE_BLUEPRINTS_18.find((b) => b.code === 'D06'));
+const mutD06 = applyPromptMutation(bpD06, 'add Looker, and bigquery');
+const mutD06Svg = renderInteractiveSvg(mutD06, { showDiff: true, detailLevel: 'L200' });
+assert.equal(/scale\(1,\s*0\.\d+\)/.test(mutD06Svg), false, 'Mutated D06 must never apply non-uniform vertical scale(1, sy) squashing');
+assert.equal((mutD06Svg.match(/class="arch-edge"/g) || []).length >= 2, true, 'Mutated D06 must render real connected Manhattan arch-edge paths');
+const mutD06Cert = compilePreRenderPlanCertificate(mutD06, mutD06Svg, { detailLevel: 'L200' });
+assert.equal(mutD06Cert.zeroHitAndTrialGuarantee, true, 'Mutated D06 must pass all 5 Pre-Render Plan stages including real Stage-4 routing');
+
+// Verify zero v1.0.x or fictional Gemini 4 / 3.8 model strings across all 18 rendered baselines
+for (const bp of LIFECYCLE_BLUEPRINTS_18) {
+  const s = renderInteractiveSvg(syncBaseline(bp), { showDiff: true, detailLevel: 'L200' });
+  assert.equal(/v1\.0\./.test(s), false, `${bp.code} SVG still contains v1.0.x string`);
+  assert.equal(/Gemini 4|Gemini 3\.8/i.test(s), false, `${bp.code} SVG still contains fictional Gemini model label`);
+}
+console.log('  [PASS] Stage-4 Real Segment-vs-Node Intersection Detector + Mutated D06 Connected Zero-Squash + Zero v1.0.x / Fictional Models');
+
 console.log('=== ALL 10 DETERMINISTIC, SQLITE WAL & LIVE VERTEX AI GEMINI INVARIANTS PASSED ===');
+
 
 
 

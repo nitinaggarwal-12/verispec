@@ -17,7 +17,7 @@
       --text-muted: #64748B;
       --accent-blue: #2563EB;
       --accent-blue-soft: #EFF6FF;
-      --accent-emerald: #059669;
+      --accent-emerald: #047857;
       --accent-emerald-soft: #ECFDF5;
       --accent-violet: #7C3AED;
       --accent-violet-soft: #F5F3FF;
@@ -545,9 +545,11 @@
       display: flex;
       align-items: stretch;
       gap: 6px;
-      flex: 1;
+      flex: 0 0 calc(100vh - 84px);
       min-width: 0;
-      max-height: calc(100vh - 88px);
+      height: calc(100vh - 84px);
+      max-height: calc(100vh - 84px);
+      min-height: 520px;
     }
 
     .adr-panel {
@@ -626,13 +628,14 @@
     }
 
     .panel-title {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 800;
       color: var(--text-primary);
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       min-width: 0;
+      white-space: nowrap;
     }
 
     .adr-timeline-list {
@@ -723,6 +726,8 @@
     /* Right Canvas Stage Card */
     .canvas-stage-card {
       flex: 1;
+      height: 100%;
+      min-height: 0;
       background: #FFFFFF;
       border: 1px solid var(--border-light);
       border-radius: 16px;
@@ -749,10 +754,10 @@
       width: 100%;
       background: #FFFFFF;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 6px 10px;
-      min-height: 440px;
+      min-height: 420px;
       position: relative;
     }
 
@@ -761,10 +766,32 @@
       min-width: var(--canvas-svg-min-width, 100%);
       height: auto;
       max-height: calc(100vh - 205px);
+      margin: 0 auto;
       border-radius: 10px;
       border: 1px solid #E2E8F0;
       flex-shrink: 0;
       display: block;
+    }
+
+    #atelierSvgContainer {
+      position: absolute !important;
+      inset: 0;
+      min-height: 0;
+      display: block;
+    }
+
+    #atelierSvgContainer > .vs-scroll-inner {
+      height: 100%;
+      max-height: 100%;
+      min-height: 0;
+    }
+
+    #atelierSvgContainer svg {
+      flex: 1 1 0;
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+      min-height: 0;
     }
 
     /* Bottom Conversational Co-Pilot Prompt Dock */
@@ -979,8 +1006,83 @@
       transition: margin-right 0.22s ease;
     }
 
-    body.workbench-open .main-stage {
+    body.workbench-open .main-stage,
+    body.creator-drawer-open .main-stage {
       margin-right: var(--right-drawer-width, 480px);
+    }
+
+    .lifecycle-rail:not(.collapsed) .rail-show-on-collapse {
+      display: none !important;
+    }
+
+    .vs-onboarding-banner {
+      padding: 6px 12px;
+      background: linear-gradient(90deg, #EFF6FF 0%, #F8FAFC 65%, #ECFDF5 100%);
+      border-bottom: 1px solid #BFDBFE;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .vs-onboarding-step-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      border: 1px solid #93C5FD;
+      background: #FFFFFF;
+      color: #1E3A8A;
+      font-size: 10.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.14s ease;
+      white-space: nowrap;
+    }
+
+    .vs-onboarding-step-pill:hover {
+      background: #DBEAFE;
+      border-color: #2563EB;
+      color: #1D4ED8;
+    }
+
+    .vs-onboarding-step-pill.primary-cta {
+      background: #2563EB;
+      border-color: #1D4ED8;
+      color: #FFFFFF;
+    }
+
+    .vs-onboarding-step-pill.primary-cta:hover {
+      background: #1D4ED8;
+    }
+
+    .vs-tour-spotlight-target {
+      outline: 2.5px solid #2563EB !important;
+      outline-offset: 2px !important;
+      box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.2) !important;
+      position: relative;
+      z-index: 55;
+    }
+
+    .vs-guided-tour-popover {
+      position: relative;
+      margin: 6px 10px 4px 10px;
+      background: linear-gradient(90deg, #EFF6FF 0%, #FFFFFF 52%, #EFF6FF 100%);
+      border: 2px solid #2563EB;
+      border-radius: 10px;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.10);
+      padding: 8px 14px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .vs-guided-tour-popover.active {
+      display: flex;
     }
 
     .right-drawer {
@@ -1005,84 +1107,239 @@
     }
 
     .toast-banner {
-      position: fixed;
-      bottom: 18px;
-      left: 24px;
-      padding: 8px 16px;
-      border-radius: 999px;
-      background: #0F172A;
-      color: #FFFFFF;
-      font-size: 11.5px;
-      font-weight: 600;
-      box-shadow: var(--shadow-lg);
-      z-index: 60;
+      margin: 6px 10px 2px 10px;
+      padding: 6px 14px;
+      border-radius: 9px;
+      background: #ECFDF5;
+      color: #065F46;
+      border: 1.5px solid #047857;
+      font-size: 11px;
+      font-weight: 700;
       display: none;
-      pointer-events: none;
     }
 
     .hidden {
       display: none !important;
     }
+
+    /* P0.1 Split Export Dropdown + 1-Row Context Ribbon + Non-Occluding Bottom Canvas Tool Dock */
+    .vs-split-export-group {
+      position: relative;
+      display: inline-flex;
+      align-items: stretch;
+      flex-shrink: 0;
+    }
+
+    .vs-split-export-primary {
+      border-radius: 8px 0 0 8px !important;
+      padding: 4px 8px !important;
+      font-size: 10px !important;
+      border-right: none !important;
+    }
+
+    .vs-split-export-chevron {
+      border-radius: 0 8px 8px 0 !important;
+      padding: 4px 6px !important;
+      font-size: 9.5px !important;
+      border-left: 1px solid rgba(255, 255, 255, 0.32) !important;
+      min-width: 22px;
+      justify-content: center;
+    }
+
+    .vs-export-dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      min-width: 256px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 11px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+      padding: 5px;
+      z-index: 85;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .vs-export-dropdown-menu.open {
+      display: flex;
+    }
+
+    .vs-export-menu-item {
+      width: 100%;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      padding: 6px 9px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #0F172A;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s ease;
+    }
+
+    .vs-export-menu-item:hover {
+      background: #EFF6FF;
+      color: #1D4ED8;
+    }
+
+    .vs-export-ext-pill {
+      padding: 1px 6px;
+      border-radius: 5px;
+      background: #F1F5F9;
+      border: 1px solid #CBD5E1;
+      color: #334155;
+      font-size: 9.5px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .vs-context-ribbon {
+      padding: 4px 12px !important;
+      min-height: 36px;
+      border-bottom: 1px solid #E2E8F0;
+      background: #F8FAFC;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      row-gap: 4px;
+      column-gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .vs-canvas-dock-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 10px 4px 10px;
+      background: #FFFFFF;
+      flex-shrink: 0;
+    }
+
+    .vs-canvas-dock-strip.dock-collapsed {
+      display: none !important;
+    }
+
+    .vs-floating-canvas-dock {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      flex-wrap: wrap;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #F8FAFC;
+      border: 1px solid #CBD5E1;
+      box-shadow: 0 3px 10px rgba(15, 23, 42, 0.07);
+      max-width: 100%;
+    }
+
+    .vs-dock-divider {
+      width: 1px;
+      height: 14px;
+      background: #CBD5E1;
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <!-- TOP EXECUTIVE GLOBAL HEADER (Zero-Overflow, Rule 25 Pruned, Phase-0 1440px Budget Verified) -->
-    <header class="top-header" style="gap:8px;padding:0 12px;">
-      <div class="brand-cluster" style="gap:8px;">
-        <div class="brand-mark" style="width:32px;height:32px;font-size:13px;cursor:pointer;" onclick="setUiEdition('landing')" title="Open VeriSpec Product Landing Page">VS</div>
-        <div class="brand-title-wrap">
-          <div class="brand-name-row">
-            <span class="brand-name" style="font-size:13.5px;cursor:pointer;" onclick="setUiEdition('home')" title="Open VeriSpec Workspace Home Dashboard">VeriSpec Studio</span>
+    <!-- TOP EXECUTIVE GLOBAL HEADER (Zero-Overflow, Rule 25 Pruned, Phase-0 1366px..1920px Budget Verified) -->
+    <header class="top-header" style="gap:5px;padding:0 10px;">
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
+        <div class="brand-cluster" style="gap:6px;">
+          <div class="brand-mark" style="width:28px;height:28px;font-size:12px;cursor:pointer;" onclick="setUiEdition('landing')" title="Open VeriSpec Product Landing Page">VS</div>
+          <div class="brand-title-wrap">
+            <div class="brand-name-row">
+              <span class="brand-name" style="font-size:12.5px;cursor:pointer;" onclick="setUiEdition('home')" title="Open VeriSpec Workspace Home Dashboard">VeriSpec Studio</span>
+            </div>
+            <span class="brand-sub" style="font-size:8.5px;">18 Blueprints · Gemini</span>
           </div>
-          <span class="brand-sub" style="font-size:9.5px;">18 Lifecycle Blueprints · Live Vertex Gemini</span>
         </div>
+        <button id="btnHeaderNewDiagram" class="btn-primary" style="padding:4px 9px;font-size:10px;background:linear-gradient(135deg,#047857 0%,#065F46 100%);border:1px solid #065F46;box-shadow:0 2px 6px rgba(4,120,87,0.22);white-space:nowrap;" onclick="openNewDiagramDrawer('prompt')" title="Create a New Diagram from Text Prompt, Blank Canvas, Code/SQL, or Whiteboard Sketch (Alt+N)">
+          <span>＋ New Diagram</span>
+        </button>
       </div>
 
       <!-- 6-Mode Product & Studio Switcher (Landing · Workspace Home · 4 Studio Views) -->
-      <nav class="edition-switcher" style="padding:2px;gap:2px;" aria-label="UI Edition Switcher">
-        <button id="btnEditionLanding" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('landing')" title="Product Landing Page: Interactive AI Diagrammer Sandbox, 6 Product Pillars, C4 Maps &amp; MCP API">
+      <nav class="edition-switcher" style="padding:2px;gap:1px;" aria-label="UI Edition Switcher">
+        <button id="btnEditionLanding" class="edition-btn" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('landing')" title="Product Landing Page: Interactive AI Diagrammer Sandbox, 6 Product Pillars, C4 Maps &amp; MCP API">
           <span>🏠 Landing</span>
         </button>
-        <button id="btnEditionHome" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('home')" title="Workspace Home Dashboard: All 18 Files, Starred Blueprints, Folders, Search &amp; Quick Create">
+        <button id="btnEditionHome" class="edition-btn" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('home')" title="Workspace Home Dashboard: All 18 Files, Starred Blueprints, Folders, Search &amp; Quick Create">
           <span>🗂️ Home</span>
         </button>
-        <button id="btnEditionAtelier" class="edition-btn active" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('atelier')">
-          <span>1. Split Co-Pilot</span>
+        <button id="btnEditionAtelier" class="edition-btn active" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('atelier')">
+          <span>1. Co-Pilot</span>
         </button>
-        <button id="btnEditionCommand" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('command')">
+        <button id="btnEditionCommand" class="edition-btn" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('command')">
           <span>2. Spotlight</span>
         </button>
-        <button id="btnEditionStepper" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('stepper')">
-          <span>3. Visual Diff</span>
+        <button id="btnEditionStepper" class="edition-btn" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('stepper')">
+          <span>3. Diff</span>
         </button>
-        <button id="btnEditionAtlas" class="edition-btn" style="padding:4px 7px;font-size:10.5px;" onclick="setUiEdition('atlas')">
-          <span>4. 18-Diagram Atlas</span>
+        <button id="btnEditionAtlas" class="edition-btn" style="padding:4px 5px;font-size:9.5px;" onclick="setUiEdition('atlas')">
+          <span>4. 18-Atlas</span>
         </button>
       </nav>
 
-      <!-- Global L100 / L200 / L300 Architectural Fidelity Switcher (Available in all Editions) -->
-      <div id="lodSwitcher" style="display:inline-flex;align-items:center;background:#F1F5F9;border:1px solid #E2E8F0;padding:2px;border-radius:8px;gap:2px;flex-shrink:0;" role="group" aria-label="Architecture Level of Detail">
-        <button id="btnLodL100" class="phase-chip mono" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L100')" title="L100 Executive Overview: High-level zones, icons &amp; titles">L100</button>
-        <button id="btnLodL200" class="phase-chip mono active" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L200')" title="L200 Solution Architecture: Service roles, metrics &amp; numbered flows">L200</button>
-        <button id="btnLodL300" class="phase-chip mono" style="font-size:9.5px;padding:3px 6px;border:none;" onclick="setDetailLevel('L300')" title="L300 Deep Engineering Spec: Protocols, ports, IAM, CMEK &amp; SLOs">L300</button>
+      <!-- Unified C4 System Map & L100/L200/L300 Architectural Fidelity Switcher (Rule 25 Consolidated) -->
+      <div id="lodSwitcher" style="display:inline-flex;align-items:center;background:#F1F5F9;border:1px solid #CBD5E1;padding:2px;border-radius:8px;gap:2px;flex-shrink:0;" role="group" aria-label="C4 Map and Architecture Level of Detail">
+        <button id="btnLodL100" data-c4-level="L100" class="phase-chip mono" style="font-size:9px;padding:3px 5px;border:none;white-space:nowrap;" onclick="drilldownC4Level('L100')" title="C4 Level 1 · System Context &amp; Executive Overview (L100)">1·Context L100</button>
+        <button id="btnLodL200" data-c4-level="L200" class="phase-chip mono active" style="font-size:9px;padding:3px 5px;border:none;white-space:nowrap;" onclick="drilldownC4Level('L200')" title="C4 Level 2 · Container Service Mesh &amp; Numbered Flows (L200)">2·Container L200</button>
+        <button id="btnLodL300" data-c4-level="L300" class="phase-chip mono" style="font-size:9px;padding:3px 5px;border:none;white-space:nowrap;" onclick="drilldownC4Level('L300')" title="C4 Level 3 · Component Engineering Spec, Ports, IAM, CMEK &amp; SLOs (L300)">3·Component L300</button>
       </div>
 
-      <!-- Live Geometry Gate, MCP & API, Studio Workbench & Export Actions -->
-      <div class="header-actions" style="flex-shrink:0;gap:5px;">
-        <div id="headerGeometryBadge" class="gate-pill" style="padding:3px 7px;font-size:10px;cursor:pointer;" onclick="openWorkbenchTab('judge')" title="Click to inspect Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Telemetry">
-          <span class="gate-dot"></span>
-          <span class="mono" id="headerGateText">5/5 PASS · 96/100</span>
-        </div>
-        <button id="btnOpenMcpModal" class="btn-secondary" style="padding:5px 8px;font-size:10.5px;border-color:#BFDBFE;background:#EFF6FF;color:#1D4ED8;" onclick="openMcpApiModal()" title="Agent-Ready verispec_mcp Server &amp; Public Diagramming REST API Playground">
-          <span>🤖 MCP &amp; API</span>
+      <!-- Quick-Start Onboarding, Live Geometry Gate, MCP, Studio Workbench & Split Export Dropdown -->
+      <div class="header-actions" style="flex-shrink:0;gap:4px;">
+        <button id="btnHeaderOnboardingTour" class="btn-secondary" style="padding:4px 6px;font-size:9.5px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;white-space:nowrap;" onclick="openOnboardingQuickStart(true)" title="Open Interactive User Onboarding &amp; 4-Step Studio Tour">
+          <span>🧭 Quick Start</span>
         </button>
-        <button id="btnOpenStudioWorkbench" class="btn-secondary" style="padding:5px 8px;font-size:10.5px;" onclick="toggleStudioWorkbench()" title="Toggle VeriSpec Studio Workbench: Bi-Directional Code DSL, 52 Cloud Stencils, Live Gemini Judge &amp; Terraform (⌘E)">
+        <div id="headerGeometryBadge" class="gate-pill" style="padding:3px 6px;font-size:9px;cursor:pointer;white-space:nowrap;" onclick="openWorkbenchTab('judge')" title="Click to inspect Live Vertex AI Gemini Judge &amp; 6-Pillar Well-Architected Telemetry">
+          <span class="gate-dot"></span>
+          <span class="mono" id="headerGateText">5/5 · 96/100</span>
+        </div>
+        <button id="btnOpenMcpModal" class="btn-secondary" style="padding:4px 6px;font-size:9.5px;border-color:#BFDBFE;background:#EFF6FF;color:#1D4ED8;white-space:nowrap;" onclick="openMcpApiModal()" title="Agent-Ready verispec_mcp Server &amp; Public Diagramming REST API Playground">
+          <span>🤖 MCP</span>
+        </button>
+        <button id="btnOpenStudioWorkbench" class="btn-secondary" style="padding:4px 6px;font-size:9.5px;white-space:nowrap;" onclick="toggleStudioWorkbench()" title="Toggle VeriSpec Studio Workbench: Bi-Directional Code DSL, 52 Cloud Stencils, Live Gemini Judge &amp; Terraform (⌘E)">
           <span>🛠️ Workbench</span>
         </button>
-        <a id="headerExportDrawioBtn" class="btn-primary" style="padding:5px 9px;font-size:10.5px;" href="/api/export-drawio?code=D05" download>
-          <span>⬇ .drawio</span>
-        </a>
+        <div id="headerExportSplitGroup" class="vs-split-export-group">
+          <a id="headerExportDrawioBtn" class="btn-primary vs-split-export-primary" style="white-space:nowrap;" href="/api/export-drawio?code=D05" download title="1-Click Export Native Editable Draw.io XML (.drawio)">
+            <span>⬇ .drawio</span>
+          </a>
+          <button id="btnHeaderExportMenuToggle" class="btn-primary vs-split-export-chevron" type="button" aria-haspopup="menu" aria-expanded="false" onclick="toggleHeaderExportMenu(event)" title="More Export Formats: Vector .SVG, 2x Retina .PNG, Living RFC .md &amp; Terraform .tf">▾</button>
+          <div id="headerExportDropdownMenu" class="vs-export-dropdown-menu" role="menu" aria-label="Export Formats">
+            <button type="button" class="vs-export-menu-item" role="menuitem" onclick="triggerHeaderExport('drawio')">
+              <span>📐 Editable Draw.io Diagram</span>
+              <span class="vs-export-ext-pill mono">.drawio</span>
+            </button>
+            <button type="button" class="vs-export-menu-item" role="menuitem" onclick="triggerHeaderExport('svg')">
+              <span>🖼️ Vector Architecture Graphic</span>
+              <span class="vs-export-ext-pill mono">.SVG</span>
+            </button>
+            <button type="button" class="vs-export-menu-item" role="menuitem" onclick="triggerHeaderExport('png')">
+              <span>📸 Retina 2x Presentation Image</span>
+              <span class="vs-export-ext-pill mono">2x .PNG</span>
+            </button>
+            <button type="button" class="vs-export-menu-item" role="menuitem" onclick="triggerHeaderExport('rfc')">
+              <span>📄 Living Engineering Design Doc</span>
+              <span class="vs-export-ext-pill mono">.md</span>
+            </button>
+            <button type="button" class="vs-export-menu-item" role="menuitem" onclick="triggerHeaderExport('tf')">
+              <span>🏗️ Multi-Cloud Terraform IaC</span>
+              <span class="vs-export-ext-pill mono">.tf</span>
+            </button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -1097,13 +1354,25 @@
           </button>
         </div>
 
+        <!-- 1-Click Create New Diagram Action in Both Collapsed & Expanded Left Rail States -->
+        <div style="padding:6px 6px 2px 6px;display:flex;flex-direction:column;gap:4px;">
+          <button id="btnRailCollapsedNewDiagram" class="rail-show-on-collapse" style="width:100%;padding:5px 2px;border-radius:8px;border:1.5px solid #047857;background:#ECFDF5;color:#065F46;font-size:9px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px;" onclick="openNewDiagramDrawer('prompt')" title="Create a New Diagram (Prompt, Blank Canvas, Code/SQL, or Whiteboard Sketch)">
+            <span style="font-size:13px;font-weight:900;line-height:1;">＋</span>
+            <span>New</span>
+          </button>
+          <button id="btnRailExpandedNewDiagram" class="btn-primary rail-hide-on-collapse" style="width:100%;padding:7px 10px;font-size:11px;justify-content:center;background:#047857;border:1px solid #065F46;" onclick="openNewDiagramDrawer('prompt')" title="Open 4-Mode New Diagram Creator (Prompt, Blank Canvas, Code/SQL, Image)">
+            <span>＋ Create New Diagram</span>
+          </button>
+        </div>
+
         <!-- Changeable Rail Width & Scrollbar Width Controls (Visible when expanded) -->
-        <div class="width-control-strip rail-hide-on-collapse">
+        <div class="width-control-strip rail-hide-on-collapse" style="gap:3px;">
           <span class="width-control-label">Rail W</span>
-          <input id="leftRailWidthSlider" class="width-slider" type="range" min="180" max="520" value="256" oninput="setLeftRailWidth(this.value)" title="Change Left Sidebar Width (180px – 520px)" />
-          <span id="leftRailWidthVal" class="mono" style="font-size:9.5px;color:#1D4ED8;font-weight:700;">256px</span>
-          <span class="width-control-label" style="margin-left:4px;">Scroll W</span>
-          <input id="railScrollWidthSlider" class="width-slider" type="range" min="6" max="20" value="11" style="width:42px;" oninput="setScrollbarThickness(this.value)" title="Change Horizontal &amp; Vertical Scrollbar Width (6px – 20px)" />
+          <input id="leftRailWidthSlider" class="width-slider" type="range" min="180" max="520" value="256" style="width:44px;" oninput="setLeftRailWidth(this.value)" title="Change Left Sidebar Width (180px – 520px)" />
+          <span id="leftRailWidthVal" class="mono" style="font-size:9px;color:#1D4ED8;font-weight:700;">256px</span>
+          <span class="width-control-label" style="margin-left:2px;">Scroll</span>
+          <input id="railScrollWidthSlider" class="width-slider" type="range" min="6" max="20" value="11" style="width:36px;" oninput="setScrollbarThickness(this.value)" title="Change Horizontal &amp; Vertical Scrollbar Width (6px – 20px)" />
+          <span id="railScrollWidthVal" class="mono" style="font-size:9px;color:#1D4ED8;font-weight:700;">11px</span>
         </div>
 
         <!-- Workspace Folder & Native SQLite (WAL) Repo Strip -->
@@ -1143,19 +1412,19 @@
               <span class="adr-collapsed-vertical-label">🕘 PROMPT EVOLUTION LINEAGE</span>
             </div>
 
-            <div class="panel-header">
+            <div class="panel-header" style="padding:8px 10px;gap:4px;">
               <div class="panel-title">
-                <span>🕘 Prompt Evolution Lineage</span>
-                <span id="atelierVersionCountBadge" class="stitch-badge mono">3 Versions</span>
+                <span>🕘 Lineage</span>
+                <span id="atelierVersionCountBadge" class="stitch-badge mono" style="padding:1px 6px;font-size:9.5px;">3 Versions</span>
               </div>
-              <div style="display:flex;align-items:center;gap:4px;">
-                <button id="btnToggleAllAdrCards" class="btn-secondary" style="padding:3px 7px;font-size:10px;" onclick="toggleAllAdrCards()" title="Collapse / Expand individual version cards">
+              <div style="display:flex;align-items:center;gap:3px;flex-shrink:0;">
+                <button id="btnToggleAllAdrCards" class="btn-secondary" style="padding:3px 6px;font-size:9.5px;white-space:nowrap;" onclick="toggleAllAdrCards()" title="Collapse / Expand individual version cards">
                   ↕ Cards
                 </button>
-                <button class="btn-secondary" style="padding:3px 7px;font-size:10px;" onclick="resetCurrentBlueprint()" title="Reset blueprint to baseline v1.0.1">
-                  ↺ Reset v1.0.1
+                <button class="btn-secondary" style="padding:3px 6px;font-size:9.5px;white-space:nowrap;" onclick="resetCurrentBlueprint()" title="Reset blueprint to Baseline">
+                  ↺ Reset
                 </button>
-                <button id="adrToggleBtn" class="btn-secondary" style="padding:3px 7px;font-size:10.5px;" onclick="toggleAdrPanel()" title="Collapse Prompt Evolution Lineage Panel">
+                <button id="adrToggleBtn" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="toggleAdrPanel()" title="Collapse Prompt Evolution Lineage Panel">
                   ◀
                 </button>
               </div>
@@ -1179,84 +1448,79 @@
 
           <!-- Right Column: Interactive 16:9 Vector Canvas + Bottom Co-Pilot Bar -->
           <div class="canvas-stage-card">
-            <div class="canvas-toolbar" style="padding:6px 12px;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-              <div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap;">
-                <button id="toolbarLineageToggleBtn" class="btn-secondary" style="padding:3px 8px;font-size:10px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;" onclick="toggleAdrPanel()" title="Expand / Collapse Prompt Evolution Lineage Panel">
-                  <span id="toolbarLineageToggleText">🕘 Lineage (3) ▶</span>
+            <!-- FIRST-TIME USER ONBOARDING QUICK-START BAR (Re-openable anytime via Header '🧭 Quick Start') -->
+            <div id="vsOnboardingQuickStartBanner" class="vs-onboarding-banner" role="region" aria-label="User Onboarding Quick Start">
+              <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                <span style="font-size:11px;font-weight:800;color:#0F172A;white-space:nowrap;">👋 New here? Start in 1 click:</span>
+                <button id="btnOnboardStep1New" class="vs-onboarding-step-pill primary-cta" onclick="openNewDiagramDrawer('prompt')" title="Create a brand-new diagram from Text Prompt, Blank Canvas, Code/SQL, or Whiteboard Sketch">
+                  <span>1. ＋ Create New Diagram</span>
                 </button>
-                <span id="activeBpCodeBadge" class="stitch-badge mono" style="font-size:11px;padding:3px 9px;">D05 · v1.0.3</span>
-                <span id="activeBpMetaStats" class="mono" style="font-size:10.5px;font-weight:700;color:#475569;white-space:nowrap;">12 Nodes · 11 Edges</span>
-                <span id="atelierFinOpsPill" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:10px;padding:2px 7px;" title="Deterministic Cloud FinOps Monthly Run-Rate &amp; Critical-Path p99 Latency">💰 $10,830/mo · ⚡ 54.6ms</span>
-                <span id="toolbarSqliteBadge" class="stitch-badge mono" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0;font-size:9.5px;padding:2px 7px;cursor:pointer;" onclick="openWorkbenchTab('iac')" title="Native node:sqlite (WAL Mode) Persistent Database &amp; GitHub Repo Status">☁️ Saved · SQLite WAL</span>
-                <!-- Interactive Canvas Zoom & Pan Controls -->
-                <div style="display:inline-flex;align-items:center;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:7px;padding:1px 4px;gap:3px;">
-                  <button class="phase-chip mono" style="border:none;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(-0.15)" title="Zoom Out">−</button>
-                  <span id="canvasZoomLabel" class="mono" style="font-size:9.5px;font-weight:700;color:#334155;min-width:32px;text-align:center;cursor:pointer;" onclick="resetCanvasZoom()" title="Reset Zoom &amp; Pan to 100%">100%</span>
-                  <button class="phase-chip mono" style="border:none;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(0.15)" title="Zoom In">+</button>
-                </div>
-                <!-- Hidden Scrollbar Width Slider (accessible via Workbench Drawer & programmatic API) -->
-                <div style="display:none;" title="Adjust Horizontal &amp; Vertical Scrollbar Width (6px – 20px)">
-                  <span class="mono" style="font-size:9.5px;font-weight:700;color:#475569;">Scroll W</span>
-                  <input id="toolbarScrollWidthSlider" type="range" min="6" max="20" value="11" style="width:48px;accent-color:#2563EB;cursor:pointer;height:4px;" oninput="setScrollbarThickness(this.value)" />
-                  <span id="toolbarScrollWidthVal" class="mono" style="font-size:9.5px;font-weight:700;color:#1D4ED8;min-width:24px;">11px</span>
-                </div>
-                <!-- Interactive Canvas Whiteboard Dock (Lasso, 8-Way Resize, Elbow Drag, Freehand Pen, Sticky Notes) -->
-                <div id="vsWhiteboardToolbar" style="display:inline-flex;align-items:center;gap:2px;background:#FFFFFF;border:1px solid #93C5FD;border-radius:8px;padding:2px 4px;">
-                  <span class="mono" style="font-size:8.5px;font-weight:800;color:#1D4ED8;padding:0 2px;">WB:</span>
-                  <button id="btnWbToolLasso" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('lasso')" title="Marquee Lasso Multi-Select &amp; Batch Move Nodes">⬚ Lasso</button>
-                  <button id="btnWbToolResize" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('resize')" title="8-Way Node Resize Handles (+W / +H)">↔️ Resize</button>
-                  <button id="btnWbToolElbow" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('elbow')" title="Orthogonal Connector Elbow Bend-Point Drag">〰️ Elbow</button>
-                  <button id="btnWbToolPen" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="setWhiteboardTool('pen')" title="Freehand SVG Pen &amp; Marker Drawing">✏️ Pen</button>
-                  <button id="btnWbToolSticky" class="phase-chip" style="padding:2px 5px;font-size:9.5px;" onclick="addWhiteboardStickyNote()" title="Drop Interactive Sticky Note Card onto Canvas">🟨 Sticky</button>
-                  <button id="btnWbToolClear" class="phase-chip" style="padding:2px 4px;font-size:9px;color:#B91C1C;" onclick="clearWhiteboardOverlays()" title="Clear Whiteboard Strokes, Stickies, Size &amp; Elbow Overrides">🧹</button>
-                </div>
-                <!-- Multiplayer Collaborator Presence & @mention Threads Trigger -->
-                <div id="vsCollabPresenceBar" style="display:inline-flex;align-items:center;gap:4px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:999px;padding:2px 7px;cursor:pointer;" onclick="openCollabThreadsModal()" onmouseenter="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='1';" onmouseleave="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='0';" title="Hover to preview Live Collaborator Cursors · Click to open Anchored @mention Comment Threads">
-                  <span style="display:inline-flex;align-items:center;">
-                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#2563EB;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;">AR</span>
-                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#059669;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">PN</span>
-                    <span class="mono" style="width:17px;height:17px;border-radius:50%;background:#7C3AED;color:#FFF;font-size:8px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;margin-left:-4px;">MV</span>
-                  </span>
-                  <span id="collabThreadCountLabel" class="mono" style="font-size:9.5px;font-weight:800;color:#0F172A;white-space:nowrap;">💬 2 Threads</span>
-                </div>
+                <button id="btnOnboardStep2Blank" class="vs-onboarding-step-pill" onclick="openNewDiagramDrawer('blank')" title="Start from a clean Blank Canvas starter topology and add any of 52 Cloud Stencils">
+                  <span>2. ⬜ Blank Canvas</span>
+                </button>
+                <button id="btnOnboardStep3Templates" class="vs-onboarding-step-pill" onclick="expandLeftRailForOnboarding()" title="Browse 18 Canonical SDLC Architecture Blueprints (D01–D18)">
+                  <span>3. 📁 Pick a Template (18)</span>
+                </button>
+                <button id="btnOnboardStep4Tour" class="vs-onboarding-step-pill" onclick="startInteractiveOnboardingTour()" title="Launch a 30-second interactive 4-step spotlight tour of VeriSpec Studio">
+                  <span>4. ▶️ 4-Step Interactive Tour</span>
+                </button>
               </div>
-              <div style="display:flex;align-items:center;gap:3px;flex-wrap:nowrap;">
-                <button id="btnUndoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="undoBlueprintMutation()" title="Undo Last Mutation (⌘Z)">↶</button>
-                <button id="btnRedoAction" class="btn-secondary mono" style="padding:3px 6px;font-size:10px;" onclick="redoBlueprintMutation()" title="Redo Mutation (⌘⇧Z)">↷</button>
-                <button id="btnOpenCommandPalette" class="btn-secondary" style="padding:3px 6px;font-size:10px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">⌘K</button>
-                <button id="btnGreenfieldSynth" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerGreenfieldArchitecture()" title="Synthesize a brand-new Custom Greenfield Cloud Architecture from scratch">✨ Greenfield</button>
-                <input id="visionImageFileInput" type="file" accept="image/*" style="display:none;" onchange="handleVisionImageUpload(event)" />
-                <button id="btnVisionDecompile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="triggerVisionDecompileSample()" title="Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision">📷 Vision</button>
-                <button id="btnVisionUploadFile" class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="document.getElementById('visionImageFileInput')?.click()" title="Upload PNG/JPEG/WebP Whiteboard Image for Gemini Vision Decompilation">📂</button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, 8-Format Polyglot Ingestion &amp; Node Inspector">🧬 Code DSL</button>
-                <button class="btn-secondary" style="padding:3px 6px;font-size:10px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">📄 Living RFC</button>
+              <div style="display:inline-flex;align-items:center;gap:6px;">
+                <span class="mono" style="font-size:9.5px;color:#475569;font-weight:600;">Tip: Double-click any node to edit inline</span>
+                <button id="btnDismissOnboardingBanner" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="dismissOnboardingBanner()" title="Hide Quick-Start Banner (re-open anytime via '🧭 Quick Start' in top header)">✕ Hide</button>
               </div>
             </div>
 
-            <!-- Row 2: C4 System Map Drill-Down + Request Flow Hop Player + Canvas Layout & Export Controls -->
-            <div id="canvasMapDrilldownBar" style="padding:4px 12px;background:#F8FAFC;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:nowrap;overflow-x:auto;">
-              <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0;">
-                <span class="mono" style="font-size:9.5px;font-weight:800;color:#1E40AF;">🗺️ C4:</span>
-                <button id="c4StepL100" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L100')" title="Zoom out to C4 Level 1: System Context &amp; Executive Topology (L100)">🌐 1. Context</button>
-                <span style="color:#94A3B8;font-size:10px;font-weight:700;">›</span>
-                <button id="c4StepL200" class="phase-chip mono active" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L200')" title="Zoom to C4 Level 2: Container Service Mesh &amp; Numbered Flows (L200)">📦 2. Container</button>
-                <span style="color:#94A3B8;font-size:10px;font-weight:700;">›</span>
-                <button id="c4StepL300" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="drilldownC4Level('L300')" title="Drill into C4 Level 3: Component Spec, Ports, IAM, CMEK &amp; SLOs (L300)">⚙️ 3. Component</button>
-                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9px;padding:2px 6px;cursor:pointer;white-space:nowrap;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to cycle C4 sub-system focus or double-click any canvas node to edit inline">🔍 Focus: Full Topology</span>
+            <!-- IN-FLOW NON-OCCLUDING 4-STEP INTERACTIVE ONBOARDING TOUR STRIP (Rule 25F Zero Toolbar / Canvas Occlusion) -->
+            <div id="vsGuidedTourPopover" class="vs-guided-tour-popover" role="dialog" aria-label="Interactive VeriSpec Studio Tour">
+              <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:280px;flex-wrap:wrap;">
+                <span id="vsTourStepBadge" class="stitch-badge mono" style="background:#DBEAFE;color:#1D4ED8;border-color:#93C5FD;font-size:10px;flex-shrink:0;">STEP 1 OF 4</span>
+                <span id="vsTourTitle" style="font-size:12.5px;font-weight:900;color:#0F172A;white-space:nowrap;">1. Create a Brand-New Diagram</span>
+                <span style="color:#94A3B8;font-weight:700;">—</span>
+                <span id="vsTourBody" style="font-size:11px;color:#334155;line-height:1.38;">
+                  Click <b>＋ New Diagram</b> in the top-left header (or left sidebar) anytime to start from a <b>Text Prompt</b>, <b>Clean Blank Canvas</b>, <b>Terraform/SQL Code</b>, or <b>Whiteboard Image</b>.
+                </span>
               </div>
-              <div style="display:inline-flex;align-items:center;gap:4px;flex-wrap:nowrap;flex-shrink:0;">
-                <button id="btnFlowWalkthroughStep" class="phase-chip mono" style="padding:2px 6px;font-size:9px;color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF;" onclick="stepArchitectureFlowWalkthrough()" title="Step through directed request flow hops one edge at a time">▶️ Flow Hop (0/0)</button>
-                <button id="btnToggleMinimap" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleCanvasMinimap()" title="Toggle Bottom-Right Live SVG Minimap Radar">🧭 Minimap</button>
-                <button id="btnToggleRenderMode" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleBlueprintRenderMode()" title="Switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Grid">🔀 Layout: Bespoke</button>
-                <button id="btnToggleNodeDrag" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">✋ Drag: Off</button>
-                <button id="btnSnapPhase0Math" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">📐 Snap</button>
-                <button id="btnAddReviewPin" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">📌 Pin</button>
-                <label style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;color:#334155;cursor:pointer;padding:2px 5px;border-radius:6px;background:#FFFFFF;border:1px solid #CBD5E1;">
+              <div style="display:inline-flex;align-items:center;gap:6px;flex-shrink:0;">
+                <button id="vsTourPrevBtn" class="btn-secondary" style="padding:4px 9px;font-size:10px;display:none;" onclick="stepInteractiveOnboardingTour(-1)">← Back</button>
+                <button id="vsTourTryActionBtn" class="btn-secondary" style="padding:4px 10px;font-size:10px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;white-space:nowrap;" onclick="triggerCurrentTourStepAction()">⚡ Try It</button>
+                <button id="vsTourNextBtn" class="btn-primary" style="padding:4px 11px;font-size:10px;white-space:nowrap;" onclick="stepInteractiveOnboardingTour(1)">Next Step →</button>
+                <button class="phase-chip mono" style="padding:3px 7px;font-size:9.5px;white-space:nowrap;" onclick="closeInteractiveOnboardingTour()">✕ Close Tour</button>
+              </div>
+            </div>
+
+            <div id="toastBanner" class="toast-banner"></div>
+
+            <!-- Consolidated 1-Row Studio Context & Telemetry Ribbon (P0.1 Rule 25 First-Principles Pruning) -->
+            <div id="canvasMapDrilldownBar" class="canvas-toolbar vs-context-ribbon">
+              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0;">
+                <button id="toolbarLineageToggleBtn" class="btn-secondary" style="padding:3px 7px;font-size:10px;border-color:#93C5FD;background:#EFF6FF;color:#1D4ED8;" onclick="toggleAdrPanel()" title="Expand / Collapse Prompt Evolution Lineage Panel">
+                  <span id="toolbarLineageToggleText">🕘 Lineage (3) ▶</span>
+                </button>
+                <span id="activeBpCodeBadge" class="stitch-badge mono" style="font-size:10.5px;padding:2px 8px;">D05 · Turn-3</span>
+                <span id="activeBpMetaStats" class="mono" style="font-size:10px;font-weight:700;color:#475569;white-space:nowrap;">12 Nodes · 11 Edges</span>
+                <span id="atelierFinOpsPill" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:9.5px;padding:2px 7px;" title="Deterministic Cloud FinOps Monthly Run-Rate &amp; Critical-Path p99 Latency">💰 $10,830/mo · ⚡ 54.6ms</span>
+                <span id="toolbarSqliteBadge" class="stitch-badge mono" style="background:#F0FDF4;color:#166534;border-color:#BBF7D0;font-size:9.5px;padding:2px 7px;cursor:pointer;" onclick="openWorkbenchTab('iac')" title="Native node:sqlite (WAL Mode) Persistent Database &amp; GitHub Repo Status">☁️ Saved · SQLite WAL</span>
+                <span id="c4DrilldownNodePill" class="stitch-badge mono" style="background:#EFF6FF;color:#1D4ED8;border-color:#BFDBFE;font-size:9px;padding:2px 7px;cursor:pointer;white-space:nowrap;" onclick="cycleC4ScopedNodeDrilldown()" title="Click to cycle C4 sub-system focus or double-click any canvas node to edit inline">🔍 Focus: Full Topology</span>
+                <!-- Hidden Scrollbar Width Slider (accessible via Workbench Drawer & programmatic API) -->
+                <div style="display:none;" title="Adjust Horizontal &amp; Vertical Scrollbar Width (6px – 20px)">
+                  <input id="toolbarScrollWidthSlider" type="range" min="6" max="20" value="11" oninput="setScrollbarThickness(this.value)" />
+                  <span id="toolbarScrollWidthVal" class="mono">11px</span>
+                </div>
+              </div>
+              <div style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;min-width:0;">
+                <button id="btnFlowWalkthroughStep" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;color:#6D28D9;border-color:#C4B5FD;background:#F5F3FF;" onclick="stepArchitectureFlowWalkthrough()" title="Step through directed request flow hops one edge at a time">▶️ Flow Hop (0/0)</button>
+                <button id="btnToggleRenderMode" class="phase-chip mono" style="padding:2px 7px;font-size:9.5px;" onclick="toggleBlueprintRenderMode()" title="Switch diagram layout between Bespoke Domain Archetype and 5-Tier Cloud Grid">🔀 Layout: Bespoke</button>
+                <label style="display:inline-flex;align-items:center;gap:3px;font-size:9.5px;font-weight:700;color:#334155;cursor:pointer;padding:2px 6px;border-radius:6px;background:#FFFFFF;border:1px solid #CBD5E1;" title="Highlight added/modified AST delta nodes and edges">
                   <input type="checkbox" id="toggleDiffCheckbox" checked onchange="toggleVisualDiff(this.checked)" style="accent-color:#2563EB;width:10px;height:10px;margin:0;" />
                   <span>Diff</span>
                 </label>
-                <button class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="downloadCurrentSvg()" title="Download Vector .SVG">⬇ .SVG</button>
-                <button class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="downloadCurrentPng2x()" title="Download High-Resolution 2x Retina .PNG">⬇ .PNG</button>
+                <div id="vsCollabPresenceBar" style="display:inline-flex;align-items:center;gap:4px;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:999px;padding:2px 7px;cursor:pointer;" onclick="openCollabThreadsModal()" onmouseenter="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='1';" onmouseleave="const o=document.getElementById('vsLiveCollabCursorsOverlay');if(o)o.style.opacity='0';" title="Hover to preview Live Collaborator Cursors · Click to open Anchored @mention Comment Threads">
+                  <span id="collabPresenceAvatars" style="display:inline-flex;align-items:center;"></span>
+                  <span id="collabThreadCountLabel" class="mono" style="font-size:9px;font-weight:800;color:#0F172A;white-space:nowrap;">💬 0 Threads</span>
+                </div>
+                <button id="btnContextOpenDsl" class="btn-secondary" style="padding:2px 7px;font-size:9.5px;" onclick="openWorkbenchTab('dsl')" title="Bi-Directional Architecture-as-Code DSL, 8-Format Polyglot Ingestion &amp; Node Inspector">🧬 DSL</button>
+                <button id="btnContextOpenRfc" class="btn-secondary" style="padding:2px 7px;font-size:9.5px;" onclick="openWorkbenchTab('rfc')" title="Living Engineering Design Doc (RFC &amp; ADR Markdown) + FinOps TCO">📄 RFC</button>
               </div>
             </div>
 
@@ -1277,6 +1541,8 @@
 
             <div style="position:relative;flex:1;display:flex;flex-direction:column;min-height:0;">
               <div id="atelierSvgContainer" class="svg-viewport-wrapper vs-dual-scroll" style="cursor:grab;flex:1;"></div>
+              <!-- Restore Pill when Bottom Canvas Tool Dock is collapsed -->
+              <button id="btnRestoreCanvasDock" class="btn-secondary hidden" style="position:absolute;left:12px;bottom:10px;z-index:9;padding:3px 9px;font-size:9.5px;border-radius:999px;box-shadow:0 3px 10px rgba(15,23,42,0.12);" onclick="toggleFloatingCanvasDock(true)" title="Expand Canvas Manipulation &amp; Whiteboard Tool Dock">🧰 Canvas Tools ▴</button>
               <!-- Bottom-Right Live SVG Minimap Radar (Auto-shown on Zoom > 105% or when toggled On) -->
               <div id="vsCanvasMinimapOverlay" style="position:absolute;right:18px;bottom:18px;width:168px;height:96px;background:rgba(255,255,255,0.95);border:1.5px solid #93C5FD;border-radius:8px;box-shadow:0 4px 12px rgba(15,23,42,0.1);padding:4px;pointer-events:none;z-index:8;display:none;flex-direction:column;justify-content:space-between;">
                 <div style="display:flex;align-items:center;justify-content:space-between;font-size:8px;font-weight:800;color:#1E40AF;padding:0 2px;" class="mono">
@@ -1287,22 +1553,61 @@
               </div>
             </div>
 
-            <!-- Conversational Prompt Mutation Dock -->
-            <div class="prompt-dock">
-              <div class="recipe-chips-row">
-                <span id="activeScopePill" class="scope-pill" onclick="clearScopedNode()" style="cursor:pointer;" title="Click to clear node scope">🎯 Scope: Full Architecture (Click any node to target)</span>
-                <div id="atelierRecipeChipsContainer" style="display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;"></div>
+            <!-- Compact Non-Occluding Floating-Pill Canvas & Whiteboard Tool Dock (Zero SVG Overlap) -->
+            <div id="vsFloatingCanvasDockStrip" class="vs-canvas-dock-strip" role="toolbar" aria-label="Canvas Manipulation and Whiteboard Tools">
+              <div id="vsFloatingCanvasDock" class="vs-floating-canvas-dock">
+                <button id="btnUndoAction" class="phase-chip mono" style="padding:2px 6px;font-size:10px;border:none;background:transparent;" onclick="undoBlueprintMutation()" title="Undo Last Mutation (⌘Z)">↶</button>
+                <button id="btnRedoAction" class="phase-chip mono" style="padding:2px 6px;font-size:10px;border:none;background:transparent;" onclick="redoBlueprintMutation()" title="Redo Mutation (⌘⇧Z)">↷</button>
+                <span class="vs-dock-divider"></span>
+                <div style="display:inline-flex;align-items:center;gap:2px;">
+                  <button class="phase-chip mono" style="border:none;background:transparent;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(-0.15)" title="Zoom Out">−</button>
+                  <span id="canvasZoomLabel" class="mono" style="font-size:9px;font-weight:700;color:#334155;min-width:30px;text-align:center;cursor:pointer;" onclick="resetCanvasZoom()" title="Reset Zoom &amp; Pan to 100%">100%</span>
+                  <button class="phase-chip mono" style="border:none;background:transparent;padding:1px 5px;font-size:11px;" onclick="adjustCanvasZoom(0.15)" title="Zoom In">+</button>
+                </div>
+                <button id="btnToggleMinimap" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleCanvasMinimap()" title="Toggle Bottom-Right Live SVG Minimap Radar">🧭 Minimap</button>
+                <span class="vs-dock-divider"></span>
+                <button id="btnToggleNodeDrag" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="toggleNodeDragMode()" title="Toggle Direct On-Canvas Freeform Node Dragging (or hold Shift + drag any node)">✋ Drag: Off</button>
+                <button id="btnSnapPhase0Math" class="phase-chip mono" style="padding:2px 6px;font-size:9px;" onclick="snapNodesToPhase0Math()" title="Re-snap all dragged nodes back to zero-collision Phase-0 mathematical coordinates">📐 Snap</button>
+                <span class="vs-dock-divider"></span>
+                <div id="vsWhiteboardToolbar" style="display:inline-flex;align-items:center;gap:2px;">
+                  <button id="btnWbToolLasso" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="setWhiteboardTool('lasso')" title="Marquee Lasso Multi-Select &amp; Batch Move Nodes">⬚ Lasso</button>
+                  <button id="btnWbToolResize" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="setWhiteboardTool('resize')" title="8-Way Node Resize Handles (+W / +H)">↔️ Resize</button>
+                  <button id="btnWbToolElbow" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="setWhiteboardTool('elbow')" title="Orthogonal Connector Elbow Bend-Point Drag">〰️ Elbow</button>
+                  <button id="btnWbToolPen" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="setWhiteboardTool('pen')" title="Freehand SVG Pen &amp; Marker Drawing">✏️ Pen</button>
+                  <button id="btnWbToolSticky" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="addWhiteboardStickyNote()" title="Drop Interactive Sticky Note Card onto Canvas">🟨 Sticky</button>
+                  <button id="btnAddReviewPin" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="addCanvasReviewPin()" title="Pin an Architecture Review Callout Note onto the SVG canvas">📌 Pin</button>
+                  <button id="btnWbToolClear" class="phase-chip" style="padding:2px 5px;font-size:9px;color:#B91C1C;" onclick="clearWhiteboardOverlays()" title="Clear Whiteboard Strokes, Stickies, Size &amp; Elbow Overrides">🧹</button>
+                </div>
+                <span class="vs-dock-divider"></span>
+                <input id="visionImageFileInput" type="file" accept="image/*" style="display:none;" onchange="handleVisionImageUpload(event)" />
+                <button id="btnVisionDecompile" class="phase-chip" style="padding:2px 6px;font-size:9px;" onclick="openNewDiagramDrawer('vision')" title="Import &amp; Decompile Architecture Image / Whiteboard via Live Vertex AI Gemini Vision">📷 Vision</button>
+                <button id="btnVisionUploadFile" class="phase-chip" style="padding:2px 5px;font-size:9px;" onclick="document.getElementById('visionImageFileInput')?.click()" title="Upload PNG/JPEG/WebP Whiteboard Image for Gemini Vision Decompilation">📂</button>
+                <button id="btnOpenCommandPalette" class="phase-chip mono" style="padding:2px 6px;font-size:9px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openCommandPaletteModal()" title="Open Universal Command Palette &amp; Slash Menu (⌘K)">⌘K</button>
+                <button id="btnCollapseCanvasDock" class="phase-chip mono" style="padding:2px 5px;font-size:9px;color:#64748B;border:none;background:transparent;" onclick="toggleFloatingCanvasDock(false)" title="Collapse Canvas Tool Dock for Maximum Fullscreen Diagram Height">▾</button>
               </div>
-              <div class="prompt-input-row">
+            </div>
+
+            <!-- Conversational Prompt Mutation & New Diagram Creation Dock -->
+            <div class="prompt-dock" style="padding:7px 12px;gap:6px;">
+              <div class="recipe-chips-row">
+                <span id="activeScopePill" class="scope-pill" onclick="clearScopedNode()" style="cursor:pointer;padding:3px 9px;font-size:10.5px;" title="Click to clear node scope">🎯 Scope: Full Architecture (Click any node to target)</span>
+                <div id="atelierRecipeChipsContainer" style="display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap;"></div>
+              </div>
+              <div class="prompt-input-row" style="gap:8px;">
+                <div style="display:inline-flex;align-items:center;background:#E2E8F0;padding:2px;border-radius:9px;gap:2px;flex-shrink:0;" role="group" aria-label="Prompt Composer Intent">
+                  <button id="composerModeEvolveBtn" class="phase-chip active" style="border:none;padding:5px 9px;font-size:10px;" onclick="setComposerIntentMode('evolve')" title="Evolve and mutate the active diagram on the canvas">🪄 Evolve</button>
+                  <button id="composerModeNewBtn" class="phase-chip" style="border:none;padding:5px 9px;font-size:10px;" onclick="setComposerIntentMode('new')" title="Create a brand-new diagram from your prompt">＋ New Diagram</button>
+                </div>
                 <input
                   id="atelierPromptInput"
                   type="text"
                   class="prompt-input"
-                  placeholder="Evolve architecture via prompt (e.g., 'Add Looker & BigQuery')..."
+                  style="padding:8px 12px;"
+                  placeholder="Evolve via prompt (e.g., 'Add BigQuery & Looker')"
                   onkeydown="if(event.key==='Enter') submitPromptFromInput('atelierPromptInput')"
                 />
-                <button class="btn-primary" style="padding:10px 14px;font-size:12px;" onclick="submitPromptFromInput('atelierPromptInput')">
-                  <span>🪄 Apply Mutation ↵</span>
+                <button id="btnAtelierSubmitPrompt" class="btn-primary" style="padding:8px 14px;font-size:11.5px;white-space:nowrap;" onclick="submitPromptFromInput('atelierPromptInput')">
+                  <span id="atelierSubmitBtnLabel">🪄 Apply Mutation ↵</span>
                 </button>
               </div>
             </div>
@@ -1362,7 +1667,7 @@
               <div class="step-circle">2</div>
               <div>
                 <div style="font-size:12px;font-weight:800;color:#1D4ED8;">Step 2: Apply Iterative Prompts</div>
-                <div style="font-size:10.5px;color:#2563EB;">Mutate AST across v1.0.x turns</div>
+                <div style="font-size:10.5px;color:#2563EB;">Mutate AST across iterative revisions</div>
               </div>
             </div>
             <div class="stitch-step-pill active">
@@ -1384,7 +1689,7 @@
           <!-- Prompt Bar inside Stepper View -->
           <div class="canvas-stage-card" style="padding:14px 18px;">
             <div class="prompt-input-row">
-              <span class="scope-pill mono" id="stepperDiffFormula">v1.0.1 → v1.0.3 Diff</span>
+              <span class="scope-pill mono" id="stepperDiffFormula">Baseline → Turn-3 Diff</span>
               <input
                 id="stepperPromptInput"
                 type="text"
@@ -1402,7 +1707,7 @@
           <div class="diff-split-grid">
             <div class="canvas-stage-card">
               <div class="canvas-toolbar">
-                <span class="stitch-badge mono" style="background:#F1F5F9;color:#334155;border-color:#CBD5E1;" id="diffBeforeLabel">BASELINE · v1.0.1 (Before Prompt Edits)</span>
+                <span class="stitch-badge mono" style="background:#F1F5F9;color:#334155;border-color:#CBD5E1;" id="diffBeforeLabel">BASELINE (Before Prompt Edits)</span>
                 <span style="font-size:11px;font-weight:600;color:#64748B;">Original Seed Topology</span>
               </div>
               <div id="diffBeforeSvgContainer" class="svg-viewport-wrapper" style="min-height:430px;"></div>
@@ -1410,7 +1715,7 @@
 
             <div class="canvas-stage-card" style="border-color:#86EFAC;">
               <div class="canvas-toolbar" style="background:#ECFDF5;">
-                <span class="stitch-badge mono" style="background:#DCFCE7;color:#065F46;border-color:#6EE7B7;" id="diffAfterLabel">CURRENT · v1.0.3 (After Iterative Prompts)</span>
+                <span class="stitch-badge mono" style="background:#DCFCE7;color:#065F46;border-color:#6EE7B7;" id="diffAfterLabel">CURRENT · Turn-3 (After Iterative Prompts)</span>
                 <span id="diffAfterSummary" style="font-size:11px;font-weight:700;color:#047857;">+2 Added · ~1 Replaced</span>
               </div>
               <div id="diffAfterSvgContainer" class="svg-viewport-wrapper" style="min-height:430px;"></div>
@@ -1543,9 +1848,6 @@
                   <span id="landingPreviewFinopsBadge" class="stitch-badge mono" style="background:#ECFDF5;color:#065F46;border-color:#A7F3D0;font-size:10px;">💰 $10,830/mo · ⚡ 54.6ms p99</span>
                 </div>
                 <div style="display:inline-flex;align-items:center;gap:4px;">
-                  <span class="mono" style="font-size:9px;background:#DBEAFE;color:#1D4ED8;padding:2px 6px;border-radius:99px;font-weight:800;">@alex.rivera</span>
-                  <span class="mono" style="font-size:9px;background:#F3E8FF;color:#6D28D9;padding:2px 6px;border-radius:99px;font-weight:800;">@sre-lead</span>
-                  <span class="mono" style="font-size:9px;background:#DCFCE7;color:#15803D;padding:2px 6px;border-radius:99px;font-weight:800;">@sec-architect</span>
                   <button class="btn-secondary" style="padding:3px 8px;font-size:10px;" onclick="setUiEdition('atelier')">Open Full Canvas ↗</button>
                 </div>
               </div>
@@ -1678,28 +1980,6 @@
             </div>
           </div>
 
-          <!-- Customer Engineering Testimonials Strip -->
-          <div id="landingTestimonialsGrid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;">
-            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
-              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
-                "Phase-0 mathematical planning eliminated every overlapping label and crooked arrow in our C4 architecture reviews. Exporting 100% editable .drawio XML saves hours per RFC."
-              </div>
-              <div class="mono" style="font-size:10.5px;font-weight:800;color:#1D4ED8;">Alex Rivera · Principal Cloud Architect</div>
-            </div>
-            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
-              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
-                "Connecting Claude Code and Gemini CLI to verispec_mcp lets our autonomous agents generate, audit, and update architecture diagrams and FinOps $/mo budgets on every PR."
-              </div>
-              <div class="mono" style="font-size:10.5px;font-weight:800;color:#059669;">Priya Nair · Staff Site Reliability Engineer</div>
-            </div>
-            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:16px;">
-              <div style="font-size:12px;color:#0F172A;font-style:italic;line-height:1.5;margin-bottom:10px;">
-                "Having 18 lifecycle blueprints, live Vertex AI Gemini 3.1 Pro + 3 Flash cross-model judging, and hybrid slash-command RFC docs in a single self-hosted Cloud Run workspace is unmatched."
-              </div>
-              <div class="mono" style="font-size:10.5px;font-weight:800;color:#7C3AED;">Marcus Vance · Principal Security Architect</div>
-            </div>
-          </div>
-
           <!-- 5-Column Product Footer -->
           <footer id="landingFooter" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:18px 22px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px;font-size:11.5px;color:#475569;">
             <div>
@@ -1757,18 +2037,18 @@
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
               <button class="btn-secondary" style="padding:6px 11px;font-size:11px;" onclick="setUiEdition('landing')">🏠 Product Landing</button>
               <button class="btn-secondary" style="padding:6px 11px;font-size:11px;border-color:#93C5FD;color:#1D4ED8;background:#EFF6FF;" onclick="openMcpApiModal()">🤖 MCP &amp; API</button>
-              <button class="btn-primary" style="padding:6px 13px;font-size:11px;" onclick="triggerGreenfieldArchitecture(); setUiEdition('atelier');">➕ New Blank Diagram</button>
+              <button class="btn-primary" style="padding:6px 13px;font-size:11px;background:#047857;" onclick="setUiEdition('atelier'); openNewDiagramDrawer('blank');">＋ New Blank Diagram</button>
             </div>
           </div>
 
           <!-- 5 Quick-Create Action Cards -->
           <div id="homeQuickCreateGrid" style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;">
-            <button onclick="triggerGreenfieldArchitecture(); setUiEdition('atelier');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
-              <span class="mono" style="font-size:10px;font-weight:800;color:#2563EB;">➕ BLANK CANVAS</span>
-              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">New Architecture</span>
-              <span style="font-size:10.5px;color:#64748B;">Greenfield 5-tier cloud grid</span>
+            <button onclick="setUiEdition('atelier'); openNewDiagramDrawer('blank');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+              <span class="mono" style="font-size:10px;font-weight:800;color:#2563EB;">⬜ BLANK CANVAS</span>
+              <span style="font-size:12.5px;font-weight:800;color:#0F172A;">New Blank Diagram</span>
+              <span style="font-size:10.5px;color:#64748B;">Clean 2 / 3 / 5-tier starter</span>
             </button>
-            <button onclick="setUiEdition('atelier'); setTimeout(()=>document.getElementById('atelierPromptInput')?.focus(), 80);" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+            <button onclick="setUiEdition('atelier'); openNewDiagramDrawer('prompt');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
               <span class="mono" style="font-size:10px;font-weight:800;color:#7C3AED;">✨ AI DIAGRAMMER</span>
               <span style="font-size:12.5px;font-weight:800;color:#0F172A;">Prompt / Code to AST</span>
               <span style="font-size:10.5px;color:#64748B;">Text, Terraform, SQL or K8s</span>
@@ -1778,7 +2058,7 @@
               <span style="font-size:12.5px;font-weight:800;color:#0F172A;">New Living RFC / ADR</span>
               <span style="font-size:10.5px;color:#64748B;">/ Slash commands + embeds</span>
             </button>
-            <button onclick="setUiEdition('atelier'); triggerVisionDecompileSample();" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
+            <button onclick="setUiEdition('atelier'); openNewDiagramDrawer('vision');" style="text-align:left;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:12px;padding:12px 14px;cursor:pointer;display:flex;flex-direction:column;gap:4px;min-width:0;box-shadow:var(--shadow-xs);">
               <span class="mono" style="font-size:10px;font-weight:800;color:#D97706;">📷 GEMINI VISION</span>
               <span style="font-size:12.5px;font-weight:800;color:#0F172A;">Import Whiteboard</span>
               <span style="font-size:10.5px;color:#64748B;">Decompile PNG/JPEG sketch</span>
@@ -2017,7 +2297,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;flex-wrap:wrap;">
             <div style="display:flex;align-items:center;gap:6px;">
               <span style="font-size:11.5px;font-weight:800;color:#1E3A8A;">⚖️ Live Vertex AI Gemini Jury (Rule 55)</span>
-              <span id="judgeScoreBadge" class="stitch-badge mono" style="background:#059669;color:#FFF;border:none;font-size:10.5px;padding:2px 8px;">96 / 100 PASS</span>
+              <span id="judgeScoreBadge" class="stitch-badge mono" style="background:#047857;color:#FFF;border:none;font-size:10.5px;padding:2px 8px;">96 / 100 PASS</span>
             </div>
             <button id="btnRunLiveGeminiJudge" class="btn-primary" style="padding:4px 10px;font-size:10.5px;" onclick="triggerLiveGeminiJudge()" title="Execute real HTTP POST to Vertex AI locations/global (gemini-3.1-pro-preview + gemini-3-flash-preview)">
               ⚡ Run Live Gemini Jury
@@ -2115,6 +2395,180 @@
       </div>
     </aside>
 
+    <!-- DOCKED RIGHT-SIDE 4-MODE NEW DIAGRAM CREATOR DRAWER (Rule 25F Non-Blocking Reflow, 0 Canvas Occlusion) -->
+    <aside id="newDiagramCreatorDrawer" class="right-drawer" aria-label="Create New Diagram Drawer">
+      <div class="panel-header" style="flex-direction:column;align-items:stretch;gap:8px;background:#F8FAFC;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div class="panel-title">
+            <span style="font-size:13px;font-weight:900;color:#0F172A;"><span style="color:#047857;">＋</span> Create New Architecture Diagram</span>
+          </div>
+          <button class="btn-secondary" style="padding:4px 10px;font-size:11px;" onclick="closeNewDiagramDrawer()">
+            ✕ Close (Esc)
+          </button>
+        </div>
+        <div style="font-size:11px;color:#475569;line-height:1.35;">
+          Pick how you want to start — every diagram compiles through the 5-Stage Phase-0 Zero-Overlap Math Solver:
+        </div>
+        <!-- 4 Creation Mode Tabs (minmax(0,1fr) zero-clipping grid) -->
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;background:#E2E8F0;padding:3px;border-radius:8px;">
+          <button id="newDiagTabBtn_prompt" class="phase-chip active" style="border:none;text-align:center;padding:6px 2px;font-size:10px;min-width:0;overflow:hidden;" onclick="switchNewDiagramTab('prompt')">✨ 1. Prompt</button>
+          <button id="newDiagTabBtn_blank" class="phase-chip" style="border:none;text-align:center;padding:6px 2px;font-size:10px;min-width:0;overflow:hidden;" onclick="switchNewDiagramTab('blank')">⬜ 2. Blank</button>
+          <button id="newDiagTabBtn_code" class="phase-chip" style="border:none;text-align:center;padding:6px 2px;font-size:10px;min-width:0;overflow:hidden;" onclick="switchNewDiagramTab('code')">🧬 3. Code/SQL</button>
+          <button id="newDiagTabBtn_vision" class="phase-chip" style="border:none;text-align:center;padding:6px 2px;font-size:10px;min-width:0;overflow:hidden;" onclick="switchNewDiagramTab('vision')">📷 4. Image</button>
+        </div>
+      </div>
+
+      <!-- MODE 1: TEXT PROMPT TO NEW ARCHITECTURE -->
+      <div id="newDiagPanel_prompt" class="vs-dual-scroll" style="padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Diagram Title</label>
+            <input id="newDiagPromptTitleInput" type="text" value="Custom Cloud &amp; AI Architecture" placeholder="e.g., Global Payment &amp; Fraud Mesh" style="width:100%;padding:7px 9px;border-radius:7px;border:1px solid #CBD5E1;font-size:11.5px;font-weight:700;color:#0F172A;" />
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Workspace Slot</label>
+            <select id="newDiagTargetSlotSelect" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid #CBD5E1;font-size:11px;font-weight:700;background:#FFFFFF;color:#0F172A;">
+              <option value="NEW" selected>➕ New Standalone Diagram (DOC-*)</option>
+              <option value="ACTIVE">Current Active Slot</option>
+              <option value="D05">D05 · Multi-Tier Cloud</option>
+              <option value="D06">D06 · Zero-Trust Hub</option>
+              <option value="D08">D08 · Agentic AI Mesh</option>
+              <option value="D10">D10 · Event Lakehouse</option>
+              <option value="D18">D18 · Multi-Region DR</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:4px;">Describe Services, Security &amp; Data Stores</label>
+          <textarea id="newDiagPromptTextarea" class="vs-dual-scroll" rows="4" placeholder="e.g., Build a HIPAA telehealth platform with Cloud Armor WAF, Apigee API Gateway, GKE Autopilot, Vertex AI Gemini, AlloyDB PostgreSQL, and BigQuery..." style="width:100%;padding:9px 10px;border-radius:8px;border:1.5px solid #93C5FD;background:#FFFFFF;color:#0F172A;font-size:11.5px;line-height:1.45;">Cloud Armor WAF, Apigee API Gateway, GKE Autopilot, Vertex AI Gemini, Cloud Spanner HA, and BigQuery</textarea>
+        </div>
+
+        <div>
+          <div style="font-size:10px;font-weight:800;color:#475569;margin-bottom:5px;">⚡ 1-Click Starter Prompts (click to populate):</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;">
+            <button class="btn-secondary" style="padding:6px 8px;font-size:10px;justify-content:flex-start;min-width:0;overflow:hidden;" onclick="fillNewDiagramStarterPrompt('Global SaaS AI Platform', 'Cloud Armor WAF, Apigee API Gateway, GKE Autopilot, Vertex AI Gemini, Memorystore Redis, and Cloud Spanner HA')">🌐 SaaS + Vertex AI</button>
+            <button class="btn-secondary" style="padding:6px 8px;font-size:10px;justify-content:flex-start;min-width:0;overflow:hidden;" onclick="fillNewDiagramStarterPrompt('Zero-Trust Payment Ledger', 'Cloudflare WAF, Okta Auth0, Apigee X, Cloud Run, Cloud KMS HSM, and Cloud Spanner Global HA')">💳 PCI Payment Ledger</button>
+            <button class="btn-secondary" style="padding:6px 8px;font-size:10px;justify-content:flex-start;min-width:0;overflow:hidden;" onclick="fillNewDiagramStarterPrompt('Real-Time Streaming Lakehouse', 'Apigee API Gateway, Apache Kafka, GKE Autopilot, BigQuery Enterprise Lakehouse, and Looker BI')">📊 Kafka → BigQuery BI</button>
+            <button class="btn-secondary" style="padding:6px 8px;font-size:10px;justify-content:flex-start;min-width:0;overflow:hidden;" onclick="fillNewDiagramStarterPrompt('Cross-Cloud GCP + AWS Mesh', 'Cloudflare WAF, AWS EKS Cluster, Vertex AI Gemini, AWS Aurora PostgreSQL, and AWS Redshift')">☁️ Cross-Cloud GCP+AWS</button>
+          </div>
+        </div>
+
+        <button id="btnSubmitNewPromptDiagram" class="btn-primary" style="padding:10px 14px;font-size:12px;justify-content:center;background:#047857;" onclick="submitCreatePromptDiagram()">
+          <span>✨ Generate New Diagram from Prompt →</span>
+        </button>
+      </div>
+
+      <!-- MODE 2: CLEAN BLANK CANVAS STARTER -->
+      <div id="newDiagPanel_blank" class="hidden vs-dual-scroll" style="padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Blank Diagram Title</label>
+            <input id="newDiagBlankTitleInput" type="text" value="New Blank Cloud Architecture" placeholder="Enter your diagram title..." style="width:100%;padding:7px 9px;border-radius:7px;border:1px solid #CBD5E1;font-size:11.5px;font-weight:700;color:#0F172A;" />
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Workspace Slot</label>
+            <select id="newDiagBlankSlotSelect" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid #CBD5E1;font-size:11px;font-weight:700;background:#FFFFFF;color:#0F172A;">
+              <option value="NEW" selected>➕ New Standalone Diagram (DOC-*)</option>
+              <option value="ACTIVE">Current Active Slot</option>
+              <option value="D05">D05 · Multi-Tier Cloud</option>
+              <option value="D06">D06 · Zero-Trust Hub</option>
+              <option value="D08">D08 · Agentic AI Mesh</option>
+              <option value="D10">D10 · Event Lakehouse</option>
+              <option value="D18">D18 · Multi-Region DR</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:5px;">Select Clean Zone Skeleton</label>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:9px;border:1.5px solid #93C5FD;background:#EFF6FF;cursor:pointer;">
+              <input type="radio" name="blankPresetRadio" value="three_tier" checked style="margin-top:2px;accent-color:#2563EB;" />
+              <div>
+                <div style="font-size:11.5px;font-weight:800;color:#0F172A;">3-Tier Starter (Client → API → Database)</div>
+                <div style="font-size:10px;color:#475569;">3 full-span tiers (Client · App &amp; API · Stateful Data) ready to double-click &amp; rename.</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:9px;border:1px solid #CBD5E1;background:#FFFFFF;cursor:pointer;">
+              <input type="radio" name="blankPresetRadio" value="minimal_2" style="margin-top:2px;accent-color:#2563EB;" />
+              <div>
+                <div style="font-size:11.5px;font-weight:800;color:#0F172A;">Minimal 2-Node Seed (Ingress → Service)</div>
+                <div style="font-size:10px;color:#475569;">2 clean tiers — build out step-by-step using 52 Stencils or Whiteboard tools.</div>
+              </div>
+            </label>
+            <label style="display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:9px;border:1px solid #CBD5E1;background:#FFFFFF;cursor:pointer;">
+              <input type="radio" name="blankPresetRadio" value="five_tier" style="margin-top:2px;accent-color:#2563EB;" />
+              <div>
+                <div style="font-size:11.5px;font-weight:800;color:#0F172A;">5-Tier Enterprise Skeleton (Client · Edge · Compute · AI · Data)</div>
+                <div style="font-size:10px;color:#475569;">1 clean node in each of the 5 security/compute zones with Manhattan connectors.</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:700;color:#0F172A;cursor:pointer;padding:6px 8px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;">
+          <input id="newDiagBlankOpenStencilsChk" type="checkbox" checked style="accent-color:#2563EB;" />
+          <span>Auto-open 🧰 52 Cloud Stencils palette after creating blank canvas</span>
+        </label>
+
+        <button id="btnSubmitNewBlankDiagram" class="btn-primary" style="padding:10px 14px;font-size:12px;justify-content:center;background:#2563EB;" onclick="submitCreateBlankDiagram()">
+          <span>⬜ Create Clean Blank Canvas →</span>
+        </button>
+      </div>
+
+      <!-- MODE 3: CODE / SQL / TERRAFORM / K8S TO NEW DIAGRAM -->
+      <div id="newDiagPanel_code" class="hidden vs-dual-scroll" style="padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px;">
+        <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:8px;">
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Diagram Title</label>
+            <input id="newDiagCodeTitleInput" type="text" value="Code-Decompiled Cloud Topology" style="width:100%;padding:7px 9px;border-radius:7px;border:1px solid #CBD5E1;font-size:11.5px;font-weight:700;color:#0F172A;" />
+          </div>
+          <div>
+            <label style="font-size:10px;font-weight:800;color:#334155;display:block;margin-bottom:3px;">Workspace Slot</label>
+            <select id="newDiagCodeSlotSelect" style="width:100%;padding:7px 8px;border-radius:7px;border:1px solid #CBD5E1;font-size:11px;font-weight:700;background:#FFFFFF;color:#0F172A;">
+              <option value="NEW" selected>➕ New Standalone Diagram (DOC-*)</option>
+              <option value="ACTIVE">Current Active Slot</option>
+              <option value="D05">D05 · Multi-Tier Cloud</option>
+              <option value="D06">D06 · Zero-Trust Hub</option>
+              <option value="D08">D08 · Agentic AI Mesh</option>
+              <option value="D10">D10 · Event Lakehouse</option>
+              <option value="D18">D18 · Multi-Region DR</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap;">
+          <button class="btn-secondary" style="padding:3px 7px;font-size:9.5px;" onclick="loadNewDiagramCodeSample('terraform')">Terraform HCL</button>
+          <button class="btn-secondary" style="padding:3px 7px;font-size:9.5px;" onclick="loadNewDiagramCodeSample('sql')">PostgreSQL DDL</button>
+          <button class="btn-secondary" style="padding:3px 7px;font-size:9.5px;" onclick="loadNewDiagramCodeSample('k8s')">K8s YAML</button>
+          <button class="btn-secondary" style="padding:3px 7px;font-size:9.5px;" onclick="loadNewDiagramCodeSample('openapi')">OpenAPI 3.1</button>
+        </div>
+        <textarea id="newDiagCodeTextarea" class="mono vs-dual-scroll" spellcheck="false" style="width:100%;flex:1;min-height:175px;padding:9px;border-radius:8px;border:1.5px solid #93C5FD;background:#F8FAFC;color:#0F172A;font-size:10.5px;line-height:1.45;">resource "google_cloud_armor_security_policy" "edge_waf" {}
+resource "google_cloud_run_v2_service" "checkout_api" {}
+resource "google_spanner_instance" "global_ledger" {}
+resource "google_bigquery_dataset" "analytics_dw" {}</textarea>
+        <button id="btnSubmitNewCodeDiagram" class="btn-primary" style="padding:10px 14px;font-size:12px;justify-content:center;background:#7C3AED;" onclick="submitCreateCodeDiagram()">
+          <span>🧬 Compile Code / Schema to New Diagram →</span>
+        </button>
+      </div>
+
+      <!-- MODE 4: GEMINI VISION WHITEBOARD / SCREENSHOT IMPORT -->
+      <div id="newDiagPanel_vision" class="hidden vs-dual-scroll" style="padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:12px;">
+        <div onclick="document.getElementById('visionImageFileInput')?.click()" style="border:2px dashed #93C5FD;border-radius:12px;background:#EFF6FF;padding:24px 16px;text-align:center;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <span style="font-size:28px;">📷</span>
+          <div style="font-size:13px;font-weight:800;color:#1E3A8A;">Click to Upload Whiteboard Photo or Architecture Screenshot</div>
+          <div style="font-size:11px;color:#475569;">Supports PNG, JPEG, WebP · Or press <code class="mono">⌘V</code> / <code class="mono">Ctrl+V</code> anywhere on the canvas to paste from clipboard</div>
+        </div>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 12px;font-size:11px;color:#334155;line-height:1.45;">
+          <b>How Gemini Vision Decompilation Works:</b><br/>
+          Vertex AI <code class="mono">gemini-3-flash-preview</code> (<code class="mono">locations/global</code>) extracts cloud services, zones, and directed flows from your sketch and compiles an editable vector diagram + <code class="mono">.drawio</code> file.
+        </div>
+        <button class="btn-primary" style="padding:10px 14px;font-size:12px;justify-content:center;background:#D97706;" onclick="closeNewDiagramDrawer(); triggerVisionDecompileSample();">
+          <span>⚡ Try Instant Sample Whiteboard Decompilation →</span>
+        </button>
+      </div>
+    </aside>
+
     <!-- Multiplayer Collaborator Presence & Anchored @mention Review Threads Modal -->
     <div id="collabThreadsModal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(15,23,42,0.38);backdrop-filter:blur(3px);align-items:flex-start;justify-content:center;padding-top:75px;" onclick="if(event.target===this)closeCollabThreadsModal()">
       <div style="width:580px;max-width:94vw;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;box-shadow:0 24px 48px rgba(15,23,42,0.18);overflow:hidden;display:flex;flex-direction:column;">
@@ -2128,7 +2582,7 @@
         <div id="collabActiveCursorsStrip" style="padding:8px 16px;background:#EFF6FF;border-bottom:1px solid #BFDBFE;font-size:10.5px;color:#1E40AF;display:flex;align-items:center;gap:10px;flex-wrap:wrap;"></div>
         <div id="collabThreadsListContainer" class="vs-dual-scroll" style="max-height:300px;padding:12px 16px;display:flex;flex-direction:column;gap:8px;"></div>
         <div style="padding:10px 16px;border-top:1px solid #E2E8F0;background:#F8FAFC;display:flex;gap:8px;">
-          <input id="collabNewThreadInput" type="text" placeholder="Start a thread with @sre-lead, @sec-architect, or @alex.rivera on the scoped node..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid #CBD5E1;font-size:11.5px;" onkeydown="if(event.key==='Enter') submitNewCollabThread()" />
+          <input id="collabNewThreadInput" type="text" placeholder="Start a thread with @sre-lead, @sec-architect, or @cloud-architect on the scoped node..." style="flex:1;padding:8px 10px;border-radius:8px;border:1px solid #CBD5E1;font-size:11.5px;" onkeydown="if(event.key==='Enter') submitNewCollabThread()" />
           <button class="btn-primary" style="padding:8px 14px;font-size:11.5px;" onclick="submitNewCollabThread()">Post @mention ↵</button>
         </div>
       </div>
@@ -2206,8 +2660,6 @@
         </div>
       </div>
     </div>
-
-    <div id="toastBanner" class="toast-banner"></div>
   </div>
 
   <script>
@@ -2288,7 +2740,7 @@
       clearTimeout(window.__toastTimer);
       window.__toastTimer = setTimeout(() => {
         el.style.display = 'none';
-      }, 2600);
+      }, 3800);
     }
 
     function copyTextFromEl(elId, toastMsg) {
@@ -2340,7 +2792,7 @@
         const el = document.getElementById(id);
         if (el && Number(el.value) !== clamped) el.value = String(clamped);
       });
-      ['adrScrollWidthVal', 'toolbarScrollWidthVal'].forEach((id) => {
+      ['railScrollWidthVal', 'adrScrollWidthVal', 'toolbarScrollWidthVal'].forEach((id) => {
         const lbl = document.getElementById(id);
         if (lbl) lbl.textContent = `${clamped}px`;
       });
@@ -2485,19 +2937,22 @@
     let activeLandingSandboxMode = 'prompt';
 
     async function loadAtlas() {
-      const params = new URLSearchParams(window.location.search);
-      const pathName = (window.location.pathname || '/').toLowerCase();
-      if (params.get('code')) activeCode = params.get('code').toUpperCase();
-      if (params.get('edition')) {
-        activeEdition = params.get('edition').toLowerCase();
-      } else if (params.get('view')) {
-        activeEdition = params.get('view').toLowerCase();
-      } else if (pathName === '/landing') {
-        activeEdition = 'landing';
-      } else if (pathName === '/home' || pathName === '/dashboard') {
-        activeEdition = 'home';
+      if (!window.__vsInitialUrlParsed) {
+        window.__vsInitialUrlParsed = true;
+        const params = new URLSearchParams(window.location.search);
+        const pathName = (window.location.pathname || '/').toLowerCase();
+        if (params.get('code')) activeCode = params.get('code').toUpperCase();
+        if (params.get('edition')) {
+          activeEdition = params.get('edition').toLowerCase();
+        } else if (params.get('view')) {
+          activeEdition = params.get('view').toLowerCase();
+        } else if (pathName === '/landing') {
+          activeEdition = 'landing';
+        } else if (pathName === '/home' || pathName === '/dashboard') {
+          activeEdition = 'home';
+        }
+        if (params.get('detail')) activeDetailLevel = params.get('detail').toUpperCase();
       }
-      if (params.get('detail')) activeDetailLevel = params.get('detail').toUpperCase();
 
       initColumnResizers();
       const scopeParam = scopedNodeId ? `&scopedNodeId=${encodeURIComponent(scopedNodeId)}` : '';
@@ -2588,9 +3043,38 @@
       showToast('Cleared node scope — targeting full architecture');
     }
 
+    const CUSTOM_STARTER_RECIPES = [
+      {
+        label: '+ Add Cloud Armor WAF & Apigee',
+        prompt: 'Add Cloud Armor WAF and Apigee API Gateway',
+        alreadyAppliedRegex: /\bcloud armor\b.*\bapigee\b|\bapigee\b.*\bcloud armor\b/i
+      },
+      {
+        label: '+ Add Vertex AI Gemini Agent',
+        prompt: 'Add Vertex AI Gemini Agent with DLP Guardrail',
+        alreadyAppliedRegex: /\bvertex\b|\bgemini\b/i
+      },
+      {
+        label: '+ Add Memorystore Redis Cache',
+        prompt: 'Add Memorystore Redis cache in the data tier',
+        alreadyAppliedRegex: /\bredis\b|\bmemorystore\b/i
+      },
+      {
+        label: '+ Add BigQuery & Looker BI',
+        prompt: 'Add BigQuery Enterprise Lakehouse and Looker BI',
+        alreadyAppliedRegex: /\bbigquery\b.*\blooker\b|\blooker\b.*\bbigquery\b/i
+      },
+      {
+        label: '↻ Upgrade DB to Cloud Spanner HA',
+        prompt: 'Replace Primary Database with Cloud Spanner Global HA',
+        alreadyAppliedRegex: /\bspanner\b/i
+      }
+    ];
+
     function renderDynamicRecipeChips(graph) {
       const nodeBlob = (graph.nodes || []).map((n) => `${n.title} ${n.subtitle || ''}`).join(' ');
-      const available = CANDIDATE_QUICK_RECIPES.filter((r) => !r.alreadyAppliedRegex.test(nodeBlob)).slice(0, 5);
+      const sourceRecipes = graph && graph.isCustomDiagram ? CUSTOM_STARTER_RECIPES : CANDIDATE_QUICK_RECIPES;
+      const available = sourceRecipes.filter((r) => !r.alreadyAppliedRegex.test(nodeBlob)).slice(0, 5);
       const html = available
         .map(
           (r) =>
@@ -2668,20 +3152,24 @@
         return activePhaseFilter === 'ALL' || d.phaseId === activePhaseFilter;
       });
       const itemsHtml = filtered
-        .map(
-          (d) => `
+        .map((d) => {
+          const dHist = Array.isArray(d.history) ? d.history : [];
+          const dLatest = dHist[dHist.length - 1];
+          const isCustom = Boolean(dLatest && dLatest.graph && dLatest.graph.isCustomDiagram);
+          const shortDomain = isCustom ? 'Custom' : BP_SHORT_DOMAIN_LABELS[d.code] || 'Arch';
+          return `
         <button class="bp-nav-item ${d.code === activeCode ? 'active' : ''}" onclick="selectBlueprint('${d.code}')" title="${d.code}: ${d.title} (${d.version})">
           <span class="bp-code-pill mono" style="display:inline-flex;flex-direction:column;align-items:center;line-height:1.1;padding:3px 5px;min-width:44px;">
             <span>${d.code}</span>
-            <span style="font-size:7.5px;font-weight:700;letter-spacing:0.02em;opacity:0.84;font-family:var(--font-sans);">${BP_SHORT_DOMAIN_LABELS[d.code] || 'Arch'}</span>
+            <span style="font-size:7.5px;font-weight:700;letter-spacing:0.02em;opacity:0.84;font-family:var(--font-sans);">${shortDomain}</span>
           </span>
           <span class="bp-item-meta rail-hide-on-collapse">
             <span class="bp-item-title">${d.title}</span>
-            <span class="bp-item-sub">${d.version} · ${d.nodeCount} Nodes · ${d.edgeCount} Edges · ${d.archetypeBadge || 'AST'}</span>
+            <span class="bp-item-sub">${d.version} · ${d.nodeCount} Nodes · ${d.edgeCount} Edges · ${isCustom ? 'CUSTOM' : d.archetypeBadge || 'AST'}</span>
           </span>
         </button>
-      `
-        )
+      `;
+        })
         .join('');
       listEl.innerHTML = `<div class="vs-scroll-inner" style="min-width:100%;display:flex;flex-direction:column;gap:3px;">${itemsHtml}</div>`;
     }
@@ -2691,6 +3179,13 @@
       activeVersionIdx = -1;
       scopedNodeId = null;
       scopedNodeTitle = null;
+      try {
+        const u = new URL(window.location.href);
+        u.searchParams.set('code', activeCode);
+        window.history.replaceState({}, '', u);
+      } catch (_e) {
+        // ignore URL sync errors
+      }
       renderLeftRailList();
       renderActiveBlueprintViews();
       renderLandingPagePreview();
@@ -2701,10 +3196,13 @@
     }
 
     function setUiEdition(edition, updateUrl = true) {
+      const editionChanged = activeEdition !== edition;
       activeEdition = edition;
-      const tb = document.getElementById('toastBanner');
-      if (tb) tb.style.display = 'none';
-      clearTimeout(window.__toastTimer);
+      if (updateUrl || editionChanged) {
+        const tb = document.getElementById('toastBanner');
+        if (tb) tb.style.display = 'none';
+        clearTimeout(window.__toastTimer);
+      }
       const map = {
         landing: ['viewEditionLanding', 'btnEditionLanding'],
         home: ['viewEditionHome', 'btnEditionHome'],
@@ -2868,9 +3366,9 @@
         const rowsHtml = filtered
           .map((d) => {
             const isStarred = Boolean(d.starred || starredSet.has(d.code));
-            const cost = d.finopsTelemetry?.totalMonthlyUsd || 4200;
-            const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms || 38.4;
-            const score = d.judgeReport?.compositeScore || 96;
+            const cost = d.finopsTelemetry?.totalMonthlyUsd ?? 0;
+            const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms ?? 0;
+            const score = d.judgeReport?.compositeScore ?? d.judgeReport?.overallScore ?? 0;
             return `
               <tr class="home-file-row" data-bp-code="${d.code}" style="border-bottom:1px solid #E2E8F0;background:#FFFFFF;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='#FFFFFF'">
                 <td style="padding:10px 12px;width:44px;text-align:center;">
@@ -2927,9 +3425,9 @@
       const cardsHtml = filtered
         .map((d) => {
           const isStarred = Boolean(d.starred || starredSet.has(d.code));
-          const cost = d.finopsTelemetry?.totalMonthlyUsd || 4200;
-          const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms || 38.4;
-          const score = d.judgeReport?.compositeScore || 96;
+          const cost = d.finopsTelemetry?.totalMonthlyUsd ?? 0;
+          const p99 = d.finopsTelemetry?.estimatedEndToEndP99Ms ?? 0;
+          const score = d.judgeReport?.compositeScore ?? d.judgeReport?.overallScore ?? 0;
           return `
             <div class="home-file-card" data-bp-code="${d.code}" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:14px;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;box-shadow:var(--shadow-xs);">
               <div>
@@ -3034,11 +3532,9 @@
     }
 
     function renderLiveCollabCursorsOverlayHtml() {
-      const collabs = (atlasData && Array.isArray(atlasData.activeCollaborators) && atlasData.activeCollaborators) || [
-        { id: 'usr_alex', name: 'Alex Rivera', handle: '@alex.rivera', color: '#2563EB', x: 320, y: 195 },
-        { id: 'usr_priya', name: 'Priya Nair', handle: '@sre-lead', color: '#059669', x: 740, y: 340 },
-        { id: 'usr_marcus', name: 'Marcus Vance', handle: '@sec-architect', color: '#7C3AED', x: 1120, y: 485 }
-      ];
+      const collabs = Array.isArray(atlasData && atlasData.activeCollaborators)
+        ? atlasData.activeCollaborators.filter((c) => !c.code || c.code === activeCode)
+        : [];
       return `
         <div id="vsLiveCollabCursorsOverlay" style="position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:12;opacity:0;transition:opacity 0.2s ease;">
           ${collabs
@@ -3078,19 +3574,50 @@
         btnRedo.style.opacity = canRedo ? '1' : '0.45';
       }
 
+      // Sync real collaborator avatars & thread count on ribbon
+      const avatarsEl = document.getElementById('collabPresenceAvatars');
+      if (avatarsEl) {
+        const activeCollabs = Array.isArray(atlasData && atlasData.activeCollaborators)
+          ? atlasData.activeCollaborators.filter((c) => !c.code || c.code === item.code)
+          : [];
+        avatarsEl.innerHTML = activeCollabs
+          .slice(0, 4)
+          .map((c, idx) => {
+            const initials = String(c.name || c.handle || 'U')
+              .replace(/^@/, '')
+              .split(/[\s._-]+/)
+              .map((w) => (w[0] || '').toUpperCase())
+              .join('')
+              .slice(0, 2) || 'U';
+            return `<span class="mono" style="width:16px;height:16px;border-radius:50%;background:${c.color || '#2563EB'};color:#FFF;font-size:7.5px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid #FFF;${idx > 0 ? 'margin-left:-4px;' : ''}">${initials}</span>`;
+          })
+          .join('');
+      }
+      const threadCountLbl = document.getElementById('collabThreadCountLabel');
+      if (threadCountLbl && typeof item.collabThreadCount === 'number') {
+        threadCountLbl.textContent = `💬 ${item.collabThreadCount} Thread${item.collabThreadCount === 1 ? '' : 's'}`;
+      }
+
       // Update Header Export Link (version-exact) & Gate Telemetry
       const exportLink = document.getElementById('headerExportDrawioBtn');
       if (exportLink) exportLink.href = `/api/export-drawio?code=${item.code}&ver=${encodeURIComponent(activeSnap.version)}`;
+      const gateBadge = document.getElementById('headerGeometryBadge');
       const gateText = document.getElementById('headerGateText');
-      const judgeScore = item.judgeReport ? item.judgeReport.overallScore : 96;
+      const judgeScore = item.judgeReport ? (item.judgeReport.overallScore ?? 0) : 0;
       const ledgerObj = (atlasData && (atlasData.geminiApiLedger || atlasData.geminiTelemetry)) || {};
       const totalGeminiCalls = ledgerObj.totalLiveCallsRecorded || ledgerObj.totalLiveVertexCalls || 0;
       if (gateText) {
-        gateText.textContent = `5/5 PASS · Judge ${judgeScore}/100 · ${totalGeminiCalls} Gemini Calls`;
+        gateText.textContent = `5/5 · ${judgeScore}/100`;
+      }
+      if (gateBadge) {
+        gateBadge.title = `Phase-0 Math Gate: 5/5 STAGES PASS · Live Vertex AI Gemini Judge: ${judgeScore}/100 · ${totalGeminiCalls} Live Gemini Calls (Click to inspect)`;
       }
 
       // Update Edition 1 (Atelier) Operational Toolbar & Dynamic Quick-Prompt Chips
-      document.getElementById('activeBpCodeBadge').textContent = `${item.code} · ${activeSnap.version}`;
+      document.getElementById('activeBpCodeBadge').textContent =
+        activeSnap.graph && activeSnap.graph.isCustomDiagram
+          ? `CUSTOM (${item.code}) · ${activeSnap.version}`
+          : `${item.code} · ${activeSnap.version}`;
       const metaStatsEl = document.getElementById('activeBpMetaStats');
       if (metaStatsEl) {
         metaStatsEl.textContent = `${activeSnap.graph.nodes.length} Nodes · ${activeSnap.graph.edges.length} Edges`;
@@ -3149,8 +3676,14 @@
 
       const btnRenderMode = document.getElementById('btnToggleRenderMode');
       if (btnRenderMode && activeSnap.graph) {
-        const isDynamicGrid = activeSnap.graph.renderMode === 'DYNAMIC_MULTI_TIER';
-        btnRenderMode.textContent = isDynamicGrid ? '🔀 Layout: 5-Tier Grid' : '🔀 Layout: Bespoke';
+        const g = activeSnap.graph;
+        const isDynamicGrid = g.renderMode === 'DYNAMIC_MULTI_TIER';
+        if (g.isCustomDiagram) {
+          const tierCount = Math.max(1, new Set((g.nodes || []).map((n) => n.zoneId || 'z3')).size);
+          btnRenderMode.textContent = `🔀 Layout: ${tierCount}-Tier Custom`;
+        } else {
+          btnRenderMode.textContent = isDynamicGrid ? '🔀 Layout: 5-Tier Grid' : '🔀 Layout: Bespoke';
+        }
         btnRenderMode.style.background = isDynamicGrid ? '#FEF3C7' : '#F8FAFC';
         btnRenderMode.style.borderColor = isDynamicGrid ? '#F59E0B' : '#CBD5E1';
         btnRenderMode.style.color = isDynamicGrid ? '#B45309' : '#0F172A';
@@ -3681,6 +4214,7 @@
         })
       });
       if (!res.ok) return;
+      autoCollapseOnboardingAfterActivity();
       await loadAtlas();
       activeVersionIdx = -1;
       renderActiveBlueprintViews();
@@ -3746,6 +4280,32 @@
       await executePromptMutation(promptText);
     }
 
+    let composerIntentMode = 'evolve';
+
+    function setComposerIntentMode(mode) {
+      composerIntentMode = mode === 'new' ? 'new' : 'evolve';
+      const evBtn = document.getElementById('composerModeEvolveBtn');
+      const nwBtn = document.getElementById('composerModeNewBtn');
+      const inp = document.getElementById('atelierPromptInput');
+      const submitBtn = document.getElementById('btnAtelierSubmitPrompt');
+      const submitLbl = document.getElementById('atelierSubmitBtnLabel');
+      if (evBtn) evBtn.classList.toggle('active', composerIntentMode === 'evolve');
+      if (nwBtn) nwBtn.classList.toggle('active', composerIntentMode === 'new');
+      if (inp) {
+        inp.placeholder =
+          composerIntentMode === 'new'
+            ? "Describe new diagram (e.g., 'WAF, Apigee, GKE, Spanner')"
+            : "Evolve via prompt (e.g., 'Add BigQuery & Looker')";
+        inp.focus();
+      }
+      if (submitBtn) {
+        submitBtn.style.background = composerIntentMode === 'new' ? '#047857' : '';
+      }
+      if (submitLbl) {
+        submitLbl.textContent = composerIntentMode === 'new' ? '＋ Create New Diagram ↵' : '🪄 Apply Mutation ↵';
+      }
+    }
+
     async function submitPromptFromInput(inputId) {
       const inputEl = document.getElementById(inputId);
       if (!inputEl) return;
@@ -3765,6 +4325,17 @@
         return;
       }
       inputEl.value = '';
+      if (inputId === 'atelierPromptInput' && composerIntentMode === 'new') {
+        await createNewDiagramViaApi({
+          code: 'NEW',
+          mode: 'prompt',
+          title: 'Custom Prompt-Synthesized Architecture',
+          prompt: val,
+          detailLevel: activeDetailLevel
+        });
+        setComposerIntentMode('evolve');
+        return;
+      }
       await executePromptMutation(val);
     }
 
@@ -3783,6 +4354,7 @@
       });
       if (!res.ok) return;
       const mutData = await res.json();
+      autoCollapseOnboardingAfterActivity();
       await loadAtlas();
       activeVersionIdx = -1;
       renderActiveBlueprintViews();
@@ -4039,7 +4611,7 @@
             </div>
           </div>
           <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:8px 10px;font-size:10px;color:#1E3A8A;">
-            <b>⚖️ Live Vertex AI Gemini Architectural Verdict (${jr.overallScore || 96}/100):</b><br/>
+            <b>⚖️ ${jr.isLiveLlmCall ? 'Live Vertex AI Gemini Architectural Verdict' : 'Deterministic Phase-0 Structural Verdict'} (${jr.overallScore ?? 0}/100):</b><br/>
             ${liveGem.executiveVerdict || 'Topology satisfies 1:1 AST<->SVG bijection, pairwise AABB disjointness, and orthogonal Manhattan channel routing.'}
           </div>
           <div>
@@ -4291,7 +4863,7 @@
           code: activeCode,
           op: 'ADD_STICKY',
           text: noteText,
-          author: '@alex.rivera',
+          author: '@architect',
           x,
           y,
           color: '#FEF08A'
@@ -4664,14 +5236,14 @@ Include:
         const scoreBadge = document.getElementById('judgeScoreBadge');
         if (scoreBadge) {
           scoreBadge.textContent = `${jr.overallScore} / 100 ${jr.certified ? 'CERTIFIED' : 'REVIEW'}`;
-          scoreBadge.style.background = jr.overallScore >= 90 ? '#059669' : '#D97706';
+          scoreBadge.style.background = jr.overallScore >= 90 ? '#047857' : '#D97706';
         }
         const pillarsEl = document.getElementById('judgePillarsList');
         if (pillarsEl) {
           pillarsEl.innerHTML = (jr.pillars || [])
             .map((p) => {
               const pct = Math.round((p.score / p.max) * 100);
-              const barColor = p.status === 'PASS' ? '#059669' : '#D97706';
+              const barColor = p.status === 'PASS' ? '#047857' : '#D97706';
               return `
                 <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:7px 10px;">
                   <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#0F172A;margin-bottom:4px;">
@@ -4820,6 +5392,9 @@ spec:
     }
 
     function openWorkbenchTab(tabId) {
+      if (typeof closeNewDiagramDrawer === 'function') {
+        closeNewDiagramDrawer();
+      }
       document.getElementById('stitchRightDrawer').classList.add('open');
       document.body.classList.add('workbench-open');
       switchWorkbenchTab(tabId || 'dsl');
@@ -4864,6 +5439,74 @@ spec:
       a.download = `VeriSpec_${item.code}_${activeSnap.version}_${activeDetailLevel}.svg`;
       a.click();
       URL.revokeObjectURL(url);
+      showToast(`Exported Vector SVG (${item.code} ${activeSnap.version} · ${activeDetailLevel})!`);
+    }
+
+    function downloadCurrentTerraformHcl() {
+      const item = getActiveBpItem();
+      if (!item) return;
+      const history = item.history || [];
+      const verIdx = activeVersionIdx >= 0 && activeVersionIdx < history.length ? activeVersionIdx : history.length - 1;
+      const activeSnap = history[verIdx] || item;
+      const tfText =
+        activeSnap.terraformHcl ||
+        item.terraformHcl ||
+        document.getElementById('drawerTerraformBox')?.value ||
+        '# Multi-Cloud Terraform IaC\n';
+      const blob = new Blob([tfText], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `VeriSpec_${item.code}_${activeSnap.version}_main.tf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`Exported Multi-Cloud Terraform HCL (${item.code} ${activeSnap.version})!`);
+    }
+
+    function closeHeaderExportMenu() {
+      const menu = document.getElementById('headerExportDropdownMenu');
+      const btn = document.getElementById('btnHeaderExportMenuToggle');
+      if (menu) menu.classList.remove('open');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleHeaderExportMenu(evt) {
+      if (evt && typeof evt.stopPropagation === 'function') {
+        evt.stopPropagation();
+      }
+      const menu = document.getElementById('headerExportDropdownMenu');
+      const btn = document.getElementById('btnHeaderExportMenuToggle');
+      if (!menu) return;
+      const willOpen = !menu.classList.contains('open');
+      menu.classList.toggle('open', willOpen);
+      if (btn) btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+
+    function triggerHeaderExport(kind) {
+      closeHeaderExportMenu();
+      if (kind === 'drawio') {
+        document.getElementById('headerExportDrawioBtn')?.click();
+      } else if (kind === 'svg') {
+        downloadCurrentSvg();
+      } else if (kind === 'png') {
+        downloadCurrentPng2x();
+      } else if (kind === 'rfc') {
+        downloadCurrentRfcMarkdown();
+      } else if (kind === 'tf') {
+        downloadCurrentTerraformHcl();
+      }
+    }
+
+    function toggleFloatingCanvasDock(forceExpand) {
+      const strip = document.getElementById('vsFloatingCanvasDockStrip');
+      const restoreBtn = document.getElementById('btnRestoreCanvasDock');
+      if (!strip) return;
+      const shouldCollapse =
+        typeof forceExpand === 'boolean' ? !forceExpand : !strip.classList.contains('dock-collapsed');
+      strip.classList.toggle('dock-collapsed', shouldCollapse);
+      if (restoreBtn) {
+        restoreBtn.classList.toggle('hidden', !shouldCollapse);
+      }
     }
 
     async function toggleBlueprintRenderMode() {
@@ -4955,26 +5598,32 @@ spec:
 
     async function triggerGreenfieldArchitecture() {
       const inp = document.getElementById('atelierPromptInput');
-      const promptText =
-        inp && inp.value.trim()
-          ? inp.value.trim()
-          : 'Add Cloudflare WAF, Okta Auth0, Apigee X, Vertex AI Gemini, Cloud Spanner, and Datadog SRE';
-      showToast(`✨ Synthesizing Greenfield Architecture from scratch on ${activeCode}...`);
+      const promptText = inp && inp.value.trim() ? inp.value.trim() : '';
+      if (!promptText) {
+        openNewDiagramDrawer('prompt');
+        showToast('✨ Enter your system architecture prompt to synthesize a new greenfield diagram');
+        return;
+      }
+      showToast('✨ Synthesizing Greenfield Architecture via Live Vertex AI Gemini...');
       try {
         const res = await fetch('/api/greenfield', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            code: activeCode,
-            title: `${activeCode}: Custom Greenfield Topology`,
+            code: 'NEW',
+            title: 'Custom Greenfield Topology',
             prompt: promptText
           })
         });
         const data = await res.json();
         if (data.ok && data.blueprint) {
+          activeCode = data.code || data.blueprint.code || activeCode;
           activeVersionIdx = -1;
-          showToast(`✨ Synthesized Greenfield Architecture (${data.blueprint.version} · ${data.blueprint.graph.nodes.length} nodes)!`);
+          showToast(`✨ Synthesized Greenfield Architecture ${activeCode} (${data.blueprint.version} · ${data.blueprint.graph.nodes.length} nodes)!`);
           await loadAtlas();
+          renderActiveBlueprintViews();
+        } else {
+          showToast(`⚠️ Greenfield error: ${(data && data.error) || 'Request failed'}`);
         }
       } catch (err) {
         showToast('Greenfield synthesis error: ' + err.message);
@@ -4991,15 +5640,12 @@ spec:
           const base64Image = dataUrl.includes(',') ? dataUrl.split(',')[1] : dataUrl;
           const mimeType = file.type || 'image/png';
           const inp = document.getElementById('atelierPromptInput');
-          const hintPrompt =
-            inp && inp.value.trim()
-              ? inp.value.trim()
-              : `Decompile uploaded architecture diagram (${file.name}) into multi-tier cloud services and connectors`;
+          const hintPrompt = inp && inp.value.trim() ? inp.value.trim() : '';
           const res = await fetch('/api/vision-decompile', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              code: activeCode,
+              code: 'NEW',
               mimeType,
               base64Image,
               hintPrompt
@@ -5007,10 +5653,14 @@ spec:
           });
           const data = await res.json();
           if (data.ok && data.blueprint) {
+            activeCode = data.code || data.blueprint.code || activeCode;
             activeVersionIdx = -1;
             const modelUsed = (data.visionDecompile && data.visionDecompile.modelUsed) || 'gemini-3-flash-preview';
-            showToast(`📷 Vision Decompiled "${file.name}" (${modelUsed}) → ${data.blueprint.version} (${data.blueprint.graph.nodes.length} nodes)!`);
+            showToast(`📷 Vision Decompiled "${file.name}" (${modelUsed}) → ${activeCode} (${data.blueprint.graph.nodes.length} nodes)!`);
             await loadAtlas();
+            renderActiveBlueprintViews();
+          } else {
+            showToast(`⚠️ Vision decompile error: ${(data && data.error) || 'Could not extract architecture from image'}`);
           }
         } catch (err) {
           showToast('Vision upload error: ' + err.message);
@@ -5027,32 +5677,79 @@ spec:
       }
     }
 
+    async function rasterizeActiveCanvasSvgToPngBase64() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1440;
+      canvas.height = 820;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, 1440, 820);
+      const svgEl = document.querySelector('#atelierSvgContainer svg');
+      if (svgEl) {
+        try {
+          const xml = new XMLSerializer().serializeToString(svgEl);
+          const svgB64 = window.btoa(unescape(encodeURIComponent(xml)));
+          await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+              ctx.drawImage(img, 0, 0, 1440, 820);
+              resolve();
+            };
+            img.onerror = reject;
+            img.src = `data:image/svg+xml;base64,${svgB64}`;
+          });
+          return canvas.toDataURL('image/png').split(',')[1];
+        } catch (_e) {
+          // fall through to crisp drawn multi-tier whiteboard diagram
+        }
+      }
+      ctx.strokeStyle = '#1E40AF';
+      ctx.lineWidth = 3;
+      const boxes = [
+        { x: 80, y: 310, label: 'Cloud Armor WAF' },
+        { x: 370, y: 310, label: 'Apigee API Gateway' },
+        { x: 660, y: 220, label: 'GKE Autopilot' },
+        { x: 660, y: 420, label: 'Vertex AI Gemini' },
+        { x: 980, y: 220, label: 'Cloud Spanner HA' },
+        { x: 980, y: 420, label: 'BigQuery Lakehouse' }
+      ];
+      ctx.font = 'bold 20px Inter, sans-serif';
+      for (const b of boxes) {
+        ctx.fillStyle = '#EFF6FF';
+        ctx.fillRect(b.x, b.y, 240, 110);
+        ctx.strokeRect(b.x, b.y, 240, 110);
+        ctx.fillStyle = '#0F172A';
+        ctx.fillText(b.label, b.x + 18, b.y + 62);
+      }
+      return canvas.toDataURL('image/png').split(',')[1];
+    }
+
     async function triggerVisionDecompileSample() {
-      showToast('📷 Executing Live Vertex AI Gemini Multimodal Vision Decompiler...');
-      const samplePngBase64 =
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-      const inp = document.getElementById('atelierPromptInput');
-      const hintPrompt =
-        inp && inp.value.trim()
-          ? inp.value.trim()
-          : 'Decompile enterprise multi-tier cloud whiteboard with Cloudflare Edge, Apigee API Gateway, GKE Autopilot, Vertex AI Agent, Cloud Spanner, BigQuery, and Datadog';
+      showToast('📷 Rasterizing canvas snapshot & calling Live Vertex AI Gemini Vision...');
       try {
+        const realPngBase64 = await rasterizeActiveCanvasSvgToPngBase64();
+        const inp = document.getElementById('atelierPromptInput');
+        const hintPrompt = inp && inp.value.trim() ? inp.value.trim() : '';
         const res = await fetch('/api/vision-decompile', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            code: activeCode,
+            code: 'NEW',
             mimeType: 'image/png',
-            base64Image: samplePngBase64,
+            base64Image: realPngBase64,
             hintPrompt
           })
         });
         const data = await res.json();
         if (data.ok && data.blueprint) {
+          activeCode = data.code || data.blueprint.code || activeCode;
           activeVersionIdx = -1;
           const modelUsed = (data.visionDecompile && data.visionDecompile.modelUsed) || 'gemini-3-flash-preview';
-          showToast(`📷 Vision Decompiled (${modelUsed}) → ${data.blueprint.version} (${data.blueprint.graph.nodes.length} nodes)!`);
+          showToast(`📷 Vision Decompiled (${modelUsed}) → ${activeCode} (${data.blueprint.graph.nodes.length} nodes)!`);
           await loadAtlas();
+          renderActiveBlueprintViews();
+        } else {
+          showToast(`⚠️ Vision decompile error: ${(data && data.error) || 'Failed to decompile image'}`);
         }
       } catch (err) {
         showToast('Vision decompile error: ' + err.message);
@@ -5117,6 +5814,9 @@ spec:
       if (!resultsEl) return;
       const q = String(query || '').trim().toLowerCase();
       const actions = [
+        { id: 'act_new_diagram', badge: '➕ NEW DIAGRAM', title: 'Create New Diagram (Prompt / Blank Canvas / Code / Image)', sub: 'Open 4-Mode Docked Diagram Creator Drawer (Alt+N)', run: () => openNewDiagramDrawer('prompt') },
+        { id: 'act_new_blank', badge: '⬜ BLANK CANVAS', title: 'Create Clean Blank Canvas Diagram (2 / 3 / 5-Tier Skeleton)', sub: 'POST /api/diagram/create · Auto-opens 52 Cloud Stencils', run: () => openNewDiagramDrawer('blank') },
+        { id: 'act_onboarding_tour', badge: '🧭 QUICK START', title: 'Launch 4-Step Interactive Studio Onboarding Tour', sub: 'Spotlight tour of New Diagram, 18 Templates, Inline Edit & AI Co-Pilot', run: () => openOnboardingQuickStart(true) },
         { id: 'act_undo', badge: '↶ UNDO (⌘Z)', title: 'Undo Last Blueprint Mutation', sub: 'POST /api/undo · Restore previous version in history', run: () => undoBlueprintMutation() },
         { id: 'act_redo', badge: '↷ REDO (⌘⇧Z)', title: 'Redo Blueprint Mutation', sub: 'POST /api/redo · Re-apply undone version', run: () => redoBlueprintMutation() },
         { id: 'act_greenfield', badge: '✨ GREENFIELD', title: 'Synthesize New Greenfield Architecture from Scratch', sub: 'POST /api/greenfield · Dynamic 5-Tier Cloud Grid', run: () => triggerGreenfieldArchitecture() },
@@ -5217,13 +5917,16 @@ spec:
       }
     });
 
-    // Global Keyboard Shortcuts (Cmd+K / '/' Command Palette, Cmd+Z Undo, Cmd+Shift+Z Redo, Delete/Backspace Node Delete, Cmd+E Workbench, Esc)
+    // Global Keyboard Shortcuts (Cmd+K / '/' Command Palette, Alt+N New Diagram, Cmd+Z Undo, Cmd+Shift+Z Redo, Delete/Backspace Node Delete, Cmd+E Workbench, Esc)
     window.addEventListener('keydown', (ev) => {
       const tag = (ev.target && ev.target.tagName) || '';
       const inInput = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (ev.target && ev.target.isContentEditable);
       if ((ev.metaKey || ev.ctrlKey) && ev.key.toLowerCase() === 'k') {
         ev.preventDefault();
         openCommandPaletteModal();
+      } else if (ev.altKey && ev.key.toLowerCase() === 'n') {
+        ev.preventDefault();
+        openNewDiagramDrawer('prompt');
       } else if (!inInput && (ev.metaKey || ev.ctrlKey) && ev.shiftKey && ev.key.toLowerCase() === 'z') {
         ev.preventDefault();
         redoBlueprintMutation();
@@ -5243,6 +5946,11 @@ spec:
         ev.preventDefault();
         toggleStudioWorkbench();
       } else if (ev.key === 'Escape') {
+        const tourPop = document.getElementById('vsGuidedTourPopover');
+        if (tourPop && tourPop.classList.contains('active')) {
+          closeInteractiveOnboardingTour();
+          return;
+        }
         const cmdModal = document.getElementById('commandPaletteModal');
         if (cmdModal && cmdModal.style.display !== 'none') {
           closeCommandPaletteModal();
@@ -5256,6 +5964,11 @@ spec:
         const mcpModal = document.getElementById('mcpApiModal');
         if (mcpModal && mcpModal.style.display !== 'none') {
           closeMcpApiModal();
+          return;
+        }
+        const creatorDrawer = document.getElementById('newDiagramCreatorDrawer');
+        if (creatorDrawer && creatorDrawer.classList.contains('open')) {
+          closeNewDiagramDrawer();
           return;
         }
         const drawer = document.getElementById('stitchRightDrawer');
@@ -5365,8 +6078,8 @@ spec:
         return;
       }
       const edge = edges[activeFlowHopIdx];
-      const fromId = edge.from || edge.source;
-      const toId = edge.to || edge.target;
+      const fromId = edge.from || edge.source || edge.sourceNodeId;
+      const toId = edge.to || edge.target || edge.targetNodeId;
       allNodes.forEach((n) => {
         const nid = n.getAttribute('data-node-id');
         if (nid === fromId || nid === toId) {
@@ -5424,11 +6137,12 @@ spec:
       const tEl = document.getElementById('inlineEditNodeTitle');
       const sEl = document.getElementById('inlineEditNodeSubtitle');
       const pEl = document.getElementById('inlineEditNodePill');
-      if (idEl) idEl.textContent = nodeObj.id;
+      if (idEl) idEl.value = nodeObj.id;
       if (tEl) tEl.value = nodeObj.title || '';
       if (sEl) sEl.value = nodeObj.subtitle || '';
       if (pEl) pEl.value = nodeObj.pill || '';
       if (bar) {
+        bar.classList.remove('hidden');
         bar.style.display = 'flex';
         if (tEl) tEl.focus();
       }
@@ -5437,11 +6151,15 @@ spec:
     function closeInlineCanvasNodeEdit() {
       activeInlineEditNodeId = null;
       const bar = document.getElementById('inlineCanvasNodeEditBar');
-      if (bar) bar.style.display = 'none';
+      if (bar) {
+        bar.style.display = 'none';
+        bar.classList.add('hidden');
+      }
     }
 
     async function submitInlineCanvasNodeEdit() {
       if (!activeInlineEditNodeId) return;
+      const targetNodeId = activeInlineEditNodeId;
       const title = (document.getElementById('inlineEditNodeTitle')?.value || '').trim();
       const subtitle = (document.getElementById('inlineEditNodeSubtitle')?.value || '').trim();
       const pill = (document.getElementById('inlineEditNodePill')?.value || '').trim();
@@ -5450,9 +6168,9 @@ spec:
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            id: activeBpId,
-            lod: activeLod,
-            nodeId: activeInlineEditNodeId,
+            code: activeCode,
+            detailLevel: activeDetailLevel,
+            nodeId: targetNodeId,
             title,
             subtitle,
             pill
@@ -5462,7 +6180,10 @@ spec:
         if (data.ok) {
           closeInlineCanvasNodeEdit();
           await loadAtlas();
-          showToast(`✅ Updated node [${activeInlineEditNodeId}] directly on canvas (${data.version})`);
+          activeVersionIdx = -1;
+          renderActiveBlueprintViews();
+          const nextVer = (data.blueprint && data.blueprint.version) || data.version || '';
+          showToast(`✅ Updated node [${targetNodeId}] directly on canvas (${nextVer})`);
         } else {
           showToast(`⚠️ Inline update failed: ${data.error || 'Unknown error'}`);
         }
@@ -5514,6 +6235,367 @@ services:
       showToast('🧬 Appended Docker Compose service — click "⚡ Apply to Canvas" to decompile');
     }
 
+    // =========================================================================
+    // v3.8 IN-STUDIO USER ONBOARDING, 4-STEP INTERACTIVE SPOTLIGHT TOUR &
+    // DOCKED 4-MODE NEW DIAGRAM CREATOR DRAWER (Prompt / Blank / Code / Image)
+    // =========================================================================
+    let activeNewDiagramTab = 'prompt';
+    let activeOnboardingTourIdx = -1;
+
+    function switchNewDiagramTab(tabId) {
+      activeNewDiagramTab = ['prompt', 'blank', 'code', 'vision'].includes(tabId) ? tabId : 'prompt';
+      ['prompt', 'blank', 'code', 'vision'].forEach((t) => {
+        const btn = document.getElementById(`newDiagTabBtn_${t}`);
+        const panel = document.getElementById(`newDiagPanel_${t}`);
+        if (btn) btn.classList.toggle('active', t === activeNewDiagramTab);
+        if (panel) panel.classList.toggle('hidden', t !== activeNewDiagramTab);
+      });
+    }
+
+    function openNewDiagramDrawer(defaultTab = 'prompt') {
+      if (activeEdition === 'landing' || activeEdition === 'home') {
+        setUiEdition('atelier');
+      }
+      // Ensure Studio Workbench drawer is closed so only 1 docked right drawer reflows the stage
+      const wbDrawer = document.getElementById('stitchRightDrawer');
+      if (wbDrawer && wbDrawer.classList.contains('open')) {
+        closeStitchPromptDrawer();
+      }
+      const drawer = document.getElementById('newDiagramCreatorDrawer');
+      if (!drawer) return;
+      drawer.classList.add('open');
+      document.body.classList.add('creator-drawer-open');
+      switchNewDiagramTab(defaultTab || 'prompt');
+    }
+
+    function closeNewDiagramDrawer() {
+      const drawer = document.getElementById('newDiagramCreatorDrawer');
+      if (drawer) drawer.classList.remove('open');
+      document.body.classList.remove('creator-drawer-open');
+    }
+
+    function fillNewDiagramStarterPrompt(title, promptText) {
+      const tInp = document.getElementById('newDiagPromptTitleInput');
+      const pInp = document.getElementById('newDiagPromptTextarea');
+      if (tInp) tInp.value = title;
+      if (pInp) {
+        pInp.value = promptText;
+        pInp.focus();
+      }
+    }
+
+    function loadNewDiagramCodeSample(kind) {
+      const tInp = document.getElementById('newDiagCodeTitleInput');
+      const cBox = document.getElementById('newDiagCodeTextarea');
+      if (!cBox) return;
+      if (kind === 'terraform') {
+        if (tInp) tInp.value = 'Terraform Cloud Run + Spanner Topology';
+        cBox.value = `resource "google_cloud_armor_security_policy" "edge_waf" {}\nresource "google_apigee_organization" "api_gateway" {}\nresource "google_cloud_run_v2_service" "order_service" {}\nresource "google_spanner_instance" "global_ledger" {}\nresource "google_bigquery_dataset" "lakehouse_dw" {}`;
+      } else if (kind === 'sql') {
+        if (tInp) tInp.value = 'PostgreSQL & Vector Ledger Schema Topology';
+        cBox.value = `CREATE TABLE customer_accounts (\n  account_id UUID PRIMARY KEY,\n  org_slug TEXT NOT NULL\n);\n\nCREATE TABLE payment_settlements (\n  settlement_id UUID PRIMARY KEY,\n  account_id UUID REFERENCES customer_accounts(account_id),\n  amount_cents BIGINT NOT NULL\n);`;
+      } else if (kind === 'k8s') {
+        if (tInp) tInp.value = 'Kubernetes Microservices Mesh';
+        cBox.value = `apiVersion: networking.k8s.io/v1\nkind: Ingress\nmetadata:\n  name: global-edge-ingress\n---\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: checkout-orchestrator\n---\napiVersion: apps/v1\nkind: StatefulSet\nmetadata:\n  name: redis-session-cluster`;
+      } else if (kind === 'openapi') {
+        if (tInp) tInp.value = 'OpenAPI 3.1 Gateway & Service Mesh';
+        cBox.value = `openapi: 3.1.0\ninfo:\n  title: Enterprise Payments API\n  version: 1.0.0\npaths:\n  /v1/payments/authorize:\n    post:\n      summary: Authorize Real-Time Payment\n  /v1/ledger/reconcile:\n    post:\n      summary: Reconcile Multi-Region Ledger`;
+      }
+    }
+
+    async function createNewDiagramViaApi(payload, options = {}) {
+      const slotSel = payload.code || 'NEW';
+      showToast(`⏳ Creating new diagram (${slotSel === 'NEW' ? 'Standalone DOC-*' : slotSel}) via Phase-0 Zero-Overlap Math Solver...`);
+      try {
+        const res = await fetch('/api/diagram/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...payload,
+            code: slotSel,
+            detailLevel: payload.detailLevel || activeDetailLevel
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          showToast(`⚠️ Could not create diagram: ${(data && data.error) || 'Request failed'}`);
+          return null;
+        }
+        activeCode = data.code || slotSel;
+        activeVersionIdx = -1;
+        scopedNodeId = null;
+        scopedNodeTitle = null;
+        try {
+          const u = new URL(window.location.href);
+          u.searchParams.set('code', activeCode);
+          window.history.replaceState({}, '', u);
+        } catch (_e) {
+          // ignore URL sync errors
+        }
+        closeNewDiagramDrawer();
+        activeOnboardingTourIdx = -1;
+        clearOnboardingTourSpotlights();
+        const tourPop = document.getElementById('vsGuidedTourPopover');
+        if (tourPop) tourPop.classList.remove('active');
+        autoCollapseOnboardingAfterActivity();
+        if (activeEdition !== 'atelier') {
+          setUiEdition('atelier');
+        }
+        await loadAtlas();
+        renderActiveBlueprintViews();
+        if (options.openStencilsAfter) {
+          openWorkbenchTab('stencils');
+        }
+        const createdGraph =
+          data.graph ||
+          (data.blueprint && data.blueprint.graph) ||
+          (typeof getActiveGraph === 'function' ? getActiveGraph() : null);
+        const nCount = createdGraph && Array.isArray(createdGraph.nodes) ? createdGraph.nodes.length : 0;
+        const eCount = createdGraph && Array.isArray(createdGraph.edges) ? createdGraph.edges.length : 0;
+        const createdTitle = (createdGraph && createdGraph.title) || payload.title || activeCode;
+        showToast(
+          `✅ Created "${createdTitle}" [${activeCode}] (${nCount} Nodes · ${eCount} Edges · Double-click any card to edit)`
+        );
+        return data;
+      } catch (err) {
+        showToast(`⚠️ Network error creating diagram: ${err.message}`);
+        return null;
+      }
+    }
+
+    async function submitCreatePromptDiagram() {
+      const title = (document.getElementById('newDiagPromptTitleInput')?.value || 'Custom Cloud & AI Architecture').trim();
+      const slotVal = document.getElementById('newDiagTargetSlotSelect')?.value || 'NEW';
+      const targetCode = slotVal === 'ACTIVE' ? activeCode : slotVal;
+      const prompt = (document.getElementById('newDiagPromptTextarea')?.value || '').trim();
+      if (!prompt) {
+        showToast('Please enter a prompt or click one of the 1-Click Starter Prompts');
+        return null;
+      }
+      return createNewDiagramViaApi({
+        code: targetCode,
+        mode: 'prompt',
+        title,
+        prompt,
+        detailLevel: activeDetailLevel
+      });
+    }
+
+    async function submitCreateBlankDiagram(autoOpenStencilsOverride) {
+      const title = (document.getElementById('newDiagBlankTitleInput')?.value || 'New Blank Cloud Architecture').trim();
+      const slotVal = document.getElementById('newDiagBlankSlotSelect')?.value || 'NEW';
+      const targetCode = slotVal === 'ACTIVE' ? activeCode : slotVal;
+      const checkedRadio = document.querySelector('input[name="blankPresetRadio"]:checked');
+      const templatePreset = (checkedRadio && checkedRadio.value) || 'three_tier';
+      const chkEl = document.getElementById('newDiagBlankOpenStencilsChk');
+      const shouldOpenStencils =
+        typeof autoOpenStencilsOverride === 'boolean' ? autoOpenStencilsOverride : Boolean(chkEl && chkEl.checked);
+      return createNewDiagramViaApi(
+        {
+          code: targetCode,
+          mode: 'blank',
+          title,
+          templatePreset,
+          detailLevel: activeDetailLevel
+        },
+        { openStencilsAfter: shouldOpenStencils }
+      );
+    }
+
+    async function submitCreateCodeDiagram() {
+      const title = (document.getElementById('newDiagCodeTitleInput')?.value || 'Code-Decompiled Cloud Topology').trim();
+      const slotVal = document.getElementById('newDiagCodeSlotSelect')?.value || 'NEW';
+      const targetCode = slotVal === 'ACTIVE' ? activeCode : slotVal;
+      const codeText = (document.getElementById('newDiagCodeTextarea')?.value || '').trim();
+      if (!codeText) {
+        showToast('Paste Terraform HCL, SQL DDL, K8s YAML, or OpenAPI YAML first');
+        return null;
+      }
+      return createNewDiagramViaApi({
+        code: targetCode,
+        mode: 'code',
+        title,
+        codeText,
+        detailLevel: activeDetailLevel
+      });
+    }
+
+    function autoCollapseOnboardingAfterActivity() {
+      const banner = document.getElementById('vsOnboardingQuickStartBanner');
+      if (banner) banner.classList.add('hidden');
+      try {
+        if (window.localStorage) window.localStorage.setItem('verispec_hide_onboarding_v38', '1');
+      } catch (_e) {
+        // ignore storage quota errors
+      }
+    }
+
+    function restoreOnboardingBannerState() {
+      const banner = document.getElementById('vsOnboardingQuickStartBanner');
+      if (!banner) return;
+      try {
+        if (window.localStorage && window.localStorage.getItem('verispec_hide_onboarding_v38') === '1') {
+          banner.classList.add('hidden');
+        } else {
+          banner.classList.remove('hidden');
+        }
+      } catch (_e) {
+        banner.classList.remove('hidden');
+      }
+    }
+
+    function dismissOnboardingBanner() {
+      autoCollapseOnboardingAfterActivity();
+      showToast('Hid Quick-Start bar — click "🧭 Quick Start" in the top header anytime to re-open');
+    }
+
+    function openOnboardingQuickStart(launchTour = false) {
+      if (activeEdition !== 'atelier') {
+        setUiEdition('atelier');
+      }
+      const banner = document.getElementById('vsOnboardingQuickStartBanner');
+      if (banner) banner.classList.remove('hidden');
+      try {
+        if (window.localStorage) window.localStorage.removeItem('verispec_hide_onboarding_v38');
+      } catch (_e) {
+        // ignore storage errors
+      }
+      if (launchTour) {
+        startInteractiveOnboardingTour();
+      }
+    }
+
+    function expandLeftRailForOnboarding() {
+      if (activeEdition !== 'atelier') {
+        setUiEdition('atelier');
+      }
+      const rail = document.getElementById('leftLifecycleRail');
+      if (rail && rail.classList.contains('collapsed')) {
+        toggleLeftRail();
+      }
+      const list = document.getElementById('blueprintRailList');
+      if (list) list.scrollTop = 0;
+      showToast('📁 Browse all 18 Canonical SDLC Blueprints (D01–D18) or filter by folder');
+    }
+
+    const ONBOARDING_TOUR_STEPS = [
+      {
+        targetSelector: '#btnHeaderNewDiagram',
+        badge: 'STEP 1 OF 4 · CREATE',
+        title: '1. Create a Brand-New Diagram Anytime',
+        body: 'Click <b>＋ New Diagram</b> in the top-left header (<code class="mono">Alt+N</code>) to start from a <b>Text Prompt</b>, <b>3-Tier Blank Canvas</b>, <b>Terraform / SQL / K8s Code</b>, or <b>Whiteboard Sketch</b>.',
+        tryLabel: '＋ Open Creator',
+        runTry: () => openNewDiagramDrawer('prompt')
+      },
+      {
+        targetSelector: '#lodSwitcher',
+        badge: 'STEP 2 OF 4 · TEMPLATES & C4 FIDELITY',
+        title: '2. 18 Canonical Blueprints & Unified C4 · LOD Switcher',
+        body: 'Use the left sidebar (<b>D01 Stream</b>..<b>D18 DR/HA</b>) to load production blueprints, and switch <b>1·Context L100 / 2·Container L200 / 3·Component L300</b> in the unified header switcher.',
+        tryLabel: '📁 Expand 18 Templates',
+        runTry: () => expandLeftRailForOnboarding()
+      },
+      {
+        targetSelector: '#vsFloatingCanvasDock',
+        badge: 'STEP 3 OF 4 · CANVAS & EXPORT',
+        title: '3. Double-Click Inline Edit, Bottom Tool Dock & Split Export',
+        body: '<b>Double-click</b> any node card to edit inline, use the non-occluding bottom <b>Canvas Tool Dock</b> for Zoom / Drag / Lasso / Sticky Notes, and use <b>[⬇ .drawio | ▾]</b> to export Draw.io, SVG, 2x PNG, RFC <code class="mono">.md</code>, or Terraform <code class="mono">.tf</code>.',
+        tryLabel: '✏️ Try Inline Edit',
+        runTry: () => {
+          const g = getActiveGraph();
+          const firstNode = g && Array.isArray(g.nodes) && g.nodes[0];
+          if (firstNode) openInlineCanvasNodeEdit(firstNode);
+        }
+      },
+      {
+        targetSelector: '#atelierPromptInput',
+        badge: 'STEP 4 OF 4 · AI CO-PILOT',
+        title: '4. Evolve or Create via Conversational Prompt',
+        body: 'Toggle between <b>🪄 Evolve</b> (mutate current diagram) and <b>＋ New Diagram</b> (build fresh) right in the bottom prompt bar — verified by Live Vertex AI Gemini &amp; 5-Stage Phase-0 Math.',
+        tryLabel: '⌨️ Focus Prompt Bar',
+        runTry: () => {
+          const inp = document.getElementById('atelierPromptInput');
+          if (inp) inp.focus();
+        }
+      }
+    ];
+
+    function clearOnboardingTourSpotlights() {
+      document.querySelectorAll('.vs-tour-spotlight-target').forEach((el) => {
+        el.classList.remove('vs-tour-spotlight-target');
+      });
+    }
+
+    function renderCurrentOnboardingTourStep() {
+      const pop = document.getElementById('vsGuidedTourPopover');
+      if (!pop) return;
+      if (activeOnboardingTourIdx < 0 || activeOnboardingTourIdx >= ONBOARDING_TOUR_STEPS.length) {
+        closeInteractiveOnboardingTour();
+        return;
+      }
+      clearOnboardingTourSpotlights();
+      const step = ONBOARDING_TOUR_STEPS[activeOnboardingTourIdx];
+      const targetEl = document.querySelector(step.targetSelector);
+      if (targetEl) {
+        targetEl.classList.add('vs-tour-spotlight-target');
+      }
+
+      const badgeEl = document.getElementById('vsTourStepBadge');
+      const titleEl = document.getElementById('vsTourTitle');
+      const bodyEl = document.getElementById('vsTourBody');
+      const prevBtn = document.getElementById('vsTourPrevBtn');
+      const tryBtn = document.getElementById('vsTourTryActionBtn');
+      const nextBtn = document.getElementById('vsTourNextBtn');
+
+      if (badgeEl) badgeEl.textContent = step.badge;
+      if (titleEl) titleEl.textContent = step.title;
+      if (bodyEl) bodyEl.innerHTML = step.body;
+      if (prevBtn) prevBtn.style.display = activeOnboardingTourIdx === 0 ? 'none' : 'inline-flex';
+      if (tryBtn) tryBtn.textContent = step.tryLabel || '⚡ Try It';
+      if (nextBtn) {
+        nextBtn.textContent =
+          activeOnboardingTourIdx === ONBOARDING_TOUR_STEPS.length - 1 ? '✅ Finish Tour' : 'Next Step →';
+      }
+
+      const obBanner = document.getElementById('vsOnboardingQuickStartBanner');
+      if (obBanner) obBanner.classList.add('hidden');
+      pop.classList.add('active');
+    }
+
+    function startInteractiveOnboardingTour() {
+      if (activeEdition !== 'atelier') {
+        setUiEdition('atelier');
+      }
+      activeOnboardingTourIdx = 0;
+      renderCurrentOnboardingTourStep();
+    }
+
+    function stepInteractiveOnboardingTour(delta) {
+      const next = activeOnboardingTourIdx + delta;
+      if (next >= ONBOARDING_TOUR_STEPS.length) {
+        closeInteractiveOnboardingTour();
+        showToast('🎉 Tour complete! Click "＋ New Diagram" anytime to start building.');
+        return;
+      }
+      activeOnboardingTourIdx = Math.max(0, next);
+      renderCurrentOnboardingTourStep();
+    }
+
+    function triggerCurrentTourStepAction() {
+      const step = ONBOARDING_TOUR_STEPS[activeOnboardingTourIdx];
+      if (step && typeof step.runTry === 'function') {
+        step.runTry();
+      }
+    }
+
+    function closeInteractiveOnboardingTour() {
+      activeOnboardingTourIdx = -1;
+      clearOnboardingTourSpotlights();
+      const pop = document.getElementById('vsGuidedTourPopover');
+      if (pop) pop.classList.remove('active');
+      restoreOnboardingBannerState();
+    }
+
     window.stepArchitectureFlowWalkthrough = stepArchitectureFlowWalkthrough;
     window.syncFlowWalkthroughButton = syncFlowWalkthroughButton;
     window.toggleCanvasMinimap = toggleCanvasMinimap;
@@ -5524,8 +6606,45 @@ services:
     window.loadSamplePrismaIntoDslEditor = loadSamplePrismaIntoDslEditor;
     window.loadSampleOpenApiIntoDslEditor = loadSampleOpenApiIntoDslEditor;
     window.loadSampleComposeIntoDslEditor = loadSampleComposeIntoDslEditor;
+    window.setComposerIntentMode = setComposerIntentMode;
+    window.openNewDiagramDrawer = openNewDiagramDrawer;
+    window.closeNewDiagramDrawer = closeNewDiagramDrawer;
+    window.switchNewDiagramTab = switchNewDiagramTab;
+    window.fillNewDiagramStarterPrompt = fillNewDiagramStarterPrompt;
+    window.loadNewDiagramCodeSample = loadNewDiagramCodeSample;
+    window.createNewDiagramViaApi = createNewDiagramViaApi;
+    window.submitCreatePromptDiagram = submitCreatePromptDiagram;
+    window.submitCreateBlankDiagram = submitCreateBlankDiagram;
+    window.submitCreateCodeDiagram = submitCreateCodeDiagram;
+    window.openOnboardingQuickStart = openOnboardingQuickStart;
+    window.dismissOnboardingBanner = dismissOnboardingBanner;
+    window.autoCollapseOnboardingAfterActivity = autoCollapseOnboardingAfterActivity;
+    window.expandLeftRailForOnboarding = expandLeftRailForOnboarding;
+    window.startInteractiveOnboardingTour = startInteractiveOnboardingTour;
+    window.stepInteractiveOnboardingTour = stepInteractiveOnboardingTour;
+    window.triggerCurrentTourStepAction = triggerCurrentTourStepAction;
+    window.closeInteractiveOnboardingTour = closeInteractiveOnboardingTour;
+    window.toggleHeaderExportMenu = toggleHeaderExportMenu;
+    window.closeHeaderExportMenu = closeHeaderExportMenu;
+    window.triggerHeaderExport = triggerHeaderExport;
+    window.downloadCurrentTerraformHcl = downloadCurrentTerraformHcl;
+    window.toggleFloatingCanvasDock = toggleFloatingCanvasDock;
+
+    document.addEventListener('click', (evt) => {
+      const grp = document.getElementById('headerExportSplitGroup');
+      if (grp && !grp.contains(evt.target)) {
+        closeHeaderExportMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (evt) => {
+      if (evt.key === 'Escape') {
+        closeHeaderExportMenu();
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', () => {
+      restoreOnboardingBannerState();
       loadAtlas();
       initLiveSseCollaboration();
     });

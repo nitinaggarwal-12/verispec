@@ -23,7 +23,7 @@ function buildBlueprint({ id, code, phaseId, phaseNumber, phaseTitle, phaseBadge
       shape: n.shape || 'service_card',
       iconKey: n.iconKey || 'cloud_run',
       slotOrder: slot,
-      addedInVersion: n.addedInVersion || 'v1.0.1',
+      addedInVersion: n.addedInVersion || 'Baseline',
       changeStatus: n.changeStatus || 'baseline'
     };
   });
@@ -44,7 +44,7 @@ function buildBlueprint({ id, code, phaseId, phaseNumber, phaseTitle, phaseBadge
     phaseNumber,
     phaseTitle,
     phaseBadge,
-    version: 'v1.0.1',
+    version: 'Baseline',
     title,
     subtitle,
     prompt,
@@ -151,9 +151,9 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
     nodes: [
       { id: 'n1', zoneId: 'z1', title: 'Interactive Template SEO', subtitle: 'Public Gallery & Shareable Links', pill: 'CTR: 8.4%', iconKey: 'client_web' },
       { id: 'n2', zoneId: 'z1', title: 'PLG Workspace Invite', subtitle: '1-Click Team Co-Editing Link', pill: 'K-Factor: 1.35', iconKey: 'iap' },
-      { id: 'n3', zoneId: 'z2', title: 'Prompt-to-Diagram Wizard', subtitle: 'Instant v1.0.1 Synthesis in 4s', pill: 'TTFV: 18 sec', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n3', zoneId: 'z2', title: 'Prompt-to-Diagram Wizard', subtitle: 'Instant AST Synthesis in 4s', pill: 'TTFV: 18 sec', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
       { id: 'n4', zoneId: 'z2', title: 'Activation Quality Gate', subtitle: 'First Export or 2nd Prompt Turn', pill: 'Conv: 64.2%', iconKey: 'dlp_guardrail', shape: 'decision_diamond' },
-      { id: 'n5', zoneId: 'z3', title: 'Multi-Turn Prompt Co-Pilot', subtitle: 'Iterative v1.0.x AST Refinements', pill: '6.4 Turns/Session', iconKey: 'adk_agent', shape: 'hexagon_agent' },
+      { id: 'n5', zoneId: 'z3', title: 'Multi-Turn Prompt Co-Pilot', subtitle: 'Iterative AST Delta Refinements', pill: '6.4 Turns/Session', iconKey: 'adk_agent', shape: 'hexagon_agent' },
       { id: 'n6', zoneId: 'z3', title: 'PR & RFC Architecture Sync', subtitle: 'GitHub & Google Slides Export', pill: 'WAU/MAU: 58%', iconKey: 'graphql_bff' },
       { id: 'n7', zoneId: 'z4', title: 'North-Star: Verified Specs', subtitle: 'Weekly Active Collaborating Teams', pill: 'NSM: +14.2% MoM', iconKey: 'telemetry_hub' },
       { id: 'n8', zoneId: 'z4', title: 'Enterprise Seat Expansion', subtitle: 'SSO/SAML & Governance Upgrade', pill: 'NRR: 132%', iconKey: 'cloud_spanner', shape: 'cylinder_db' }
@@ -161,7 +161,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
     edges: [
       { from: 'n1', to: 'n3', label: 'Try Prompt', type: 'sync_request' },
       { from: 'n2', to: 'n4', label: 'SSO Join', type: 'sync_request' },
-      { from: 'n3', to: 'n4', label: 'v1.0.1 Ready', type: 'sync_request' },
+      { from: 'n3', to: 'n4', label: 'Draft Ready', type: 'sync_request' },
       { from: 'n3', to: 'n5', label: 'Iterate Prompt', type: 'ai_rag_grounding' },
       { from: 'n4', to: 'n6', label: 'Activated', type: 'partner_protocol' },
       { from: 'n5', to: 'n7', label: 'Spec Certified', type: 'sync_request' },
@@ -190,7 +190,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'n1', zoneId: 'z1', title: 'Landing & Prompt Input', subtitle: 'Pre-Auth Natural Language Box', pill: 'Route: /studio', iconKey: 'client_web', shape: 'state_capsule' },
       { id: 'n2', zoneId: 'z1', title: 'Passkey / OAuth 2.1 Gate', subtitle: 'Workspace Session Binding', pill: 'WebAuthn + JWT', iconKey: 'iap', shape: 'decision_diamond' },
       { id: 'n3', zoneId: 'z2', title: 'Starter Blueprint Picker', subtitle: '18 Lifecycle Archetype Cards', pill: 'Modal / Drawer', iconKey: 'apigee' },
-      { id: 'n4', zoneId: 'z2', title: 'Initial CAG Synthesis', subtitle: 'Generates v1.0.1 Vector Graph', pill: 'State: READY', iconKey: 'vertex_ai', shape: 'state_capsule' },
+      { id: 'n4', zoneId: 'z2', title: 'Initial CAG Synthesis', subtitle: 'Generates Canonical Vector Graph', pill: 'State: READY', iconKey: 'vertex_ai', shape: 'state_capsule' },
       { id: 'n5', zoneId: 'z3', title: 'Click Node to Scope Target', subtitle: 'Pins Target Pill in Prompt Bar', pill: 'Scoped Edit', iconKey: 'gke_autopilot' },
       { id: 'n6', zoneId: 'z3', title: 'Visual Diff Inspection', subtitle: 'Highlights +Added & ~Replaced', pill: 'Diff Overlay ON', iconKey: 'dlp_guardrail', shape: 'decision_diamond' },
       { id: 'n7', zoneId: 'z4', title: 'Draw.io & SVG Vector Export', subtitle: '1-Click Standards Bundle', pill: '.drawio / .svg', iconKey: 'cloud_run' },
@@ -228,7 +228,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'n1', zoneId: 'z1', title: 'Cmd: SubmitPromptMutation', subtitle: 'Actor: System Architect', pill: 'Command Payload', iconKey: 'client_web' },
       { id: 'n2', zoneId: 'z1', title: 'Cmd: CertifyBlueprintRelease', subtitle: 'Actor: Principal Reviewer', pill: 'Governance Cmd', iconKey: 'iap' },
       { id: 'n3', zoneId: 'z2', title: 'Agg: ArchitectureGraphRoot', subtitle: 'Enforces Acyclic & Zone Invariants', pill: 'Aggregate Root', iconKey: 'gke_autopilot', shape: 'hexagon_agent' },
-      { id: 'n4', zoneId: 'z2', title: 'Agg: VersionLineageLedger', subtitle: 'Manages v1.0.x Snapshot Tree', pill: 'Immutable DAG', iconKey: 'cloud_spanner', shape: 'cylinder_db' },
+      { id: 'n4', zoneId: 'z2', title: 'Agg: RevisionLineageLedger', subtitle: 'Manages Bounded Undo/Redo Ring', pill: 'Immutable DAG', iconKey: 'cloud_spanner', shape: 'cylinder_db' },
       { id: 'n5', zoneId: 'z3', title: 'Evt: GraphPatchApplied', subtitle: 'Emitted on AST Delta Commit', pill: 'Domain Event', iconKey: 'kafka_pubsub' },
       { id: 'n6', zoneId: 'z3', title: 'Evt: GeometryGateCertified', subtitle: 'Emitted when 0 AABB Collisions', pill: 'Verified Event', iconKey: 'dlp_guardrail', shape: 'decision_diamond' },
       { id: 'n7', zoneId: 'z4', title: 'View: InteractiveSvgCanvas', subtitle: 'Real-Time CQRS Vector Projection', pill: 'Sub-15ms View', iconKey: 'cloud_run' },
@@ -270,7 +270,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'n4', zoneId: 'z2', title: 'API Gateway & Session BFF', subtitle: 'Rate Limiting, Auth & Stream Multiplex', pill: '[Container: Node]', iconKey: 'apigee' },
       { id: 'n5', zoneId: 'z3', title: 'AST Delta Patch Engine', subtitle: 'Compiles Prompts to GraphPatchOp[]', pill: '[Service: Engine]', iconKey: 'adk_agent', shape: 'hexagon_agent' },
       { id: 'n6', zoneId: 'z3', title: '2D AABB Layout & XML Compiler', subtitle: 'Orthogonal Routing & Collision Solver', pill: '[Service: Layout]', iconKey: 'gke_autopilot' },
-      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.8 Flash & Pro API', subtitle: 'Structured JSON Schema Synthesis', pill: '[External AI]', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.1 Pro & 3 Flash API', subtitle: 'Structured JSON Schema Synthesis', pill: '[External AI]', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
       { id: 'n8', zoneId: 'z4', title: 'Cloud Spanner Blueprint Store', subtitle: 'Versioned CAG & XML Repository', pill: '[Container: DB]', iconKey: 'cloud_spanner', shape: 'cylinder_db' }
     ],
     edges: [
@@ -280,7 +280,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { from: 'n3', to: 'n5', label: 'Delta Prompt', type: 'sync_request' },
       { from: 'n4', to: 'n6', label: 'Compile XML', type: 'sync_request' },
       { from: 'n5', to: 'n7', label: 'Schema Prompt', type: 'ai_rag_grounding' },
-      { from: 'n6', to: 'n8', label: 'Save v1.0.x', type: 'sync_request' }
+      { from: 'n6', to: 'n8', label: 'Save Snapshot', type: 'sync_request' }
     ]
   }),
 
@@ -298,17 +298,17 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'z1', title: 'TIER 1 · EDGE & WAF', subtitle: 'Anycast CDN, WAF & API Gateway', accent: 'blue' },
       { id: 'z2', title: 'TIER 2 · SERVICE MESH', subtitle: 'GKE Autopilot & Cloud Run', accent: 'indigo' },
       { id: 'z3', title: 'TIER 3 · DATA & CACHE', subtitle: 'Redis Cluster & Global Spanner', accent: 'sky' },
-      { id: 'z4', title: 'TIER 4 · AI & GUARDRAILS', subtitle: 'DLP Gate & Gemini 3.8 RAG', accent: 'purple' }
+      { id: 'z4', title: 'TIER 4 · AI & GUARDRAILS', subtitle: 'DLP Gate & Gemini 3.1 RAG', accent: 'purple' }
     ],
     nodes: [
       { id: 'n1', zoneId: 'z1', title: 'Cloud Armor + Zero-Trust IAP', subtitle: 'OWASP WAF & Identity Proxy', pill: 'TLS 1.3 · mTLS', iconKey: 'cloud_armor' },
       { id: 'n2', zoneId: 'z1', title: 'Apigee X API Gateway', subtitle: 'Traffic Shaping & OAuth 2.1', pill: '50k RPS Edge', iconKey: 'apigee' },
       { id: 'n3', zoneId: 'z2', title: 'Catalog & Search Service', subtitle: 'Real-Time Inventory & Pricing', pill: 'Cloud Run Gen2', iconKey: 'cloud_run' },
       { id: 'n4', zoneId: 'z2', title: 'Checkout & Order Orchestrator', subtitle: 'Distributed Cart & Payment Saga', pill: 'GKE Autopilot', iconKey: 'gke_autopilot' },
-      { id: 'n5', zoneId: 'z3', title: 'Memorystore Redis Cluster', subtitle: 'Sub-ms Session & Cart Cache', pill: 'RESP3 :6379', iconKey: 'redis_memorystore', changeStatus: 'added', addedInVersion: 'v1.0.2' },
+      { id: 'n5', zoneId: 'z3', title: 'Memorystore Redis Cluster', subtitle: 'Sub-ms Session & Cart Cache', pill: 'RESP3 :6379', iconKey: 'redis_memorystore', changeStatus: 'added', addedInVersion: 'Turn-2' },
       { id: 'n6', zoneId: 'z3', title: 'Cloud Spanner Global HA', subtitle: 'Multi-Region TrueTime Ledger', pill: '99.999% SLA', iconKey: 'cloud_spanner', shape: 'cylinder_db', changeStatus: 'replaced' },
-      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.8 Commerce Agent', subtitle: 'Personalized Ranking & Bundling', pill: 'Vertex AI Global', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
-      { id: 'n8', zoneId: 'z4', title: 'DLP & Fraud Policy Gate', subtitle: 'PII Filter & Risk Decision Gate', pill: '[GO] / [BLOCK]', iconKey: 'dlp_guardrail', shape: 'decision_diamond', changeStatus: 'added', addedInVersion: 'v1.0.3' }
+      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.1 Commerce Agent', subtitle: 'Personalized Ranking & Bundling', pill: 'Vertex AI Global', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n8', zoneId: 'z4', title: 'DLP & Fraud Policy Gate', subtitle: 'PII Filter & Risk Decision Gate', pill: '[GO] / [BLOCK]', iconKey: 'dlp_guardrail', shape: 'decision_diamond', changeStatus: 'added', addedInVersion: 'Turn-3' }
     ],
     edges: [
       { from: 'n1', to: 'n2', label: 'mTLS Pass', type: 'governance_policy' },
@@ -617,7 +617,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'n4', zoneId: 'z2', title: 'Spanner Graph + Vector Index', subtitle: 'Stores (Node)-[EDGE]->(Node) + ANN', pill: 'GQL + Cosine', iconKey: 'vector_search', shape: 'cylinder_db' },
       { id: 'n5', zoneId: 'z3', title: 'Reciprocal Rank Fusion (RRF)', subtitle: 'Merges Dense ANN + Sparse + Graph', pill: 'Top-50 Candidates', iconKey: 'graphql_bff' },
       { id: 'n6', zoneId: 'z3', title: 'Cross-Encoder Reranker Model', subtitle: 'Scores Exact Query-Passage Relevance', pill: 'Top-8 Context', iconKey: 'adk_agent', shape: 'hexagon_agent' },
-      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.8 Pro Synthesizer', subtitle: 'Generates Answer with Inline [Doc:Line]', pill: 'Temp: 0.1 Grounded', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n7', zoneId: 'z4', title: 'Gemini 3.1 Pro Synthesizer', subtitle: 'Generates Answer with Inline [Doc:Line]', pill: 'Temp: 0.1 Grounded', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
       { id: 'n8', zoneId: 'z4', title: 'NLI Entailment Citation Gate', subtitle: 'Verifies Every Claim vs. Retrieved Span', pill: '[VERIFIED] Only', iconKey: 'dlp_guardrail', shape: 'decision_diamond' }
     ],
     edges: [
@@ -652,7 +652,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
     nodes: [
       { id: 'n1', zoneId: 'z1', title: 'Model Armor Prompt Shield', subtitle: 'Blocks Prompt Injection & Jailbreaks', pill: 'Pre-Inference Guard', iconKey: 'cloud_armor' },
       { id: 'n2', zoneId: 'z1', title: 'Episodic & Working Memory', subtitle: 'Session Context & KV Cache Prefix', pill: 'Redis + Spanner', iconKey: 'redis_memorystore', shape: 'cylinder_db' },
-      { id: 'n3', zoneId: 'z2', title: 'Supervisor Planner Agent (ADK)', subtitle: 'Decomposes Goal into A2A Sub-Tasks', pill: 'Gemini 3.8 Pro', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n3', zoneId: 'z2', title: 'Supervisor Planner Agent (ADK)', subtitle: 'Decomposes Goal into A2A Sub-Tasks', pill: 'Gemini 3.1 Pro', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
       { id: 'n4', zoneId: 'z2', title: 'Bounded Critic & Reflection Loop', subtitle: 'Verifies Subagent Output Completeness', pill: 'Max 2 Retries', iconKey: 'adk_agent', shape: 'hexagon_agent' },
       { id: 'n5', zoneId: 'z3', title: 'Topology Synthesizer Subagent', subtitle: 'Emits Typed GraphPatchOp[] AST', pill: 'A2A JSON-RPC', iconKey: 'adk_agent', shape: 'hexagon_agent' },
       { id: 'n6', zoneId: 'z3', title: 'Security & Compliance Subagent', subtitle: 'Audits IAM, VPC-SC & Encryption', pill: 'A2A JSON-RPC', iconKey: 'iap', shape: 'hexagon_agent' },
@@ -810,7 +810,7 @@ export const LIFECYCLE_BLUEPRINTS_18 = [
       { id: 'n3', zoneId: 'z2', title: 'OpenTelemetry Collector Fleet', subtitle: 'Tail-Based Sampling & Span Enrichment', pill: 'OTLP gRPC :4317', iconKey: 'kafka_pubsub' },
       { id: 'n4', zoneId: 'z2', title: 'Cloud Monitoring & Trace Store', subtitle: 'High-Cardinality Time-Series Engine', pill: '1s Granularity', iconKey: 'telemetry_hub', shape: 'cylinder_db' },
       { id: 'n5', zoneId: 'z3', title: 'Multi-Window SLO Burn Gate', subtitle: 'Fires when 1h Burn Rate > 14.4x Budget', pill: '[BURN > 14.4x]', iconKey: 'dlp_guardrail', shape: 'decision_diamond' },
-      { id: 'n6', zoneId: 'z3', title: 'SRE Incident RCA Agent', subtitle: 'Correlates Bad Deploy SHA with Spans', pill: 'Gemini 3.8 SRE', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
+      { id: 'n6', zoneId: 'z3', title: 'SRE Incident RCA Agent', subtitle: 'Correlates Bad Deploy SHA with Spans', pill: 'Gemini 3.1 SRE', iconKey: 'vertex_ai', shape: 'hexagon_agent' },
       { id: 'n7', zoneId: 'z4', title: 'Global Load Balancer Health Drain', subtitle: 'Evacuates Degraded Region in < 2s', pill: 'Anycast Shift', iconKey: 'apigee' },
       { id: 'n8', zoneId: 'z4', title: 'Spanner Paxos Leader Re-Election', subtitle: 'Moves Read-Write Quorum to Healthy Zone', pill: 'Zero Data Loss', iconKey: 'cloud_spanner', shape: 'cylinder_db' }
     ],

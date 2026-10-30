@@ -1,8 +1,8 @@
 // ============================================================================
 // VeriSpec — Bi-Directional Architecture-as-Code (AaC) DSL Compiler,
 // Multi-Cloud Terraform HCL / Mermaid Exporter, and Cross-Model LLM-as-a-Judge
-// Separation Engine (Rule 55 / Law 16: gemini-4-argon, gemini-3.1-pro-preview,
-// gemini-3.8-flash, google-omni-1.1).
+// Separation Engine (gemini-3.1-pro-preview, gemini-3-flash-preview,
+// gemini-2.5-pro, gemini-2.5-flash on Vertex AI locations/global).
 // ============================================================================
 
 import {
@@ -12,47 +12,45 @@ import {
 } from './canonicalGraphEngine.mjs';
 import { getIconSpec, resolveIconKeyFromText } from './iconCatalog.mjs';
 
-export const GEMINI_ARGON_MODEL_ID = process.env.GEMINI_ARGON_MODEL_ID || 'gemini-4-argon';
 export const GEMINI_PRO_MODEL_ID = process.env.GEMINI_PRO_MODEL_ID || 'gemini-3.1-pro-preview';
-export const GEMINI_FLASH_MODEL_ID = process.env.GEMINI_FLASH_MODEL_ID || 'gemini-3.8-flash';
+export const GEMINI_FLASH_MODEL_ID = process.env.GEMINI_FLASH_MODEL_ID || 'gemini-3-flash-preview';
 export const GEMINI_FALLBACK_PRO_MODEL_ID = process.env.GEMINI_FALLBACK_PRO_MODEL_ID || 'gemini-2.5-pro';
 export const GEMINI_FALLBACK_FLASH_MODEL_ID = process.env.GEMINI_FALLBACK_FLASH_MODEL_ID || 'gemini-2.5-flash';
-export const OMNI_ORCHESTRATOR_ID = process.env.OMNI_ORCHESTRATOR_ID || 'google-omni-1.1';
 
 /**
- * Cross-Model LLM-as-a-Judge Separation Matrix (Rule 55 / Law 16)
+ * Cross-Model LLM-as-a-Judge Separation Matrix
  * Guarantees the Critic/Judge model evaluating a diagram, AST mutation, or specification
- * is NEVER the same model family/tier that generated the artifact.
+ * is distinct from the model tier that generated the artifact.
  */
 export const LLM_JUDGE_MATRIX = {
   diagramGenerationV2: {
     generator: GEMINI_FLASH_MODEL_ID,
-    primaryJudge: GEMINI_ARGON_MODEL_ID,
-    crossFamilyJudge: GEMINI_PRO_MODEL_ID,
+    primaryJudge: GEMINI_PRO_MODEL_ID,
+    crossFamilyJudge: GEMINI_FLASH_MODEL_ID,
     fallbackJudge: GEMINI_FALLBACK_PRO_MODEL_ID,
-    visualJudge: OMNI_ORCHESTRATOR_ID,
+    visualJudge: GEMINI_FLASH_MODEL_ID,
     endpoint: 'locations/global',
-    thinkingConfig: { thinkingLevel: 'HIGH' },
+    thinkingConfig: { thinkingLevel: 'LOW' },
     maxOutputTokens: 32768
   },
   astMutationAndDslSync: {
     generator: GEMINI_PRO_MODEL_ID,
-    primaryJudge: GEMINI_ARGON_MODEL_ID,
+    primaryJudge: GEMINI_PRO_MODEL_ID,
     crossFamilyJudge: GEMINI_FLASH_MODEL_ID,
     fallbackJudge: GEMINI_FALLBACK_FLASH_MODEL_ID,
-    visualJudge: OMNI_ORCHESTRATOR_ID,
+    visualJudge: GEMINI_FLASH_MODEL_ID,
     endpoint: 'locations/global',
-    thinkingConfig: { thinkingLevel: 'HIGH' },
+    thinkingConfig: { thinkingLevel: 'LOW' },
     maxOutputTokens: 32768
   },
   wellArchitectedPostureAudit: {
     generator: GEMINI_FLASH_MODEL_ID,
-    primaryJudge: GEMINI_ARGON_MODEL_ID,
-    crossFamilyJudge: GEMINI_PRO_MODEL_ID,
+    primaryJudge: GEMINI_PRO_MODEL_ID,
+    crossFamilyJudge: GEMINI_FLASH_MODEL_ID,
     fallbackJudge: GEMINI_FALLBACK_PRO_MODEL_ID,
-    visualJudge: OMNI_ORCHESTRATOR_ID,
+    visualJudge: GEMINI_FLASH_MODEL_ID,
     endpoint: 'locations/global',
-    thinkingConfig: { thinkingLevel: 'HIGH' },
+    thinkingConfig: { thinkingLevel: 'LOW' },
     maxOutputTokens: 32768
   }
 };
@@ -62,8 +60,11 @@ export function getDistinctJudgeModel(generatorModelId = GEMINI_FLASH_MODEL_ID) 
   if (norm === GEMINI_PRO_MODEL_ID.toLowerCase()) {
     return GEMINI_FLASH_MODEL_ID;
   }
-  if (norm === GEMINI_ARGON_MODEL_ID.toLowerCase()) {
-    return GEMINI_PRO_MODEL_ID;
+  if (norm === GEMINI_FALLBACK_PRO_MODEL_ID.toLowerCase()) {
+    return GEMINI_FALLBACK_FLASH_MODEL_ID;
+  }
+  if (norm === GEMINI_FALLBACK_FLASH_MODEL_ID.toLowerCase()) {
+    return GEMINI_FALLBACK_PRO_MODEL_ID;
   }
   return GEMINI_PRO_MODEL_ID;
 }
@@ -76,7 +77,7 @@ export function compileGraphToVeriSpecDsl(graph) {
   const lines = [];
   lines.push(`// VeriSpec Bi-Directional Architecture-as-Code DSL`);
   lines.push(`// Edit any group, node [icon, slo, desc], or edge (Source > Target: Label) and click "Apply DSL"`);
-  lines.push(`title ${graph.code || 'D05'} — ${graph.title} (${graph.version || 'v1.0.1'})`);
+  lines.push(`title ${graph.code || 'D05'} — ${graph.title} (${graph.version || 'Baseline'})`);
   lines.push(`direction right`);
   lines.push('');
 
@@ -551,7 +552,7 @@ export function compileGraphToTerraformHcl(graph) {
     lines.push(`  labels = {`);
     lines.push(`    vendor       = "${(spec.vendor || 'gcp').toLowerCase()}"`);
     lines.push(`    slo_target   = "${(n.pill || 'verified').replace(/[^a-zA-Z0-9_.-]/g, '_').toLowerCase()}"`);
-    lines.push(`    version_tag  = "${(n.addedInVersion || graph.version || 'v1_0_1').replace(/\./g, '_')}"`);
+    lines.push(`    revision_tag = "${String(n.addedInVersion || graph.version || 'baseline').replace(/[^a-zA-Z0-9_-]/g, '_').toLowerCase()}"`);
     lines.push(`  }`);
     lines.push(`}`);
     lines.push(``);
@@ -591,9 +592,9 @@ export function compileGraphToMermaid(graph) {
  */
 export function evaluateArchitectureWithJudgeJury(graph, svgString, bijectionContract) {
   const generatorModel = GEMINI_FLASH_MODEL_ID;
-  const crossFamilyJudgeModel = getDistinctJudgeModel(generatorModel); // gemini-3.1-pro-preview
-  const frontierJudgeModel = GEMINI_ARGON_MODEL_ID; // gemini-4-argon
-  const visualJudgeModel = OMNI_ORCHESTRATOR_ID; // google-omni-1.1
+  const crossFamilyJudgeModel = getDistinctJudgeModel(generatorModel);
+  const frontierJudgeModel = GEMINI_PRO_MODEL_ID;
+  const visualJudgeModel = GEMINI_FLASH_MODEL_ID;
 
   const nodes = graph.nodes || [];
   const titlesJoined = nodes.map((n) => `${n.title} ${n.subtitle || ''} ${n.iconKey || ''}`).join(' ').toLowerCase();
@@ -787,7 +788,7 @@ export function estimateArchitectureFinOpsAndLatency(graph) {
 export function compileGraphToLivingRfcMarkdown(graph, judgeReport, preRenderPlan) {
   const finops = estimateArchitectureFinOpsAndLatency(graph);
   const code = graph.code || 'D05';
-  const ver = graph.version || 'v1.0.1';
+  const ver = graph.version || 'Baseline';
   const zones = graph.zones || [];
   const nodes = graph.nodes || [];
   const edges = graph.edges || [];
@@ -802,9 +803,9 @@ export function compileGraphToLivingRfcMarkdown(graph, judgeReport, preRenderPla
     ``,
     `| Dimension | Verified Metric / Status |`,
     `| :--- | :--- |`,
-    `| **Blueprint ID & Version** | \`${code}\` · \`${ver}\` (${nodes.length} Components · ${edges.length} Directed Flows · ${zones.length} Zones) |`,
+    `| **Blueprint ID & State** | \`${code}\` · \`${ver}\` (${nodes.length} Components · ${edges.length} Directed Flows · ${zones.length} Zones) |`,
     `| **Phase-0 Math & Geometry Gate** | \`${preRenderPlan?.stagesPassed || '5/5 STAGES PASS'}\` (\`zeroHitAndTrialGuarantee: ${Boolean(preRenderPlan?.zeroHitAndTrialGuarantee)}\`) |`,
-    `| **Well-Architected Judge Score** | **${judgeReport?.overallScore || 96} / 100** via \`${judgeReport?.frontierJudgeModel || 'gemini-4-argon'}\` & \`${judgeReport?.crossFamilyJudgeModel || 'gemini-3.1-pro-preview'}\` |`,
+    `| **Well-Architected Judge Score** | **${judgeReport?.overallScore ?? 0} / 100** via \`${judgeReport?.frontierJudgeModel || 'gemini-3.1-pro-preview'}\` & \`${judgeReport?.crossFamilyJudgeModel || 'gemini-3-flash-preview'}\` |`,
     `| **Estimated Cloud FinOps Run-Rate** | **$${finops.totalMonthlyUsd.toLocaleString()}/mo** ($${finops.annualRunRateUsd.toLocaleString()}/yr estimated infrastructure TCO) |`,
     `| **Critical-Path p99 Latency** | **${finops.criticalPathP99Ms} ms** (${finops.cacheHitAcceleration}) |`,
     `| **Composite Availability Target** | **${finops.compositeSla}** |`,

@@ -9,6 +9,7 @@
 
 import { getIconSpec, getIconDataUri } from './iconCatalog.mjs';
 import { renderBespokeLifecycleSvg, ARCHETYPE_METADATA } from './archetypeRenderers18.mjs';
+import { estimateGlyphPixelWidth } from './preRenderGeometryPlanner.mjs';
 export { ARCHETYPE_METADATA };
 
 const ZONE_PALETTES = {
@@ -431,7 +432,12 @@ export function runGeometryAudit(layout) {
  * Renders the positioned layout to a crisp, interactive SVG string.
  */
 export function renderInteractiveSvg(graph, options = {}) {
-  if (graph && graph.code && /^D(0[1-9]|1[0-8])$/i.test(graph.code)) {
+  if (
+    graph &&
+    (graph.isCustomDiagram ||
+      graph.renderMode === 'DYNAMIC_MULTI_TIER' ||
+      (graph.code && /^(?:D(?:0[1-9]|1[0-8])|DOC-\d+)$/i.test(graph.code)))
+  ) {
     return renderBespokeLifecycleSvg(graph, options);
   }
   const { showDiff = true, scopedNodeId = null } = options;
@@ -540,7 +546,7 @@ export function renderInteractiveSvg(graph, options = {}) {
       if (isAdded) {
         statusBadgeMarkup = `
           <rect x="${n.x + n.w - 66}" y="${n.y + n.h - 27}" width="56" height="17" rx="8.5" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
-          <text class="node-diff-text" x="${n.x + n.w - 38}" y="${n.y + n.h - 15.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#15803D">+${escapeXml(n.addedInVersion || 'NEW')}</text>
+          <text class="node-diff-text" x="${n.x + n.w - 38}" y="${n.y + n.h - 15.5}" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="8.5" font-weight="700" fill="#15803D">+ADDED</text>
         `;
       } else if (isReplaced) {
         statusBadgeMarkup = `
@@ -558,13 +564,16 @@ export function renderInteractiveSvg(graph, options = {}) {
       const iconBoxY = n.y + 14;
       const textStartX = n.x + 54;
       const pillMaxW = statusBadgeMarkup ? n.w - 130 : n.w - 66;
-      const upperCount = (String(n.title).match(/[A-Z_]/g) || []).length;
-      const isUpperHeavy = upperCount > String(n.title).length * 0.45;
-      const titleFontSize = isUpperHeavy ? '10.4' : '11.3';
-      const titleMaxLen = isUpperHeavy ? 20 : 23;
+      const usableTitleW = Math.max(96, n.w - 66);
+      let solvedTitleFs = 11.4;
+      while (solvedTitleFs > 8.4 && estimateGlyphPixelWidth(n.title, solvedTitleFs, false) > usableTitleW) {
+        solvedTitleFs = Math.round((solvedTitleFs - 0.3) * 10) / 10;
+      }
+      const titleFontSize = String(solvedTitleFs);
+      const titleMaxLen = solvedTitleFs < 10.2 ? 26 : 23;
 
       return `
-      <g class="arch-node" data-node-id="${escapeXml(n.id)}" data-node-title="${escapeXml(n.title)}" style="cursor:pointer;">
+      <g class="arch-node" data-node-id="${escapeXml(n.id)}" data-node-title="${escapeXml(n.title)}" data-base-x="${n.x}" data-base-y="${n.y}" style="cursor:pointer;">
         ${shapeBgMarkup}
         <rect x="${n.x + 3.5}" y="${n.y + 12}" width="3.5" height="${n.h - 24}" rx="1.75" fill="${icon.accent}"/>
         <rect x="${iconBoxX}" y="${iconBoxY}" width="34" height="34" rx="8" fill="${icon.bg}" stroke="${icon.border}" stroke-width="1.2"/>
@@ -602,7 +611,7 @@ export function renderInteractiveSvg(graph, options = {}) {
 
       return `
       <g class="arch-edge" data-edge-id="${escapeXml(e.id)}">
-        <path class="edge-shaft-path" d="${d}" fill="none" stroke="${st.stroke}" stroke-width="2" ${dashAttr} marker-end="url(#arrow-${markerKey})"/>
+        <path class="edge-shaft-path" data-edge-id="${escapeXml(e.id)}" data-source-id="${escapeXml(e.sourceNodeId)}" data-target-id="${escapeXml(e.targetNodeId)}" d="${d}" fill="none" stroke="${st.stroke}" stroke-width="2" ${dashAttr} marker-end="url(#arrow-${markerKey})"/>
         ${labelMarkup}
       </g>
     `;
